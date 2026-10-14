@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Param, Query } from '@nestjs/common';
+import { Controller, Get, Inject, Param, Query, StreamableFile } from '@nestjs/common';
 import { ZodPipe } from '../../../../common/validation/zod-pipe.js';
 import { clubIdSchema } from '../../../clubs/infra/http/input/club-id.schema.js';
 import { type TransactionFilter } from '../../application/repositories/market-repository.js';
@@ -8,6 +8,7 @@ import {
 } from '../../application/use-cases/list-transactions.use-case.js';
 import { transactionQuerySchema } from './input/transaction-query.schema.js';
 import { presentTransactions } from './presenters/transaction-response.js';
+import { toTransactionsCsv } from './presenters/transactions-csv.js';
 
 @Controller('clubs')
 export class ClubsMarketController {
@@ -15,6 +16,21 @@ export class ClubsMarketController {
     @Inject(LIST_TRANSACTIONS)
     private readonly listTransactions: ListTransactionsPort,
   ) {}
+
+  @Get(':id/transactions/export')
+  async exportFile(
+    @Param(
+      'id',
+      new ZodPipe(clubIdSchema, 'not_found', 'Clube não encontrado'),
+    )
+    id: number,
+    @Query(new ZodPipe(transactionQuerySchema)) filter: TransactionFilter,
+  ): Promise<StreamableFile> {
+    const page = await this.listTransactions.execute(id, filter);
+    return new StreamableFile(Buffer.from(toTransactionsCsv(page.data), 'utf8'), {
+      type: 'text/csv; charset=utf-8',
+    });
+  }
 
   @Get(':id/transactions')
   async list(
