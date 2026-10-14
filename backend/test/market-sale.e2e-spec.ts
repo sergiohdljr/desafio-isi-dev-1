@@ -147,6 +147,134 @@ describe('Market sale', () => {
       .expect(404);
   });
 
+  it('rounds remaining loyalty up into the penalty band', async () => {
+    const day = 24 * 60 * 60 * 1000;
+    const hour = 60 * 60 * 1000;
+    const minute = 60 * 1000;
+    const bands: Array<[string, string, number, number, number]> = [
+      ['Faixa Onze', 'FON', 10 * day + 2 * hour, 11, 5],
+      ['Faixa Trinta', 'FTR', 30 * day, 30, 5],
+      ['Minuto Trinta', 'MTR', 30 * day + minute, 31, 10],
+      ['Faixa Cheia', 'FCH', 180 * day, 180, 10],
+      ['Minuto Cheio', 'MCH', 180 * day + minute, 181, 20],
+      ['Faixa Longa', 'FLO', 200 * day, 200, 20],
+    ];
+
+    for (const [name, acronym, offset, days, rate] of bands) {
+      const sold = await sellAfter({
+        name,
+        acronym,
+        bought: '40.00',
+        sold: '40.00',
+        loyaltyMs: offset,
+      });
+      expect(sold.remaining_days).toBe(days);
+      expect(sold.penalty_rate).toBe(rate);
+      expect(sold.contract_status).toBe('RESCINDIDO');
+    }
+  });
+
+  it('caps the penalty at 10 and credits the worked sales', async () => {
+    const day = 24 * 60 * 60 * 1000;
+    expect(
+      await sellAfter({
+        name: 'Meia Multa',
+        acronym: 'MMF',
+        bought: '37.00',
+        sold: '40.00',
+        loyaltyMs: 31 * day,
+      }),
+    ).toMatchObject({
+      value: 40,
+      purchase_value: 37,
+      penalty: 4,
+      penalty_rate: 10,
+      profit: 3,
+      fee: 0.3,
+      cash_change: 35.7,
+      contract_status: 'RESCINDIDO',
+    });
+    expect(
+      await sellAfter({
+        name: 'Meia Perda',
+        acronym: 'MPF',
+        bought: '50.00',
+        sold: '42.50',
+        loyaltyMs: 181 * day,
+      }),
+    ).toMatchObject({
+      value: 42.5,
+      purchase_value: 50,
+      penalty: 8.5,
+      penalty_rate: 20,
+      profit: -7.5,
+      fee: 0,
+      cash_change: 34,
+      contract_status: 'RESCINDIDO',
+    });
+    expect(
+      await sellAfter({
+        name: 'Meia Curta',
+        acronym: 'MCF',
+        bought: '26.15',
+        sold: '30.00',
+        loyaltyMs: 11 * day,
+      }),
+    ).toMatchObject({
+      value: 30,
+      purchase_value: 26.15,
+      penalty: 1.5,
+      penalty_rate: 5,
+      profit: 3.85,
+      fee: 0.39,
+      cash_change: 28.11,
+      contract_status: 'RESCINDIDO',
+    });
+    expect(
+      await sellAfter({
+        name: 'Meia Teto',
+        acronym: 'MTF',
+        bought: '60.00',
+        sold: '75.00',
+        loyaltyMs: 200 * day,
+      }),
+    ).toMatchObject({
+      value: 75,
+      purchase_value: 60,
+      penalty: 10,
+      penalty_rate: 20,
+      profit: 15,
+      fee: 2,
+      cash_change: 63,
+      contract_status: 'RESCINDIDO',
+    });
+  });
+
+  async function sellAfter(input: {
+    name: string;
+    acronym: string;
+    bought: string;
+    sold: string;
+    loyaltyMs: number;
+  }) {
+    const clubId = await createClub(`${input.name} FC`, input.acronym);
+    const playerId = await createPlayer(input.name, input.bought);
+    await buy(playerId, clubId);
+    const prisma = app.get(PrismaService);
+    await prisma.jogadores.update({
+      where: { id: playerId },
+      data: { valor_base: input.sold },
+    });
+    await prisma.contratos.updateMany({
+      where: { jogador_id: playerId, situacao: 'ATIVO' },
+      data: { fidelidade_ate: new Date(Date.now() + input.loyaltyMs) },
+    });
+    const response = await request(app.getHttpServer())
+      .post(`/api/v1/players/${playerId}/sell`)
+      .expect(200);
+    return response.body;
+  }
+
   async function createClub(name: string, acronym: string): Promise<number> {
     const response = await request(app.getHttpServer())
       .post('/api/v1/clubs')
