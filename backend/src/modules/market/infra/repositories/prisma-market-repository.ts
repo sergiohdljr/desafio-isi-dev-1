@@ -15,6 +15,7 @@ import {
   type PurchaseReceipt,
   type SaleReceipt,
   type StoredTransaction,
+  type TransactionFilter,
   type TransactionPage,
 } from '../../application/repositories/market-repository.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
@@ -240,20 +241,42 @@ export class PrismaMarketRepository implements MarketRepository {
     });
   }
 
-  async list(clubId: number): Promise<TransactionPage> {
+  async list(
+    clubId: number,
+    filter: TransactionFilter,
+  ): Promise<TransactionPage> {
     const club = await this.prisma.clubes.findUnique({
       where: { id: clubId },
       select: { id: true },
     });
     if (!club) {
-      return { clubFound: false, transactions: [] };
+      return { clubFound: false, playerFound: true, transactions: [] };
+    }
+    if (filter.playerId !== undefined) {
+      const player = await this.prisma.jogadores.findFirst({
+        where: { id: filter.playerId, excluido_em: null },
+        select: { id: true },
+      });
+      if (!player) {
+        return { clubFound: true, playerFound: false, transactions: [] };
+      }
     }
 
     const rows = await this.prisma.transacoes.findMany({
-      where: { clube_id: clubId },
+      where: {
+        clube_id: clubId,
+        ...(filter.types ? { tipo: { in: filter.types } } : {}),
+        ...(filter.playerId !== undefined
+          ? { jogador_id: filter.playerId }
+          : {}),
+      },
       orderBy: [{ criado_em: 'desc' }, { id: 'desc' }],
     });
-    return { clubFound: true, transactions: rows.map(toStoredTransaction) };
+    return {
+      clubFound: true,
+      playerFound: true,
+      transactions: rows.map(toStoredTransaction),
+    };
   }
 }
 

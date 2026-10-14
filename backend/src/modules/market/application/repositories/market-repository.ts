@@ -30,8 +30,13 @@ export interface MarketRepository {
     playerId: number,
     settle: (facts: SaleFacts) => SaleWrite,
   ): Promise<SaleReceipt>;
-  list(clubId: number): Promise<TransactionPage>;
+  list(clubId: number, filter: TransactionFilter): Promise<TransactionPage>;
 }
+
+export type TransactionFilter = {
+  types?: Array<'COMPRA' | 'VENDA'>;
+  playerId?: number;
+};
 
 export type StoredTransaction = {
   id: number;
@@ -49,6 +54,7 @@ export type StoredTransaction = {
 
 export type TransactionPage = {
   clubFound: boolean;
+  playerFound: boolean;
   transactions: StoredTransaction[];
 };
 

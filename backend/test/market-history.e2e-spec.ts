@@ -157,6 +157,98 @@ describe('Market history', () => {
       .expect(404);
   });
 
+  it('filters the history by type and player and keeps the summary on that subset', async () => {
+    const clubId = await createClub('Filtro FC', 'FFC');
+    const traded = await createPlayer('Meia Filtro', '40.00');
+    const outsider = await createPlayer('Meia Fora', '10.00');
+    await buy(traded, clubId);
+    await app.get(PrismaService).contratos.updateMany({
+      where: { jogador_id: traded, situacao: 'ATIVO' },
+      data: { fidelidade_ate: new Date('2020-01-01T03:00:00.000Z') },
+    });
+    await request(app.getHttpServer())
+      .post(`/api/v1/players/${traded}/sell`)
+      .expect(200);
+
+    const sales = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${clubId}/transactions`)
+      .query({ type: 'VENDA', extra: '1' })
+      .expect(200);
+    expect(sales.body.data).toHaveLength(1);
+    expect(sales.body.data[0].type).toBe('VENDA');
+    expect(sales.body.summary.total_spent).toBe(0);
+
+    const purchases = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${clubId}/transactions`)
+      .query({ type: 'COMPRA' })
+      .expect(200);
+    expect(purchases.body.summary).toMatchObject({
+      total_received: 0,
+      total_penalties: 0,
+      total_profit: 0,
+    });
+    expect(purchases.body.data[0].type).toBe('COMPRA');
+
+    const both = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${clubId}/transactions`)
+      .query({ type: 'COMPRA,VENDA', player_id: String(traded) })
+      .expect(200);
+    expect(both.body.data).toHaveLength(2);
+
+    const empty = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${clubId}/transactions`)
+      .query({ player_id: String(outsider) })
+      .expect(200);
+    expect(empty.body.data).toEqual([]);
+    expect(empty.body.summary).toEqual({
+      total_spent: 0,
+      total_received: 0,
+      total_fees: 0,
+      total_penalties: 0,
+      total_profit: 0,
+    });
+  });
+
+  it('rejects a bad history filter and a missing player', async () => {
+    const clubId = await createClub('Recusa FC', 'RFC');
+    for (const query of [
+      { type: '' },
+      { type: 'venda' },
+      { type: 'COMPRA,COMPRA' },
+      { type: 'COMPRA, VENDA' },
+      { player_id: '01' },
+      { player_id: '0' },
+    ]) {
+      const response = await request(app.getHttpServer())
+        .get(`/api/v1/clubs/${clubId}/transactions`)
+        .query(query)
+        .expect(400);
+      expect(response.body.message.length).toBeGreaterThan(0);
+      expect(response.headers['content-type']).toMatch(/application\/json/);
+    }
+
+    const missing = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${clubId}/transactions`)
+      .query({ player_id: '999999' })
+      .expect(404);
+    expect(missing.body.message.length).toBeGreaterThan(0);
+
+    const gone = await createPlayer('Meia Some', '10.00');
+    await request(app.getHttpServer())
+      .delete(`/api/v1/players/${gone}`)
+      .expect(204);
+    await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${clubId}/transactions`)
+      .query({ player_id: String(gone) })
+      .expect(404);
+
+    const unknownClub = await request(app.getHttpServer())
+      .get('/api/v1/clubs/999999/transactions')
+      .query({ type: 'VENDA' })
+      .expect(404);
+    expect(unknownClub.body.message.length).toBeGreaterThan(0);
+  });
+
   async function createClub(name: string, acronym: string): Promise<number> {
     const response = await request(app.getHttpServer())
       .post('/api/v1/clubs')

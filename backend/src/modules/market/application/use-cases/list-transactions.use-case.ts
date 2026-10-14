@@ -5,6 +5,7 @@ import {
   MARKET_REPOSITORY,
   type MarketRepository,
   type StoredTransaction,
+  type TransactionFilter,
 } from '../repositories/market-repository.js';
 
 export const LIST_TRANSACTIONS = Symbol('LIST_TRANSACTIONS');
@@ -35,7 +36,10 @@ export type TransactionListView = {
 };
 
 export interface ListTransactionsPort {
-  execute(clubId: number): Promise<TransactionListView>;
+  execute(
+    clubId: number,
+    filter: TransactionFilter,
+  ): Promise<TransactionListView>;
 }
 
 @Injectable()
@@ -44,10 +48,16 @@ export class ListTransactions implements ListTransactionsPort {
     @Inject(MARKET_REPOSITORY) private readonly market: MarketRepository,
   ) {}
 
-  async execute(clubId: number): Promise<TransactionListView> {
-    const page = await this.market.list(clubId);
+  async execute(
+    clubId: number,
+    filter: TransactionFilter,
+  ): Promise<TransactionListView> {
+    const page = await this.market.list(clubId, filter);
     if (!page.clubFound) {
       throw new DomainError('missing', 'Clube não encontrado');
+    }
+    if (filter.playerId !== undefined && !page.playerFound) {
+      throw new DomainError('missing', 'Jogador não encontrado');
     }
 
     const summary = summarize(page.transactions);
