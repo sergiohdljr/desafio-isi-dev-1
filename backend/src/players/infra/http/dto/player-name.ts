@@ -3,7 +3,7 @@ import {
   codePointLength,
   hasControlCharacter,
   normalizeSpaces,
-} from '../input/player-text.js';
+} from '../../../../shared/text/plain-text.js';
 
 export const playerNameSchema = z
   .string('Nome inválido')

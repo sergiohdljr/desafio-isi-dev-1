@@ -8,7 +8,7 @@ import {
   codePointLength,
   hasControlCharacter,
   normalizeSpaces,
-} from './player-text.js';
+} from '../../../../shared/text/plain-text.js';
 
 const MAX_INT32 = 2_147_483_647;
 const INTEGER = /^[1-9]\d*$/;

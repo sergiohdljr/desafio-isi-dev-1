@@ -1,0 +1,24 @@
+import { Module } from '@nestjs/common';
+import { PrismaModule } from '../prisma/prisma.module.js';
+import { CLUBS_REPOSITORY } from './application/repositories/clubs-repository.js';
+import {
+  CREATE_CLUB,
+  CreateClub,
+} from './application/use-cases/create-club.use-case.js';
+import {
+  FIND_CLUB,
+  FindClub,
+} from './application/use-cases/find-club.use-case.js';
+import { ClubsController } from './infra/http/clubs.controller.js';
+import { PrismaClubsRepository } from './infra/repositories/prisma-clubs-repository.js';
+
+@Module({
+  imports: [PrismaModule],
+  controllers: [ClubsController],
+  providers: [
+    { provide: CREATE_CLUB, useClass: CreateClub },
+    { provide: FIND_CLUB, useClass: FindClub },
+    { provide: CLUBS_REPOSITORY, useClass: PrismaClubsRepository },
+  ],
+})
+export class ClubsModule {}

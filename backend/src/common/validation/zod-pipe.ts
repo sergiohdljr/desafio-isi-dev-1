@@ -9,6 +9,7 @@ export class ZodPipe<T> implements PipeTransform<unknown, T> {
   constructor(
     private readonly schema: ZodType<T>,
     private readonly failure: 'bad_request' | 'not_found' = 'bad_request',
+    private readonly notFoundMessage = 'Jogador não encontrado',
   ) {}
 
   transform(value: unknown): T {
@@ -18,7 +19,7 @@ export class ZodPipe<T> implements PipeTransform<unknown, T> {
     }
 
     if (this.failure === 'not_found') {
-      throw new NotFoundException('Jogador não encontrado');
+      throw new NotFoundException(this.notFoundMessage);
     }
 
     const message = parsed.error.issues
