@@ -19,8 +19,8 @@ function player(cents: number, clubId: number | null = null): PurchasePlayer {
   };
 }
 
-function club(cents: number): PurchaseClub {
-  return { id: 3, cash: Money.fromCents(cents) };
+function club(cents: number, squadSize = 0): PurchaseClub {
+  return { id: 3, cash: Money.fromCents(cents), squadSize };
 }
 
 function facts(
@@ -65,5 +65,35 @@ describe('decide purchase', () => {
     expect(() => decidePurchase(facts(2800, 30000), boughtAt, boughtAt)).toThrow(
       DomainError,
     );
+  });
+
+  it('refuses a player who already has a club, a 13th squad place, or a cost above half the cash', () => {
+    expect(() =>
+      decidePurchase(
+        facts(2800, 30000, { player: player(2800, 9) }),
+        loyaltyUntil,
+        boughtAt,
+      ),
+    ).toThrow(DomainError);
+    expect(() =>
+      decidePurchase(
+        { player: player(100), club: club(30000, 12) },
+        loyaltyUntil,
+        boughtAt,
+      ),
+    ).toThrow(DomainError);
+    expect(() =>
+      decidePurchase(
+        { player: player(100), club: club(30000, 11) },
+        loyaltyUntil,
+        boughtAt,
+      ),
+    ).not.toThrow();
+    expect(() => decidePurchase(facts(4800, 10000), loyaltyUntil, boughtAt)).toThrow(
+      DomainError,
+    );
+    expect(() =>
+      decidePurchase(facts(12436, 26115), loyaltyUntil, boughtAt),
+    ).toThrow(DomainError);
   });
 });

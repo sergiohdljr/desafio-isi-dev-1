@@ -220,6 +220,85 @@ describe('Market purchase', () => {
     expect(await prisma.transacoes.count()).toBe(before);
   });
 
+  it('refuses a player who already has a club and leaves both clubs untouched', async () => {
+    const prisma = app.get(PrismaService);
+    const homeId = await createClub('Casa Alta', 'CAA');
+    const awayId = await createClub('Fora Alta', 'FAA');
+    const player = await createPlayer('Meia Presa');
+    await request(app.getHttpServer())
+      .post(`/api/v1/players/${player.id}/buy`)
+      .send({ club_id: homeId, loyalty_until: '2027-06-15T10:15-03:00' })
+      .expect(200);
+    const before = await prisma.transacoes.count();
+    const awayBefore = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${awayId}`)
+      .expect(200);
+
+    const response = await request(app.getHttpServer())
+      .post(`/api/v1/players/${player.id}/buy`)
+      .send({ club_id: awayId, loyalty_until: '2027-06-15T10:15-03:00' })
+      .expect(409);
+    expect(response.body.message.length).toBeGreaterThan(0);
+
+    expect(await prisma.transacoes.count()).toBe(before);
+    const away = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${awayId}`)
+      .expect(200);
+    expect(away.body.cash).toBe(awayBefore.body.cash);
+    expect(away.body.players).toEqual([]);
+    const stillHome = await request(app.getHttpServer())
+      .get(`/api/v1/players/${player.id}`)
+      .expect(200);
+    expect(stillHome.body.club_id).toBe(homeId);
+  });
+
+  it('accepts the 12th player and refuses the 13th without recording it', async () => {
+    const prisma = app.get(PrismaService);
+    const clubId = await createClub('Elenco Cheio', 'ELC');
+    const names = [
+      'Reserva Alfa',
+      'Reserva Beta',
+      'Reserva Gama',
+      'Reserva Delta',
+      'Reserva Zeta',
+      'Reserva Eta',
+      'Reserva Teta',
+      'Reserva Iota',
+      'Reserva Kapa',
+      'Reserva Lambda',
+      'Reserva Mu',
+      'Reserva Ni',
+      'Reserva Xi',
+    ];
+    for (const [index, name] of names.entries()) {
+      const player = await createPlayer(name);
+      await prisma.jogadores.update({
+        where: { id: player.id },
+        data: { valor_base: '1.00' },
+      });
+      const response = await request(app.getHttpServer())
+        .post(`/api/v1/players/${player.id}/buy`)
+        .send({ club_id: clubId, loyalty_until: '2027-06-15T10:15-03:00' });
+      expect(response.status).toBe(index < 12 ? 200 : 409);
+    }
+
+    const club = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${clubId}`)
+      .expect(200);
+    expect(club.body.players).toHaveLength(12);
+    expect(club.body.cash).toBe(288);
+    const leftOut = await request(app.getHttpServer())
+      .get('/api/v1/players')
+      .query({ search: 'Reserva Xi' })
+      .expect(200);
+    expect(leftOut.body.data[0].club_id).toBeNull();
+  });
+
+  it('refuses a cost above half the cash, including an unrounded half', async () => {
+    await expectRefusal({ market: '48.00', cash: '100.00' });
+    await expectRefusal({ market: '124.36', cash: '261.15' });
+  });
+
   async function createClub(name: string, acronym: string): Promise<number> {
     const response = await request(app.getHttpServer())
       .post('/api/v1/clubs')
@@ -275,6 +354,40 @@ describe('Market purchase', () => {
     expect(response.body.fee).toBe(input.fee);
     expect(response.body.cash_change).toBe(-input.cost);
     expect(response.body.club_cash).toBe(input.left);
+  }
+
+  async function expectRefusal(input: { market: string; cash: string }) {
+    const prisma = app.get(PrismaService);
+    serial += 1;
+    const letter = String.fromCharCode(64 + serial);
+    const clubId = await createClub(`Recusa ${letter} Norte`, `R${letter}N`);
+    const player = await createPlayer(`Recusa ${letter} Alfa`);
+    await prisma.jogadores.update({
+      where: { id: player.id },
+      data: { valor_base: input.market },
+    });
+    await prisma.clubes.update({
+      where: { id: clubId },
+      data: { caixa: input.cash },
+    });
+    const before = await prisma.transacoes.count();
+
+    const response = await request(app.getHttpServer())
+      .post(`/api/v1/players/${player.id}/buy`)
+      .send({ club_id: clubId, loyalty_until: '2027-06-15T10:15-03:00' })
+      .expect(409);
+    expect(response.body.message.length).toBeGreaterThan(0);
+    expect(await prisma.transacoes.count()).toBe(before);
+
+    const club = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${clubId}`)
+      .expect(200);
+    expect(club.body.cash).toBe(Number(input.cash));
+    expect(club.body.players).toEqual([]);
+    const free = await request(app.getHttpServer())
+      .get(`/api/v1/players/${player.id}`)
+      .expect(200);
+    expect(free.body.club_id).toBeNull();
   }
 });
 

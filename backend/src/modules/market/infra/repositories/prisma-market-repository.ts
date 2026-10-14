@@ -50,12 +50,18 @@ export class PrismaMarketRepository implements MarketRepository {
         where: { id: playerId, excluido_em: null },
       });
       const club = await tx.clubes.findUnique({ where: { id: clubId } });
+      const squadSize = club
+        ? await tx.jogadores.count({
+            where: { clube_id: clubId, excluido_em: null },
+          })
+        : 0;
       const write = settle({
         player: player ? toPurchasePlayer(player) : null,
         club: club
           ? {
               id: club.id,
               cash: Money.roundHalfAwayFromZero(club.caixa.toString()),
+              squadSize,
             }
           : null,
       });

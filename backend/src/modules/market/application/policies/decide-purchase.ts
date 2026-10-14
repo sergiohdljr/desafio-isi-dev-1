@@ -1,7 +1,7 @@
 import { DomainError } from '../../../../shared/domain/domain-error.js';
 import { Money } from '../../../../shared/domain/money.js';
 import { assertLoyaltyWindow } from '../../domain/loyalty-window.js';
-import { purchaseFee } from '../../domain/purchase-cost.js';
+import { exceedsHalfCash, purchaseFee } from '../../domain/purchase-cost.js';
 
 export type PurchasePlayer = {
   id: number;
@@ -10,9 +10,12 @@ export type PurchasePlayer = {
   marketValue: Money;
 };
 
+export const SQUAD_LIMIT = 12;
+
 export type PurchaseClub = {
   id: number;
   cash: Money;
+  squadSize: number;
 };
 
 export type PurchaseFacts = {
@@ -41,10 +44,19 @@ export function decidePurchase(
   if (!facts.club) {
     throw new DomainError('missing', 'Clube não encontrado');
   }
+  if (facts.player.clubId !== null) {
+    throw new DomainError('conflict', 'Jogador não está livre');
+  }
+  if (facts.club.squadSize >= SQUAD_LIMIT) {
+    throw new DomainError('conflict', 'O elenco já tem 12 jogadores');
+  }
 
   const value = facts.player.marketValue;
   const fee = purchaseFee(value);
   const cost = Money.fromCents(value.cents + fee.cents);
+  if (exceedsHalfCash(cost, facts.club.cash)) {
+    throw new DomainError('conflict', 'O custo passa de 50% do caixa');
+  }
   return {
     playerName: facts.player.name,
     value,

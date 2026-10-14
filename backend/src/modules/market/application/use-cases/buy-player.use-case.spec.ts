@@ -52,7 +52,7 @@ describe('buy player', () => {
         clubId: null,
         marketValue: Money.fromCents(4000),
       },
-      club: { id: 3, cash: Money.fromCents(30000) },
+      club: { id: 3, cash: Money.fromCents(30000), squadSize: 0 },
     });
     const module = await Test.createTestingModule({
       providers: [
@@ -88,7 +88,7 @@ describe('buy player', () => {
   it('does not record a purchase when the player is missing', async () => {
     const { market, stored } = repository({
       player: null,
-      club: { id: 3, cash: Money.fromCents(30000) },
+      club: { id: 3, cash: Money.fromCents(30000), squadSize: 0 },
     });
     const module = await Test.createTestingModule({
       providers: [
