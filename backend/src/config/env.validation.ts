@@ -1,46 +1,26 @@
-import { plainToInstance } from 'class-transformer';
-import {
-  IsEnum,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Min,
-  validateSync,
-} from 'class-validator';
+import { z } from 'zod';
 
-enum Environment {
-  Development = 'development',
-  Production = 'production',
-  Test = 'test',
-}
+const envSchema = z.looseObject({
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .optional()
+    .default('development'),
+  PORT: z
+    .string()
+    .regex(/^[1-9]\d*$/, 'PORT inválida')
+    .transform(Number)
+    .optional(),
+  DATABASE_URL: z.string().min(1, 'DATABASE_URL obrigatória'),
+});
 
-class EnvironmentVariables {
-  @IsOptional()
-  @IsEnum(Environment)
-  NODE_ENV: Environment = Environment.Development;
-
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  PORT?: number;
-
-  @IsString()
-  @IsNotEmpty()
-  DATABASE_URL: string;
-}
-
-export function validateEnv(
-  config: Record<string, unknown>,
-): EnvironmentVariables {
-  const validated = plainToInstance(EnvironmentVariables, config, {
-    enableImplicitConversion: true,
-  });
-  const errors = validateSync(validated, { skipMissingProperties: false });
-
-  if (errors.length > 0) {
-    throw new Error(errors.toString());
+export function validateEnv(config: Record<string, unknown>) {
+  const parsed = envSchema.safeParse(config);
+  if (!parsed.success) {
+    const message = parsed.error.issues
+      .map((issue) => issue.message)
+      .join('; ');
+    throw new Error(message || 'Ambiente inválido');
   }
 
-  return validated;
+  return parsed.data;
 }
