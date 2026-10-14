@@ -1,17 +1,32 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module.js';
-import { PLAYERS } from './use-cases/players.token.js';
-import { PrismaPlayersRepository } from './infrastructure/prisma/players.repository.js';
-import { PlayersController } from './infrastructure/http/players.controller.js';
+import { PLAYERS_REPOSITORY } from './application/repositories/players-repository.js';
+import { PlayersController } from './infra/http/players.controller.js';
+import { PrismaPlayersRepository } from './infra/repositories/prisma-players-repository.js';
 import {
   CHANGE_PLAYER_CONDITION,
   ChangePlayerCondition,
-} from './use-cases/change-player-condition.js';
-import { CREATE_PLAYER, CreatePlayer } from './use-cases/create-player.js';
-import { DELETE_PLAYER, DeletePlayer } from './use-cases/delete-player.js';
-import { FIND_PLAYER, FindPlayer } from './use-cases/find-player.js';
-import { LIST_PLAYERS, ListPlayers } from './use-cases/list-players.usecase.js';
-import { UPDATE_PLAYER, UpdatePlayer } from './use-cases/update-player.js';
+} from './application/use-cases/change-player-condition.js';
+import {
+  CREATE_PLAYER,
+  CreatePlayer,
+} from './application/use-cases/create-player.js';
+import {
+  DELETE_PLAYER,
+  DeletePlayer,
+} from './application/use-cases/delete-player.js';
+import {
+  FIND_PLAYER,
+  FindPlayer,
+} from './application/use-cases/find-player.js';
+import {
+  LIST_PLAYERS,
+  ListPlayers,
+} from './application/use-cases/list-players.js';
+import {
+  UPDATE_PLAYER,
+  UpdatePlayer,
+} from './application/use-cases/update-player.js';
 
 @Module({
   imports: [PrismaModule],
@@ -23,7 +38,7 @@ import { UPDATE_PLAYER, UpdatePlayer } from './use-cases/update-player.js';
     { provide: UPDATE_PLAYER, useClass: UpdatePlayer },
     { provide: CHANGE_PLAYER_CONDITION, useClass: ChangePlayerCondition },
     { provide: DELETE_PLAYER, useClass: DeletePlayer },
-    { provide: PLAYERS, useClass: PrismaPlayersRepository },
+    { provide: PLAYERS_REPOSITORY, useClass: PrismaPlayersRepository },
   ],
 })
 export class PlayersModule {}
