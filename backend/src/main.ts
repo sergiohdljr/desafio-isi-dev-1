@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import {
   FastifyAdapter,
@@ -6,11 +7,19 @@ import {
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
+  const isProduction = process.env.NODE_ENV === 'production';
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: true }),
+    {
+      logger: isProduction
+        ? ['error', 'warn', 'log']
+        : ['error', 'warn', 'log', 'debug', 'verbose'],
+    },
   );
   app.enableShutdownHooks();
-  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
+
+  const configService = app.get(ConfigService);
+  await app.listen(configService.getOrThrow<number>('app.port'), '0.0.0.0');
 }
 await bootstrap();
