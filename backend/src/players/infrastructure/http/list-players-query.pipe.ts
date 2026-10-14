@@ -1,5 +1,6 @@
 import { Injectable, PipeTransform } from '@nestjs/common';
-import { parsePlayerListQuery, PlayerListQuery } from './player-list-query.js';
+import { PlayerListQuery } from '../../application/player-list-query.js';
+import { parsePlayerListQuery } from './parse-player-list-query.js';
 
 @Injectable()
 export class ListPlayersQueryPipe implements PipeTransform<

@@ -8,6 +8,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { DomainError } from '../../shared/domain/domain-error.js';
+import { httpStatusForDomainError } from './domain-error-http.js';
 
 @Catch()
 @Injectable()
@@ -19,12 +21,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<FastifyReply>();
     const request = ctx.getRequest<FastifyRequest>();
 
-    const status =
-      exception instanceof HttpException
+    const domainError =
+      exception instanceof DomainError ? exception : undefined;
+    const status = domainError
+      ? httpStatusForDomainError(domainError.kind)
+      : exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    if (!(exception instanceof HttpException) || status >= 500) {
+    if (
+      !domainError &&
+      (!(exception instanceof HttpException) || status >= 500)
+    ) {
       this.logger.error(
         `${request.method} ${request.url}`,
         exception instanceof Error ? exception.stack : String(exception),
@@ -33,8 +41,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const exceptionBody =
       exception instanceof HttpException ? exception.getResponse() : undefined;
-    const message =
-      typeof exceptionBody === 'string'
+    const message = domainError
+      ? domainError.message
+      : typeof exceptionBody === 'string'
         ? exceptionBody
         : exceptionBody &&
             typeof exceptionBody === 'object' &&

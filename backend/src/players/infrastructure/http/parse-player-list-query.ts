@@ -1,5 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
-import { condicao, posicao } from '../generated/prisma/client.js';
+import {
+  type PlayerListQuery,
+  type PlayerSort,
+} from '../../application/player-list-query.js';
+import { CONDITIONS, POSITIONS } from '../../domain/player-types.js';
 import { codePointLength } from './player-text.js';
 
 const MAX_INT32 = 2_147_483_647;
@@ -23,25 +27,8 @@ const sortField: Record<PlayerSort, string> = {
   position: 'position',
 };
 
-const positions = new Set<string>(Object.values(posicao));
-const conditions = new Set<string>(Object.values(condicao));
-
-export type PlayerSort = (typeof SORTS)[number];
-
-export type PlayerListQuery = {
-  search?: string;
-  position?: posicao;
-  condition?: condicao;
-  free?: boolean;
-  clubId?: number;
-  minAge?: number;
-  maxAge?: number;
-  minValue?: number;
-  maxValue?: number;
-  sorts: PlayerSort[];
-  page: number;
-  limit: number;
-};
+const positions = new Set<string>(POSITIONS);
+const conditions = new Set<string>(CONDITIONS);
 
 export function parsePlayerListQuery(value: unknown): PlayerListQuery {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -79,8 +66,8 @@ export function parsePlayerListQuery(value: unknown): PlayerListQuery {
 
   return {
     search,
-    position: position as posicao | undefined,
-    condition: condition as condicao | undefined,
+    position: position as PlayerListQuery['position'],
+    condition: condition as PlayerListQuery['condition'],
     free,
     clubId,
     minAge,

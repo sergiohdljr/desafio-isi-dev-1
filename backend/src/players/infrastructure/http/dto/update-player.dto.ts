@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
-  IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsString,
@@ -8,7 +8,7 @@ import {
   Min,
   Validate,
 } from 'class-validator';
-import { posicao } from '../../generated/prisma/client.js';
+import { POSITIONS, type Position } from '../../../domain/player-types.js';
 import { normalizeName, PlayerNameConstraint } from './create-player.dto.js';
 
 export class UpdatePlayerDto {
@@ -18,8 +18,8 @@ export class UpdatePlayerDto {
   @Validate(PlayerNameConstraint)
   name: string;
 
-  @IsEnum(posicao)
-  position: posicao;
+  @IsIn(POSITIONS)
+  position: Position;
 
   @IsInt()
   @Min(1)

@@ -1,8 +1,8 @@
-import { posicao } from '../generated/prisma/client.js';
-import { PlayerResponse } from './player-response.js';
+import { Player } from '../domain/player.js';
+import { Position } from '../domain/player-types.js';
 import { PlayerListQuery, PlayerSort } from './player-list-query.js';
 
-const positionOrder: Record<posicao, number> = {
+const positionOrder: Record<Position, number> = {
   GOL: 0,
   ZAG: 1,
   LAT: 2,
@@ -10,8 +10,8 @@ const positionOrder: Record<posicao, number> = {
   ATA: 4,
 };
 
-export type PlayerListResponse = {
-  data: PlayerResponse[];
+export type PlayerListPage = {
+  data: Player[];
   meta: {
     page: number;
     limit: number;
@@ -21,9 +21,9 @@ export type PlayerListResponse = {
 };
 
 export function listPlayers(
-  players: PlayerResponse[],
+  players: Player[],
   query: PlayerListQuery,
-): PlayerListResponse {
+): PlayerListPage {
   const matched = players
     .filter((player) => matches(player, query))
     .sort((left, right) => comparePlayers(left, right, query.sorts));
@@ -41,7 +41,7 @@ export function listPlayers(
   };
 }
 
-function matches(player: PlayerResponse, query: PlayerListQuery): boolean {
+function matches(player: Player, query: PlayerListQuery): boolean {
   if (
     query.search !== undefined &&
     !foldName(player.name).includes(foldName(query.search))
@@ -54,13 +54,13 @@ function matches(player: PlayerResponse, query: PlayerListQuery): boolean {
   if (query.condition !== undefined && player.condition !== query.condition) {
     return false;
   }
-  if (query.free === true && player.club_id !== null) {
+  if (query.free === true && player.clubId !== null) {
     return false;
   }
-  if (query.free === false && player.club_id === null) {
+  if (query.free === false && player.clubId === null) {
     return false;
   }
-  if (query.clubId !== undefined && player.club_id !== query.clubId) {
+  if (query.clubId !== undefined && player.clubId !== query.clubId) {
     return false;
   }
   if (query.minAge !== undefined || query.maxAge !== undefined) {
@@ -73,8 +73,10 @@ function matches(player: PlayerResponse, query: PlayerListQuery): boolean {
   if (query.minValue !== undefined || query.maxValue !== undefined) {
     const minValue = cents(query.minValue ?? 0);
     const maxValue = cents(query.maxValue ?? 550);
-    const value = cents(player.market_value);
-    if (value < minValue || value > maxValue) {
+    if (
+      player.marketValue.cents < minValue ||
+      player.marketValue.cents > maxValue
+    ) {
       return false;
     }
   }
@@ -83,8 +85,8 @@ function matches(player: PlayerResponse, query: PlayerListQuery): boolean {
 }
 
 function comparePlayers(
-  left: PlayerResponse,
-  right: PlayerResponse,
+  left: Player,
+  right: Player,
   sorts: PlayerSort[],
 ): number {
   for (const sort of sorts) {
@@ -102,18 +104,14 @@ function comparePlayers(
   return left.id - right.id;
 }
 
-function compareBy(
-  left: PlayerResponse,
-  right: PlayerResponse,
-  sort: PlayerSort,
-): number {
+function compareBy(left: Player, right: Player, sort: PlayerSort): number {
   switch (sort) {
     case 'name':
       return compareNames(left.name, right.name);
     case 'value_asc':
-      return cents(left.market_value) - cents(right.market_value);
+      return left.marketValue.cents - right.marketValue.cents;
     case 'value_desc':
-      return cents(right.market_value) - cents(left.market_value);
+      return right.marketValue.cents - left.marketValue.cents;
     case 'age_asc':
       return left.age - right.age;
     case 'age_desc':

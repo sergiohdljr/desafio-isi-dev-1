@@ -30,11 +30,22 @@ describe('AppController (e2e)', () => {
     await app.getHttpAdapter().getInstance().ready();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
+  it('answers the API root as an unknown path', async () => {
+    const unknown = await request(app.getHttpServer())
+      .get('/api/v1/caminho-inexistente')
+      .expect(404)
+      .expect('Content-Type', /application\/json/);
+
+    const root = await request(app.getHttpServer())
       .get('/api/v1')
-      .expect(200)
-      .expect('Hello World!');
+      .expect(404)
+      .expect('Content-Type', /application\/json/);
+
+    expect(typeof root.body.message).toBe('string');
+    expect(root.body.message.length).toBeGreaterThan(0);
+    expect(root.body.statusCode).toBe(unknown.body.statusCode);
+    expect(JSON.stringify(root.body)).not.toContain('Hello World');
+    expect(JSON.stringify(root.body)).not.toContain('stack');
   });
 
   afterEach(async () => {

@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
-  IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsString,
@@ -10,7 +10,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { posicao } from '../../generated/prisma/client.js';
+import { POSITIONS, type Position } from '../../../domain/player-types.js';
 import { codePointLength } from '../player-text.js';
 
 @ValidatorConstraint({ name: 'playerName' })
@@ -67,8 +67,8 @@ export class CreatePlayerDto {
   @Validate(PlayerNameConstraint)
   name: string;
 
-  @IsEnum(posicao)
-  position: posicao;
+  @IsIn(POSITIONS)
+  position: Position;
 
   @IsInt()
   @Min(1)

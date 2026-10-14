@@ -6,7 +6,6 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
 import { appConfig } from './config/app.config.js';
 import { databaseConfig } from './config/database.config.js';
 import { validateEnv } from './config/env.validation.js';
-import { HelloModule } from './hello/hello.module.js';
 import { PlayersModule } from './players/players.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 
@@ -18,7 +17,6 @@ import { PrismaModule } from './prisma/prisma.module.js';
       validate: validateEnv,
     }),
     PrismaModule,
-    HelloModule,
     PlayersModule,
   ],
   providers: [
