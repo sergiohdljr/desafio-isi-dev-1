@@ -1,0 +1,22 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Bola">
+<g clip-path="url(#clip0_0_9)">
+<circle id="Couro" cx="8" cy="8" r="8" fill="white"/>
+<g id="Gomos">
+<path d="M8 4.9L10.948 7.042L9.822 10.508H6.178L5.052 7.042L8 4.9Z" fill="#09090B"/>
+<path d="M8 3.4L5.432 1.534L6.413 -1.484H9.587L10.568 1.534L8 3.4Z" fill="#09090B"/>
+<path d="M12.375 6.579L13.356 3.56H16.53L17.511 6.579L14.943 8.444L12.375 6.579Z" fill="#09090B"/>
+<path d="M10.704 11.721H13.878L14.859 14.74L12.291 16.606L9.723 14.74L10.704 11.721Z" fill="#09090B"/>
+<path d="M5.296 11.721L6.277 14.74L3.709 16.606L1.141 14.74L2.122 11.721H5.296Z" fill="#09090B"/>
+<path d="M3.625 6.579L1.057 8.444L-1.511 6.579L-0.53 3.56H2.644L3.625 6.579Z" fill="#09090B"/>
+</g>
+<path id="Costuras" d="M8 4.9V3.4M10.948 7.042L12.375 6.579M9.822 10.508L10.704 11.721M6.178 10.508L5.296 11.721M5.052 7.042L3.625 6.579" stroke="#09090B" stroke-linecap="round"/>
+<circle id="Contorno" cx="8" cy="8" r="7.5" stroke="#09090B"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_0_9">
+<rect width="16" height="16" rx="8" fill="white"/>
+</clipPath>
+</defs>
+</svg>
