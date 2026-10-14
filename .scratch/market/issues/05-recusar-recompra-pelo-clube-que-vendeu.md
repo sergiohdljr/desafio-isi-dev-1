@@ -4,8 +4,12 @@
 
 **Blocked by:** 03: Vender um jogador com a fidelidade cumprida.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Depois da venda, o mesmo clube que vendeu recebe `409` com `message` não vazio ao tentar comprar esse jogador. Não grava transação nem contrato, e não muda caixa, elenco nem o fato de o jogador estar livre.
-- [ ] Outro clube compra esse jogador com sucesso, pelo valor de mercado do momento, com taxa, contrato ativo e transação de compra.
-- [ ] A proibição é só do clube que já o vendeu. Um terceiro clube, que nunca o vendeu, também pode comprá-lo quando ele estiver livre.
+- [x] Depois da venda, o mesmo clube que vendeu recebe `409` com `message` não vazio ao tentar comprar esse jogador. Não grava transação nem contrato, e não muda caixa, elenco nem o fato de o jogador estar livre.
+- [x] Outro clube compra esse jogador com sucesso, pelo valor de mercado do momento, com taxa, contrato ativo e transação de compra.
+- [x] A proibição é só do clube que já o vendeu. Um terceiro clube, que nunca o vendeu, também pode comprá-lo quando ele estiver livre.
+
+## Comments
+
+Implementado: o clube que vendeu recebe 409 na recompra, e outro clube consegue comprar o jogador livre.

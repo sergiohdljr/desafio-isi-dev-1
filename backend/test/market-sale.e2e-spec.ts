@@ -147,6 +147,61 @@ describe('Market sale', () => {
       .expect(404);
   });
 
+  it('refuses a rebuy by the selling club and lets another club buy', async () => {
+    const prisma = app.get(PrismaService);
+    const sellerId = await createClub('Vendedor FC', 'VFC');
+    const buyerId = await createClub('Comprador FC', 'CFC');
+    const thirdId = await createClub('Terceiro FC', 'TFC');
+    const playerId = await createPlayer('Meia Volta', '25.00');
+    await buy(playerId, sellerId);
+    await prisma.contratos.updateMany({
+      where: { jogador_id: playerId, situacao: 'ATIVO' },
+      data: { fidelidade_ate: new Date('2020-01-01T03:00:00.000Z') },
+    });
+    await request(app.getHttpServer())
+      .post(`/api/v1/players/${playerId}/sell`)
+      .expect(200);
+    const before = await prisma.transacoes.count();
+    const seller = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${sellerId}`)
+      .expect(200);
+
+    const refused = await request(app.getHttpServer())
+      .post(`/api/v1/players/${playerId}/buy`)
+      .send({ club_id: sellerId, loyalty_until: '2027-06-15T10:15-03:00' })
+      .expect(409);
+    expect(refused.body.message.length).toBeGreaterThan(0);
+    expect(await prisma.transacoes.count()).toBe(before);
+    const stillFree = await request(app.getHttpServer())
+      .get(`/api/v1/players/${playerId}`)
+      .expect(200);
+    expect(stillFree.body.club_id).toBeNull();
+    const sellerAfter = await request(app.getHttpServer())
+      .get(`/api/v1/clubs/${sellerId}`)
+      .expect(200);
+    expect(sellerAfter.body.cash).toBe(seller.body.cash);
+
+    const accepted = await request(app.getHttpServer())
+      .post(`/api/v1/players/${playerId}/buy`)
+      .send({ club_id: buyerId, loyalty_until: '2027-06-15T10:15-03:00' })
+      .expect(200);
+    expect(accepted.body.club_id).toBe(buyerId);
+    expect(accepted.body.type).toBe('COMPRA');
+
+    await prisma.contratos.updateMany({
+      where: { jogador_id: playerId, situacao: 'ATIVO' },
+      data: { fidelidade_ate: new Date('2020-01-01T03:00:00.000Z') },
+    });
+    await request(app.getHttpServer())
+      .post(`/api/v1/players/${playerId}/sell`)
+      .expect(200);
+    const third = await request(app.getHttpServer())
+      .post(`/api/v1/players/${playerId}/buy`)
+      .send({ club_id: thirdId, loyalty_until: '2027-06-15T10:15-03:00' })
+      .expect(200);
+    expect(third.body.club_id).toBe(thirdId);
+  });
+
   it('rounds remaining loyalty up into the penalty band', async () => {
     const day = 24 * 60 * 60 * 1000;
     const hour = 60 * 60 * 1000;

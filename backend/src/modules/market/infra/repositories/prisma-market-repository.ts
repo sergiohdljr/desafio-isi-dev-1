@@ -57,6 +57,17 @@ export class PrismaMarketRepository implements MarketRepository {
             where: { clube_id: clubId, excluido_em: null },
           })
         : 0;
+      const previousSale =
+        player && club
+          ? await tx.transacoes.findFirst({
+              where: {
+                clube_id: clubId,
+                jogador_id: playerId,
+                tipo: 'VENDA',
+              },
+              select: { id: true },
+            })
+          : null;
       const write = settle({
         player: player ? toPurchasePlayer(player) : null,
         club: club
@@ -66,6 +77,7 @@ export class PrismaMarketRepository implements MarketRepository {
               squadSize,
             }
           : null,
+        previouslySoldByClub: previousSale !== null,
       });
       if (!club) {
         throw new Error('Compra sem clube');

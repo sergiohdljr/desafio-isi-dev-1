@@ -56,6 +56,7 @@ describe('buy player', () => {
         marketValue: Money.fromCents(4000),
       },
       club: { id: 3, cash: Money.fromCents(30000), squadSize: 0 },
+      previouslySoldByClub: false,
     });
     const module = await Test.createTestingModule({
       providers: [
@@ -92,6 +93,7 @@ describe('buy player', () => {
     const { market, stored } = repository({
       player: null,
       club: { id: 3, cash: Money.fromCents(30000), squadSize: 0 },
+      previouslySoldByClub: false,
     });
     const module = await Test.createTestingModule({
       providers: [

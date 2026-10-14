@@ -21,6 +21,7 @@ export type PurchaseClub = {
 export type PurchaseFacts = {
   player: PurchasePlayer | null;
   club: PurchaseClub | null;
+  previouslySoldByClub: boolean;
 };
 
 export type PurchaseWrite = {
@@ -46,6 +47,12 @@ export function decidePurchase(
   }
   if (facts.player.clubId !== null) {
     throw new DomainError('conflict', 'Jogador não está livre');
+  }
+  if (facts.previouslySoldByClub) {
+    throw new DomainError(
+      'conflict',
+      'O clube não pode recomprar um jogador que já vendeu',
+    );
   }
   if (facts.club.squadSize >= SQUAD_LIMIT) {
     throw new DomainError('conflict', 'O elenco já tem 12 jogadores');

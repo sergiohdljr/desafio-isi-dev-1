@@ -31,6 +31,7 @@ function facts(
   return {
     player: player(marketCents),
     club: club(cashCents),
+    previouslySoldByClub: false,
     ...overrides,
   };
 }
@@ -77,14 +78,14 @@ describe('decide purchase', () => {
     ).toThrow(DomainError);
     expect(() =>
       decidePurchase(
-        { player: player(100), club: club(30000, 12) },
+        { player: player(100), club: club(30000, 12), previouslySoldByClub: false },
         loyaltyUntil,
         boughtAt,
       ),
     ).toThrow(DomainError);
     expect(() =>
       decidePurchase(
-        { player: player(100), club: club(30000, 11) },
+        { player: player(100), club: club(30000, 11), previouslySoldByClub: false },
         loyaltyUntil,
         boughtAt,
       ),
@@ -94,6 +95,13 @@ describe('decide purchase', () => {
     );
     expect(() =>
       decidePurchase(facts(12436, 26115), loyaltyUntil, boughtAt),
+    ).toThrow(DomainError);
+    expect(() =>
+      decidePurchase(
+        facts(2800, 30000, { previouslySoldByClub: true }),
+        loyaltyUntil,
+        boughtAt,
+      ),
     ).toThrow(DomainError);
   });
 });
