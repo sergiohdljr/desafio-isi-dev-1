@@ -6,6 +6,10 @@ import {
   BUY_PLAYER,
   BuyPlayer,
 } from './application/use-cases/buy-player.use-case.js';
+import {
+  SELL_PLAYER,
+  SellPlayer,
+} from './application/use-cases/sell-player.use-case.js';
 import { PlayersMarketController } from './infra/http/players-market.controller.js';
 import { PrismaMarketRepository } from './infra/repositories/prisma-market-repository.js';
 
@@ -14,6 +18,7 @@ import { PrismaMarketRepository } from './infra/repositories/prisma-market-repos
   controllers: [PlayersMarketController],
   providers: [
     { provide: BUY_PLAYER, useClass: BuyPlayer },
+    { provide: SELL_PLAYER, useClass: SellPlayer },
     { provide: MARKET_REPOSITORY, useClass: PrismaMarketRepository },
     { provide: CLOCK, useClass: SystemClock },
   ],

@@ -39,6 +39,9 @@ function repository(initial: PurchaseFacts) {
       };
       return receipt;
     },
+    async sale() {
+      throw new Error('venda fora deste teste');
+    },
   };
   return { market, stored };
 }

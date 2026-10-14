@@ -3,6 +3,7 @@ import {
   type PurchaseFacts,
   type PurchaseWrite,
 } from '../policies/decide-purchase.js';
+import { type SaleFacts, type SaleWrite } from '../policies/decide-sale.js';
 
 export const MARKET_REPOSITORY = Symbol('MARKET_REPOSITORY');
 
@@ -25,4 +26,26 @@ export interface MarketRepository {
     clubId: number,
     settle: (facts: PurchaseFacts) => PurchaseWrite,
   ): Promise<PurchaseReceipt>;
+  sale(
+    playerId: number,
+    settle: (facts: SaleFacts) => SaleWrite,
+  ): Promise<SaleReceipt>;
 }
+
+export type SaleReceipt = {
+  id: number;
+  clubId: number;
+  playerId: number;
+  playerName: string;
+  value: Money;
+  fee: Money;
+  penalty: Money;
+  profit: Money;
+  cashChange: Money;
+  createdAt: Date;
+  purchaseValue: Money;
+  remainingDays: number;
+  penaltyRate: number;
+  contractStatus: SaleWrite['contractStatus'];
+  clubCash: Money;
+};
