@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
 import { ClubsModule } from './modules/clubs/clubs.module.js';
+import { MarketModule } from './modules/market/market.module.js';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
 import { appConfig } from './config/app.config.js';
 import { databaseConfig } from './config/database.config.js';
@@ -19,6 +20,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
     PrismaModule,
     PlayersModule,
     ClubsModule,
+    MarketModule,
   ],
   providers: [
     {
