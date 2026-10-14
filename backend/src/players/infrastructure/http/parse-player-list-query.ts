@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import {
   type PlayerListQuery,
   type PlayerSort,
-} from '../../application/player-list-query.js';
+} from '../../use-cases/player-list-query.js';
 import { CONDITIONS, POSITIONS } from '../../domain/player-types.js';
 import { codePointLength } from './player-text.js';
 

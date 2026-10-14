@@ -1,17 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Player, RevisePlayer } from '../domain/player.js';
-import type { Players } from '../domain/players.js';
+import { type Players } from '../domain/players.js';
 import { PLAYERS } from './players.token.js';
 import { requireActivePlayer } from './require-active-player.js';
 
+export const DELETE_PLAYER = Symbol('DELETE_PLAYER');
+
+export interface DeletePlayerPort {
+  execute(id: number): Promise<void>;
+}
+
 @Injectable()
-export class UpdatePlayer {
+export class DeletePlayer implements DeletePlayerPort {
   constructor(@Inject(PLAYERS) private readonly players: Players) {}
 
-  async execute(id: number, input: RevisePlayer): Promise<Player> {
+  async execute(id: number): Promise<void> {
     const player = await requireActivePlayer(this.players, id);
-    player.revise(input);
+    player.exclude();
     await this.players.save(player);
-    return player;
   }
 }

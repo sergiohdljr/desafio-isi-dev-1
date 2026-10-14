@@ -15,8 +15,8 @@ export type PlayerListPage = {
   meta: {
     page: number;
     limit: number;
-    total_items: number;
-    total_pages: number;
+    totalItems: number;
+    totalPages: number;
   };
 };
 
@@ -35,8 +35,8 @@ export function listPlayers(
     meta: {
       page: query.page,
       limit: query.limit,
-      total_items: totalItems,
-      total_pages: totalItems === 0 ? 0 : Math.ceil(totalItems / query.limit),
+      totalItems,
+      totalPages: totalItems === 0 ? 0 : Math.ceil(totalItems / query.limit),
     },
   };
 }

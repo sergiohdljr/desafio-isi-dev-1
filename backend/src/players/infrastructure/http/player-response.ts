@@ -1,5 +1,5 @@
-import { Player } from '../../domain/player.js';
 import { Condition, Position } from '../../domain/player-types.js';
+import { PlayerListView, PlayerView } from '../../use-cases/player-view.js';
 
 export type PlayerResponse = {
   id: number;
@@ -21,24 +21,44 @@ export type PlayerResponse = {
   club_id: number | null;
 };
 
-export function toPlayerResponse(player: Player): PlayerResponse {
+export function presentPlayer(view: PlayerView): PlayerResponse {
   return {
-    id: player.id,
-    name: player.name,
-    position: player.position,
-    agility: player.agility,
-    age: player.age,
-    condition: player.condition,
-    base_value: player.baseValue.amount,
-    market_value: player.marketValue.amount,
-    pace: player.pace,
-    shooting: player.shooting,
-    passing: player.passing,
-    dribbling: player.dribbling,
-    defending: player.defending,
-    physical: player.physical,
-    potential: player.potential,
-    overall: player.overall,
-    club_id: player.clubId,
+    id: view.id,
+    name: view.name,
+    position: view.position,
+    agility: view.agility,
+    age: view.age,
+    condition: view.condition,
+    base_value: view.baseValue,
+    market_value: view.marketValue,
+    pace: view.pace,
+    shooting: view.shooting,
+    passing: view.passing,
+    dribbling: view.dribbling,
+    defending: view.defending,
+    physical: view.physical,
+    potential: view.potential,
+    overall: view.overall,
+    club_id: view.clubId,
+  };
+}
+
+export function presentPlayerList(page: PlayerListView): {
+  data: PlayerResponse[];
+  meta: {
+    page: number;
+    limit: number;
+    total_items: number;
+    total_pages: number;
+  };
+} {
+  return {
+    data: page.data.map(presentPlayer),
+    meta: {
+      page: page.meta.page,
+      limit: page.meta.limit,
+      total_items: page.meta.totalItems,
+      total_pages: page.meta.totalPages,
+    },
   };
 }

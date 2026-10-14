@@ -1,5 +1,5 @@
 import { Injectable, PipeTransform } from '@nestjs/common';
-import { PlayerListQuery } from '../../application/player-list-query.js';
+import { PlayerListQuery } from '../../use-cases/player-list-query.js';
 import { parsePlayerListQuery } from './parse-player-list-query.js';
 
 @Injectable()
