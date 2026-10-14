@@ -7,6 +7,7 @@ import request from 'supertest';
 import { AppModule } from './../src/app.module.js';
 import { configureApp } from './../src/configure-app.js';
 import { PrismaService } from './../src/prisma/prisma.service.js';
+import { emptyLeague } from './empty-league.js';
 
 const meia = {
   name: 'Meia Lua',
@@ -109,8 +110,20 @@ describe('Market purchase', () => {
   });
 
   it('charges the fee from the worked examples, including a cost equal to half the cash', async () => {
-    await expectPurchase({ market: '28.00', cash: '300.00', fee: 0, cost: 28, left: 272 });
-    await expectPurchase({ market: '30.00', cash: '300.00', fee: 0, cost: 30, left: 270 });
+    await expectPurchase({
+      market: '28.00',
+      cash: '300.00',
+      fee: 0,
+      cost: 28,
+      left: 272,
+    });
+    await expectPurchase({
+      market: '30.00',
+      cash: '300.00',
+      fee: 0,
+      cost: 30,
+      left: 270,
+    });
     await expectPurchase({
       market: '30.01',
       cash: '300.00',
@@ -208,7 +221,10 @@ describe('Market purchase', () => {
       [`/api/v1/players/${player.id}/buy`, { club_id: clubId, ...loyalty }],
       ['/api/v1/players/999999/buy', { club_id: clubId, ...loyalty }],
       ['/api/v1/players/01/buy', { club_id: clubId, ...loyalty }],
-      [`/api/v1/players/${(await createPlayer('Meia Livre')).id}/buy`, { club_id: 999999, ...loyalty }],
+      [
+        `/api/v1/players/${(await createPlayer('Meia Livre')).id}/buy`,
+        { club_id: 999999, ...loyalty },
+      ],
     ] as const) {
       const response = await request(app.getHttpServer())
         .post(url)
@@ -390,13 +406,3 @@ describe('Market purchase', () => {
     expect(free.body.club_id).toBeNull();
   }
 });
-
-async function emptyLeague(prisma: PrismaService): Promise<void> {
-  await prisma.duelos_partida.deleteMany();
-  await prisma.partidas.deleteMany();
-  await prisma.escalacoes.deleteMany();
-  await prisma.transacoes.deleteMany();
-  await prisma.contratos.deleteMany();
-  await prisma.jogadores.deleteMany();
-  await prisma.clubes.deleteMany();
-}

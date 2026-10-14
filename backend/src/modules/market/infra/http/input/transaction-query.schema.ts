@@ -1,7 +1,6 @@
 import { z } from 'zod';
+import { resourceId } from '../../../../../common/validation/resource-id.js';
 import { type TransactionFilter } from '../../../application/repositories/market-repository.js';
-
-const MAX_INT32 = 2_147_483_647;
 
 const transactionType = z
   .string('Tipo inválido')
@@ -12,11 +11,7 @@ const transactionType = z
   }, 'Tipo inválido')
   .transform((value) => value.split(',') as Array<'COMPRA' | 'VENDA'>);
 
-const playerId = z
-  .string('Jogador inválido')
-  .regex(/^[1-9]\d*$/, 'Jogador inválido')
-  .refine((value) => Number(value) <= MAX_INT32, 'Jogador inválido')
-  .transform(Number);
+const playerId = resourceId('Jogador inválido');
 
 export const transactionQuerySchema = z
   .object({
@@ -24,11 +19,9 @@ export const transactionQuerySchema = z
     player_id: playerId.optional(),
   })
   .strip()
-  .transform(
-    (query): TransactionFilter => ({
-      types: query.type,
-      playerId: query.player_id,
-    }),
-  );
+  .transform((query): TransactionFilter => ({
+    types: query.type,
+    playerId: query.player_id,
+  }));
 
 export type TransactionQuery = z.infer<typeof transactionQuerySchema>;

@@ -1,15 +1,10 @@
-import { compareNames, foldName } from '../../../../shared/domain/name-order.js';
+import {
+  compareNames,
+  foldName,
+} from '../../../../shared/domain/name-order.js';
+import { positionOrder } from '../../../clubs/domain/entities/squad.js';
 import { Player } from '../../domain/entities/player.js';
-import { Position } from '../../domain/types/player-types.js';
 import { PlayerListQuery, PlayerSort } from './player-list-query.js';
-
-const positionOrder: Record<Position, number> = {
-  GOL: 0,
-  ZAG: 1,
-  LAT: 2,
-  MEI: 3,
-  ATA: 4,
-};
 
 export type PlayerListPage = {
   data: Player[];

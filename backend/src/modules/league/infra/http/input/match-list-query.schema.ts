@@ -1,12 +1,7 @@
 import { z } from 'zod';
+import { resourceId } from '../../../../../common/validation/resource-id.js';
 
-const MAX_INT32 = 2_147_483_647;
-
-const clubId = z
-  .string('Clube inválido')
-  .regex(/^[1-9]\d*$/, 'Clube inválido')
-  .refine((value) => Number(value) <= MAX_INT32, 'Clube inválido')
-  .transform(Number);
+const clubId = resourceId('Clube inválido');
 
 export const matchListQuerySchema = z
   .object({

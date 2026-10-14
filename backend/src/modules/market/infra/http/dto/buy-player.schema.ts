@@ -1,7 +1,6 @@
 import { z } from 'zod';
+import { MAX_INT32 } from '../../../../../common/validation/resource-id.js';
 import { parseBrasiliaMinute } from '../parse-brasilia-minute.js';
-
-const MAX_INT32 = 2_147_483_647;
 
 export const buyPlayerSchema = z
   .object({

@@ -7,6 +7,7 @@ import request from 'supertest';
 import { AppModule } from './../src/app.module.js';
 import { configureApp } from './../src/configure-app.js';
 import { PrismaService } from './../src/prisma/prisma.service.js';
+import { emptyLeague } from './empty-league.js';
 
 const loyalty = '2027-06-15T10:15-03:00';
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -749,14 +750,4 @@ function skill(
   condition?: 'MAL_CONDICIONADO',
 ) {
   return { name, position, ...skills, condition };
-}
-
-async function emptyLeague(prisma: PrismaService): Promise<void> {
-  await prisma.duelos_partida.deleteMany();
-  await prisma.partidas.deleteMany();
-  await prisma.escalacoes.deleteMany();
-  await prisma.transacoes.deleteMany();
-  await prisma.contratos.deleteMany();
-  await prisma.jogadores.deleteMany();
-  await prisma.clubes.deleteMany();
 }

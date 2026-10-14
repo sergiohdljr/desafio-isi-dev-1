@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import {
+  MAX_INT32,
+  resourceId,
+} from '../../../../../common/validation/resource-id.js';
+import {
   type PlayerListQuery,
   type PlayerSort,
 } from '../../../application/queries/player-list-query.js';
@@ -10,7 +14,6 @@ import {
   normalizeSpaces,
 } from '../../../../../shared/text/plain-text.js';
 
-const MAX_INT32 = 2_147_483_647;
 const INTEGER = /^[1-9]\d*$/;
 const DECIMAL = /^(?:0|[1-9]\d*)(?:\.\d{1,2})?$/;
 const SORTS = [
@@ -112,11 +115,7 @@ export const playerListQuerySchema = z
       .transform((value) =>
         value === undefined ? undefined : value === 'true',
       ),
-    club_id: queryInteger(
-      1,
-      MAX_INT32,
-      'Parâmetro club_id inválido',
-    ).optional(),
+    club_id: resourceId('Parâmetro club_id inválido').optional(),
     min_age: queryInteger(16, 45, 'Parâmetro min_age inválido').optional(),
     max_age: queryInteger(16, 45, 'Parâmetro max_age inválido').optional(),
     min_value: queryDecimal('Parâmetro min_value inválido'),

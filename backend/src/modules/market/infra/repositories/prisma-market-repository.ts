@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '../../../../generated/prisma/client.js';
 import { Money } from '../../../../shared/domain/money.js';
-import { Player } from '../../../players/domain/entities/player.js';
+import { releaseLineupSeat } from '../../../league/infra/repositories/release-lineup-seat.js';
 import {
-  type Condition,
-  type Position,
-} from '../../../players/domain/types/player-types.js';
+  playerFromRow,
+  type PlayerRow,
+} from '../../../players/infra/repositories/player-row.js';
 import {
   type PurchaseFacts,
   type PurchaseWrite,
@@ -23,23 +24,7 @@ import {
 } from '../../application/repositories/market-repository.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
 
-type PlayerRow = {
-  id: number;
-  nome: string;
-  posicao: Position;
-  agilidade: number;
-  idade: number;
-  valor_base: { toString(): string };
-  condicao: Condition;
-  velocidade: number;
-  finalizacao: number;
-  passe: number;
-  drible: number;
-  defesa: number;
-  fisico: number;
-  potencial: number;
-  clube_id: number | null;
-};
+type Tx = Prisma.TransactionClient;
 
 @Injectable()
 export class PrismaMarketRepository implements MarketRepository {
@@ -51,93 +36,18 @@ export class PrismaMarketRepository implements MarketRepository {
     settle: (facts: PurchaseFacts) => PurchaseWrite,
   ): Promise<PurchaseReceipt> {
     return this.prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT id FROM clubes WHERE id = ${clubId} FOR UPDATE`;
-      await tx.$queryRaw`SELECT id FROM jogadores WHERE id = ${playerId} FOR UPDATE`;
-
-      const player = await tx.jogadores.findFirst({
-        where: { id: playerId, excluido_em: null },
-      });
-      const club = await tx.clubes.findUnique({ where: { id: clubId } });
-      const squadSize = club
-        ? await tx.jogadores.count({
-            where: { clube_id: clubId, excluido_em: null },
-          })
-        : 0;
-      const previousSale =
-        player && club
-          ? await tx.transacoes.findFirst({
-              where: {
-                clube_id: clubId,
-                jogador_id: playerId,
-                tipo: 'VENDA',
-              },
-              select: { id: true },
-            })
-          : null;
-      const write = settle({
-        player: player ? toPurchasePlayer(player) : null,
-        club: club
-          ? {
-              id: club.id,
-              cash: Money.roundHalfAwayFromZero(club.caixa.toString()),
-              squadSize,
-            }
-          : null,
-        previouslySoldByClub: previousSale !== null,
-      });
-      if (!club) {
+      await lockPurchase(tx, clubId, playerId);
+      const loaded = await readPurchase(tx, playerId, clubId);
+      const write = settle(loaded.facts);
+      if (!loaded.club) {
         throw new Error('Compra sem clube');
       }
-
-      const clubCash = Money.fromCents(
-        Money.roundHalfAwayFromZero(club.caixa.toString()).cents +
-          write.cashChange.cents,
-      );
-      await tx.jogadores.update({
-        where: { id: playerId },
-        data: { clube_id: clubId },
-      });
-      await tx.clubes.update({
-        where: { id: clubId },
-        data: { caixa: clubCash.toDecimalString() },
-      });
-      await tx.contratos.create({
-        data: {
-          jogador_id: playerId,
-          clube_id: clubId,
-          valor_compra: write.value.toDecimalString(),
-          fidelidade_ate: write.loyaltyUntil,
-          situacao: 'ATIVO',
-          iniciado_em: write.at,
-        },
-      });
-      const created = await tx.transacoes.create({
-        data: {
-          clube_id: clubId,
-          jogador_id: playerId,
-          nome_jogador: write.playerName,
-          tipo: 'COMPRA',
-          valor: write.value.toDecimalString(),
-          taxa: write.fee.toDecimalString(),
-          multa: '0.00',
-          lucro: null,
-          variacao_caixa: write.cashChange.toDecimalString(),
-          criado_em: write.at,
-        },
-      });
-
-      return {
-        id: created.id,
-        clubId,
+      return persistPurchase(tx, {
         playerId,
-        playerName: write.playerName,
-        value: write.value,
-        fee: write.fee,
-        cashChange: write.cashChange,
-        createdAt: write.at,
-        loyaltyUntil: write.loyaltyUntil,
-        clubCash,
-      };
+        clubId,
+        cash: loaded.club.caixa,
+        write,
+      });
     });
   }
 
@@ -146,102 +56,17 @@ export class PrismaMarketRepository implements MarketRepository {
     settle: (facts: SaleFacts) => SaleWrite,
   ): Promise<SaleReceipt> {
     return this.prisma.$transaction(async (tx) => {
-      const peek = await tx.jogadores.findFirst({
-        where: { id: playerId, excluido_em: null },
-        select: { clube_id: true },
-      });
-      if (peek?.clube_id) {
-        await tx.$queryRaw`SELECT id FROM clubes WHERE id = ${peek.clube_id} FOR UPDATE`;
-      }
-      await tx.$queryRaw`SELECT id FROM jogadores WHERE id = ${playerId} FOR UPDATE`;
-
-      const player = await tx.jogadores.findFirst({
-        where: { id: playerId, excluido_em: null },
-      });
-      const club = player?.clube_id
-        ? await tx.clubes.findUnique({ where: { id: player.clube_id } })
-        : null;
-      const active = player?.clube_id
-        ? await tx.contratos.findFirst({
-            where: {
-              jogador_id: playerId,
-              clube_id: player.clube_id,
-              situacao: 'ATIVO',
-            },
-            orderBy: { iniciado_em: 'desc' },
-          })
-        : null;
-      const write = settle({
-        player: player ? toPurchasePlayer(player) : null,
-        clubCash: club
-          ? Money.roundHalfAwayFromZero(club.caixa.toString())
-          : null,
-        contract: active
-          ? {
-              purchaseValue: Money.roundHalfAwayFromZero(
-                active.valor_compra.toString(),
-              ),
-              loyaltyUntil: active.fidelidade_ate,
-            }
-          : null,
-      });
-      if (!club) {
+      await lockSale(tx, playerId);
+      const loaded = await readSale(tx, playerId);
+      const write = settle(loaded.facts);
+      if (!loaded.club) {
         throw new Error('Venda sem clube');
       }
-
-      const clubCash = Money.fromCents(
-        Money.roundHalfAwayFromZero(club.caixa.toString()).cents +
-          write.cashChange.cents,
-      );
-      await tx.jogadores.update({
-        where: { id: playerId },
-        data: { clube_id: null },
-      });
-      await tx.escalacoes.deleteMany({ where: { jogador_id: playerId } });
-      await tx.clubes.update({
-        where: { id: write.clubId },
-        data: { caixa: clubCash.toDecimalString() },
-      });
-      await tx.contratos.updateMany({
-        where: {
-          jogador_id: playerId,
-          clube_id: write.clubId,
-          situacao: 'ATIVO',
-        },
-        data: { situacao: write.contractStatus, encerrado_em: write.at },
-      });
-      const created = await tx.transacoes.create({
-        data: {
-          clube_id: write.clubId,
-          jogador_id: playerId,
-          nome_jogador: write.playerName,
-          tipo: 'VENDA',
-          valor: write.value.toDecimalString(),
-          taxa: write.fee.toDecimalString(),
-          multa: write.penalty.toDecimalString(),
-          lucro: write.profit.toDecimalString(),
-          variacao_caixa: write.cashChange.toDecimalString(),
-          criado_em: write.at,
-        },
-      });
-
-      return {
-        id: created.id,
-        clubId: write.clubId,
+      return persistSale(tx, {
         playerId,
-        playerName: write.playerName,
-        value: write.value,
-        fee: write.fee,
-        penalty: write.penalty,
-        profit: write.profit,
-        cashChange: write.cashChange,
-        createdAt: write.at,
-        purchaseValue: write.purchaseValue,
-        remainingDays: write.remainingDays,
-        penaltyRate: write.penaltyRate,
-        contractStatus: write.contractStatus,
-        clubCash,
-      };
+        cash: loaded.club.caixa,
+        write,
+      });
     });
   }
 
@@ -315,28 +140,225 @@ function toStoredTransaction(row: {
 }
 
 function toPurchasePlayer(row: PlayerRow) {
-  const player = Player.reconstitute({
-    id: row.id,
-    name: row.nome,
-    position: row.posicao,
-    agility: row.agilidade,
-    age: row.idade,
-    condition: row.condicao,
-    baseValue: Money.roundHalfAwayFromZero(row.valor_base.toString()),
-    pace: row.velocidade,
-    shooting: row.finalizacao,
-    passing: row.passe,
-    dribbling: row.drible,
-    defending: row.defesa,
-    physical: row.fisico,
-    potential: row.potencial,
-    clubId: row.clube_id,
-    excluded: false,
-  });
+  const player = playerFromRow(row);
   return {
     id: player.id,
     name: player.name,
     clubId: player.clubId,
     marketValue: player.marketValue,
+  };
+}
+
+async function lockPurchase(
+  tx: Tx,
+  clubId: number,
+  playerId: number,
+): Promise<void> {
+  await tx.$queryRaw`SELECT id FROM clubes WHERE id = ${clubId} FOR UPDATE`;
+  await tx.$queryRaw`SELECT id FROM jogadores WHERE id = ${playerId} FOR UPDATE`;
+}
+
+async function readPurchase(tx: Tx, playerId: number, clubId: number) {
+  const player = await tx.jogadores.findFirst({
+    where: { id: playerId, excluido_em: null },
+  });
+  const club = await tx.clubes.findUnique({ where: { id: clubId } });
+  const squadSize = club
+    ? await tx.jogadores.count({
+        where: { clube_id: clubId, excluido_em: null },
+      })
+    : 0;
+  const previousSale =
+    player && club
+      ? await tx.transacoes.findFirst({
+          where: {
+            clube_id: clubId,
+            jogador_id: playerId,
+            tipo: 'VENDA',
+          },
+          select: { id: true },
+        })
+      : null;
+  return {
+    club,
+    facts: {
+      player: player ? toPurchasePlayer(player) : null,
+      club: club
+        ? {
+            id: club.id,
+            cash: Money.roundHalfAwayFromZero(club.caixa.toString()),
+            squadSize,
+          }
+        : null,
+      previouslySoldByClub: previousSale !== null,
+    } satisfies PurchaseFacts,
+  };
+}
+
+async function persistPurchase(
+  tx: Tx,
+  purchase: {
+    playerId: number;
+    clubId: number;
+    cash: { toString(): string };
+    write: PurchaseWrite;
+  },
+): Promise<PurchaseReceipt> {
+  const clubCash = Money.fromCents(
+    Money.roundHalfAwayFromZero(purchase.cash.toString()).cents +
+      purchase.write.cashChange.cents,
+  );
+  await tx.jogadores.update({
+    where: { id: purchase.playerId },
+    data: { clube_id: purchase.clubId },
+  });
+  await tx.clubes.update({
+    where: { id: purchase.clubId },
+    data: { caixa: clubCash.toDecimalString() },
+  });
+  await tx.contratos.create({
+    data: {
+      jogador_id: purchase.playerId,
+      clube_id: purchase.clubId,
+      valor_compra: purchase.write.value.toDecimalString(),
+      fidelidade_ate: purchase.write.loyaltyUntil,
+      situacao: 'ATIVO',
+      iniciado_em: purchase.write.at,
+    },
+  });
+  const created = await tx.transacoes.create({
+    data: {
+      clube_id: purchase.clubId,
+      jogador_id: purchase.playerId,
+      nome_jogador: purchase.write.playerName,
+      tipo: 'COMPRA',
+      valor: purchase.write.value.toDecimalString(),
+      taxa: purchase.write.fee.toDecimalString(),
+      multa: '0.00',
+      lucro: null,
+      variacao_caixa: purchase.write.cashChange.toDecimalString(),
+      criado_em: purchase.write.at,
+    },
+  });
+  return {
+    id: created.id,
+    clubId: purchase.clubId,
+    playerId: purchase.playerId,
+    playerName: purchase.write.playerName,
+    value: purchase.write.value,
+    fee: purchase.write.fee,
+    cashChange: purchase.write.cashChange,
+    createdAt: purchase.write.at,
+    loyaltyUntil: purchase.write.loyaltyUntil,
+    clubCash,
+  };
+}
+
+async function lockSale(tx: Tx, playerId: number): Promise<void> {
+  const peek = await tx.jogadores.findFirst({
+    where: { id: playerId, excluido_em: null },
+    select: { clube_id: true },
+  });
+  if (peek?.clube_id) {
+    await tx.$queryRaw`SELECT id FROM clubes WHERE id = ${peek.clube_id} FOR UPDATE`;
+  }
+  await tx.$queryRaw`SELECT id FROM jogadores WHERE id = ${playerId} FOR UPDATE`;
+}
+
+async function readSale(tx: Tx, playerId: number) {
+  const player = await tx.jogadores.findFirst({
+    where: { id: playerId, excluido_em: null },
+  });
+  const club = player?.clube_id
+    ? await tx.clubes.findUnique({ where: { id: player.clube_id } })
+    : null;
+  const active = player?.clube_id
+    ? await tx.contratos.findFirst({
+        where: {
+          jogador_id: playerId,
+          clube_id: player.clube_id,
+          situacao: 'ATIVO',
+        },
+        orderBy: { iniciado_em: 'desc' },
+      })
+    : null;
+  return {
+    club,
+    facts: {
+      player: player ? toPurchasePlayer(player) : null,
+      clubCash: club
+        ? Money.roundHalfAwayFromZero(club.caixa.toString())
+        : null,
+      contract: active
+        ? {
+            purchaseValue: Money.roundHalfAwayFromZero(
+              active.valor_compra.toString(),
+            ),
+            loyaltyUntil: active.fidelidade_ate,
+          }
+        : null,
+    } satisfies SaleFacts,
+  };
+}
+
+async function persistSale(
+  tx: Tx,
+  sale: {
+    playerId: number;
+    cash: { toString(): string };
+    write: SaleWrite;
+  },
+): Promise<SaleReceipt> {
+  const clubCash = Money.fromCents(
+    Money.roundHalfAwayFromZero(sale.cash.toString()).cents +
+      sale.write.cashChange.cents,
+  );
+  await tx.jogadores.update({
+    where: { id: sale.playerId },
+    data: { clube_id: null },
+  });
+  await releaseLineupSeat(tx, sale.playerId);
+  await tx.clubes.update({
+    where: { id: sale.write.clubId },
+    data: { caixa: clubCash.toDecimalString() },
+  });
+  await tx.contratos.updateMany({
+    where: {
+      jogador_id: sale.playerId,
+      clube_id: sale.write.clubId,
+      situacao: 'ATIVO',
+    },
+    data: { situacao: sale.write.contractStatus, encerrado_em: sale.write.at },
+  });
+  const created = await tx.transacoes.create({
+    data: {
+      clube_id: sale.write.clubId,
+      jogador_id: sale.playerId,
+      nome_jogador: sale.write.playerName,
+      tipo: 'VENDA',
+      valor: sale.write.value.toDecimalString(),
+      taxa: sale.write.fee.toDecimalString(),
+      multa: sale.write.penalty.toDecimalString(),
+      lucro: sale.write.profit.toDecimalString(),
+      variacao_caixa: sale.write.cashChange.toDecimalString(),
+      criado_em: sale.write.at,
+    },
+  });
+  return {
+    id: created.id,
+    clubId: sale.write.clubId,
+    playerId: sale.playerId,
+    playerName: sale.write.playerName,
+    value: sale.write.value,
+    fee: sale.write.fee,
+    penalty: sale.write.penalty,
+    profit: sale.write.profit,
+    cashChange: sale.write.cashChange,
+    createdAt: sale.write.at,
+    purchaseValue: sale.write.purchaseValue,
+    remainingDays: sale.write.remainingDays,
+    penaltyRate: sale.write.penaltyRate,
+    contractStatus: sale.write.contractStatus,
+    clubCash,
   };
 }

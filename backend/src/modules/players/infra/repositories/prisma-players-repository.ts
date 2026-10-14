@@ -1,27 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Money } from '../../../../shared/domain/money.js';
+import { releaseLineupSeat } from '../../../league/infra/repositories/release-lineup-seat.js';
 import { Player } from '../../domain/entities/player.js';
-import { Condition, Position } from '../../domain/types/player-types.js';
 import { type PlayersRepository } from '../../application/repositories/players-repository.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
-
-type PlayerRow = {
-  id: number;
-  nome: string;
-  posicao: Position;
-  agilidade: number;
-  idade: number;
-  valor_base: { toString(): string };
-  condicao: Condition;
-  velocidade: number;
-  finalizacao: number;
-  passe: number;
-  drible: number;
-  defesa: number;
-  fisico: number;
-  potencial: number;
-  clube_id: number | null;
-};
+import { playerFromRow } from './player-row.js';
 
 @Injectable()
 export class PrismaPlayersRepository implements PlayersRepository {
@@ -46,21 +28,21 @@ export class PrismaPlayersRepository implements PlayersRepository {
       },
     });
 
-    return toPlayer(created);
+    return playerFromRow(created);
   }
 
   async findActiveById(id: number): Promise<Player | null> {
     const player = await this.prisma.jogadores.findFirst({
       where: { id, excluido_em: null },
     });
-    return player ? toPlayer(player) : null;
+    return player ? playerFromRow(player) : null;
   }
 
   async findActive(): Promise<Player[]> {
     const players = await this.prisma.jogadores.findMany({
       where: { excluido_em: null },
     });
-    return players.map(toPlayer);
+    return players.map(playerFromRow);
   }
 
   async clubExists(id: number): Promise<boolean> {
@@ -88,29 +70,8 @@ export class PrismaPlayersRepository implements PlayersRepository {
         },
       });
       if (player.condition === 'DOENTE') {
-        await tx.escalacoes.deleteMany({ where: { jogador_id: player.id } });
+        await releaseLineupSeat(tx, player.id);
       }
     });
   }
-}
-
-function toPlayer(row: PlayerRow): Player {
-  return Player.reconstitute({
-    id: row.id,
-    name: row.nome,
-    position: row.posicao,
-    agility: row.agilidade,
-    age: row.idade,
-    condition: row.condicao,
-    baseValue: Money.roundHalfAwayFromZero(row.valor_base.toString()),
-    pace: row.velocidade,
-    shooting: row.finalizacao,
-    passing: row.passe,
-    dribbling: row.drible,
-    defending: row.defesa,
-    physical: row.fisico,
-    potential: row.potencial,
-    clubId: row.clube_id,
-    excluded: false,
-  });
 }

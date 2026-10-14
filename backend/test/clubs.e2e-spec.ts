@@ -7,6 +7,7 @@ import request from 'supertest';
 import { AppModule } from './../src/app.module.js';
 import { configureApp } from './../src/configure-app.js';
 import { PrismaService } from './../src/prisma/prisma.service.js';
+import { emptyLeague } from './empty-league.js';
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -157,7 +158,15 @@ describe('Clubs', () => {
   });
 
   it('answers 404 when the club id does not exist or is not a canonical positive integer', async () => {
-    for (const id of ['abc', '0', '-1', '1.5', '01', '2147483648', '999999999']) {
+    for (const id of [
+      'abc',
+      '0',
+      '-1',
+      '1.5',
+      '01',
+      '2147483648',
+      '999999999',
+    ]) {
       const response = await request(app.getHttpServer())
         .get(`/api/v1/clubs/${id}`)
         .expect(404)
@@ -334,7 +343,9 @@ describe('Clubs', () => {
         .expect(200);
       const names = ascending.body.map((club: { name: string }) => club.name);
       expect(names.indexOf('Zulu FC')).toBeLessThan(names.indexOf('Alpha FC'));
-      expect(names.indexOf('Águias FC')).toBeLessThan(names.indexOf('Aguias FC'));
+      expect(names.indexOf('Águias FC')).toBeLessThan(
+        names.indexOf('Aguias FC'),
+      );
       expect(names.at(-1)).toBe('Alpha FC');
 
       const alphaRow = ascending.body.find(
@@ -372,7 +383,8 @@ describe('Clubs', () => {
         physical: 70,
         potential: 86,
       };
-      const created: { id: number; market_value: number; position: string }[] = [];
+      const created: { id: number; market_value: number; position: string }[] =
+        [];
       for (const player of [
         { ...meia, name: 'Meia Épsilon', position: 'MEI' },
         { ...meia, name: 'Goleiro Alfa', position: 'GOL' },
@@ -421,18 +433,19 @@ describe('Clubs', () => {
         .get(`/api/v1/clubs/${club.body.id}`)
         .expect(200);
 
-      expect(detail.body.players.map((player: { name: string }) => player.name)).toEqual([
+      expect(
+        detail.body.players.map((player: { name: string }) => player.name),
+      ).toEqual([
         'Goleiro Alfa',
         'Meia Delta',
         'Meia Épsilon',
         'Atacante Beta',
       ]);
-      expect(detail.body.players.map((player: { position: string }) => player.position)).toEqual([
-        'GOL',
-        'MEI',
-        'MEI',
-        'ATA',
-      ]);
+      expect(
+        detail.body.players.map(
+          (player: { position: string }) => player.position,
+        ),
+      ).toEqual(['GOL', 'MEI', 'MEI', 'ATA']);
       expect(
         created
           .filter((player) => player.position === 'MEI')
@@ -532,16 +545,3 @@ describe('Clubs', () => {
     });
   });
 });
-
-async function emptyLeague(prisma: PrismaService): Promise<void> {
-  await prisma.duelos_partida.deleteMany();
-  await prisma.partidas.deleteMany();
-  await prisma.escalacoes.deleteMany();
-  await prisma.transacoes.deleteMany();
-  await prisma.contratos.deleteMany();
-  await prisma.jogadores.updateMany({
-    where: { clube_id: { not: null } },
-    data: { clube_id: null },
-  });
-  await prisma.clubes.deleteMany();
-}

@@ -1,6 +1,5 @@
 import { z } from 'zod';
-
-const MAX_INT32 = 2_147_483_647;
+import { MAX_INT32 } from '../../../../../common/validation/resource-id.js';
 
 const clubId = z
   .int('Clube inválido')

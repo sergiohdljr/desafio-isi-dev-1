@@ -4,7 +4,7 @@ import { type Position } from '../../../players/domain/types/player-types.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const positionOrder: Record<Position, number> = {
+export const positionOrder: Record<Position, number> = {
   GOL: 0,
   ZAG: 1,
   LAT: 2,
@@ -29,7 +29,8 @@ export function squadValueOf(values: Money[]): Money {
 
 export function arrangeSquad<T extends SquadPlayer>(players: T[]): T[] {
   return [...players].sort((left, right) => {
-    const byPosition = positionOrder[left.position] - positionOrder[right.position];
+    const byPosition =
+      positionOrder[left.position] - positionOrder[right.position];
     if (byPosition !== 0) {
       return byPosition;
     }

@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Player } from '../../../players/domain/entities/player.js';
-import {
-  type Condition,
-  type Position,
-} from '../../../players/domain/types/player-types.js';
+import { playerFromRow } from '../../../players/infra/repositories/player-row.js';
 import { DomainError } from '../../../../shared/domain/domain-error.js';
 import { Money } from '../../../../shared/domain/money.js';
 import { Club, MAX_CLUBS } from '../../domain/entities/club.js';
@@ -99,7 +95,7 @@ export class PrismaClubsRepository implements ClubsRepository {
       return [
         {
           clubId: row.clube_id,
-          player: toSquadPlayer(row),
+          player: playerFromRow(row),
           purchaseValue: Money.roundHalfAwayFromZero(
             contract.valor_compra.toString(),
           ),
@@ -124,45 +120,6 @@ function toClub(row: ClubRow): Club {
     name: row.nome,
     acronym: row.sigla.trim(),
     cash: Money.roundHalfAwayFromZero(row.caixa.toString()),
-  });
-}
-
-type SquadRow = {
-  id: number;
-  nome: string;
-  posicao: Position;
-  agilidade: number;
-  idade: number;
-  valor_base: { toString(): string };
-  condicao: Condition;
-  velocidade: number;
-  finalizacao: number;
-  passe: number;
-  drible: number;
-  defesa: number;
-  fisico: number;
-  potencial: number;
-  clube_id: number | null;
-};
-
-function toSquadPlayer(row: SquadRow): Player {
-  return Player.reconstitute({
-    id: row.id,
-    name: row.nome,
-    position: row.posicao,
-    agility: row.agilidade,
-    age: row.idade,
-    condition: row.condicao,
-    baseValue: Money.roundHalfAwayFromZero(row.valor_base.toString()),
-    pace: row.velocidade,
-    shooting: row.finalizacao,
-    passing: row.passe,
-    dribbling: row.drible,
-    defending: row.defesa,
-    physical: row.fisico,
-    potential: row.potencial,
-    clubId: row.clube_id,
-    excluded: false,
   });
 }
 

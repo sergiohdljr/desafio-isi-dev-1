@@ -7,6 +7,7 @@ import request from 'supertest';
 import { AppModule } from './../src/app.module.js';
 import { configureApp } from './../src/configure-app.js';
 import { PrismaService } from './../src/prisma/prisma.service.js';
+import { emptyLeague } from './empty-league.js';
 
 const meia = {
   position: 'MEI' as const,
@@ -86,10 +87,9 @@ describe('Market history', () => {
     const response = await request(app.getHttpServer())
       .get(`/api/v1/clubs/${clubId}/transactions`)
       .expect(200);
-    expect(response.body.data.map((row: { type: string }) => row.type)).toEqual([
-      'VENDA',
-      'COMPRA',
-    ]);
+    expect(response.body.data.map((row: { type: string }) => row.type)).toEqual(
+      ['VENDA', 'COMPRA'],
+    );
     expect(response.body.data[1]).toMatchObject({
       player_name: 'Meia Lua',
       type: 'COMPRA',
@@ -276,13 +276,3 @@ describe('Market history', () => {
       .expect(200);
   }
 });
-
-async function emptyLeague(prisma: PrismaService): Promise<void> {
-  await prisma.duelos_partida.deleteMany();
-  await prisma.partidas.deleteMany();
-  await prisma.escalacoes.deleteMany();
-  await prisma.transacoes.deleteMany();
-  await prisma.contratos.deleteMany();
-  await prisma.jogadores.deleteMany();
-  await prisma.clubes.deleteMany();
-}
