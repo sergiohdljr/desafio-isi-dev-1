@@ -10,6 +10,14 @@ import { PrismaService } from './../src/prisma/prisma.service.js';
 
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
+function idOf(clubs: { id: number; name: string }[], name: string): number {
+  const club = clubs.find((item) => item.name === name);
+  if (!club) {
+    throw new Error(`Clube ${name} não foi criado`);
+  }
+  return club.id;
+}
+
 function clubPayload(index: number): { name: string; acronym: string } {
   const first = alphabet[Math.floor(index / 26)] ?? 'A';
   const second = alphabet[index % 26] ?? 'A';
@@ -232,16 +240,14 @@ describe('Clubs', () => {
         'Épsilon FC',
         'Gama FC',
       ]);
-      const aguias = created.find((club) => club.name === 'Águias FC');
-      const aguiasSemAcento = created.find((club) => club.name === 'Aguias FC');
       expect(response.body.map((club: { id: number }) => club.id)).toEqual([
-        aguias.id,
-        aguiasSemAcento.id,
-        created.find((club) => club.name === 'Ana Lima').id,
-        created.find((club) => club.name === 'Ana-Maria FC').id,
-        created.find((club) => club.name === 'Delta FC').id,
-        created.find((club) => club.name === 'Épsilon FC').id,
-        created.find((club) => club.name === 'Gama FC').id,
+        idOf(created, 'Águias FC'),
+        idOf(created, 'Aguias FC'),
+        idOf(created, 'Ana Lima'),
+        idOf(created, 'Ana-Maria FC'),
+        idOf(created, 'Delta FC'),
+        idOf(created, 'Épsilon FC'),
+        idOf(created, 'Gama FC'),
       ]);
       expect(response.body[0]).not.toHaveProperty('players');
       expect(response.body[0]).toMatchObject({
@@ -294,13 +300,32 @@ describe('Clubs', () => {
         .expect(201);
 
       const prisma = app.get(PrismaService);
+      const loyaltyUntil = new Date(Date.now() + 49 * 60 * 60 * 1000);
       await prisma.jogadores.update({
         where: { id: player.body.id },
         data: { clube_id: alpha.body.id },
       });
+      await prisma.contratos.create({
+        data: {
+          jogador_id: player.body.id,
+          clube_id: alpha.body.id,
+          valor_compra: '25.50',
+          fidelidade_ate: loyaltyUntil,
+          situacao: 'ATIVO',
+        },
+      });
       await prisma.jogadores.update({
         where: { id: ghost.body.id },
         data: { clube_id: zulu.body.id, excluido_em: new Date() },
+      });
+      await prisma.contratos.create({
+        data: {
+          jogador_id: ghost.body.id,
+          clube_id: zulu.body.id,
+          valor_compra: '25.50',
+          fidelidade_ate: loyaltyUntil,
+          situacao: 'ATIVO',
+        },
       });
 
       const ascending = await request(app.getHttpServer())
@@ -329,6 +354,112 @@ describe('Clubs', () => {
       expect(descending.body[1].name).toBe('Águias FC');
     });
 
+    it('returns the squad contract and calculated totals', async () => {
+      const club = await request(app.getHttpServer())
+        .post('/api/v1/clubs')
+        .send({ name: 'Ordem FC', acronym: 'ORF' })
+        .expect(201);
+      const loyaltyUntil = new Date(Date.now() + 49 * 60 * 60 * 1000);
+      const meia = {
+        position: 'MEI',
+        agility: 50,
+        age: 25,
+        pace: 70,
+        shooting: 70,
+        passing: 80,
+        dribbling: 80,
+        defending: 50,
+        physical: 70,
+        potential: 86,
+      };
+      const created: { id: number; market_value: number; position: string }[] = [];
+      for (const player of [
+        { ...meia, name: 'Meia Épsilon', position: 'MEI' },
+        { ...meia, name: 'Goleiro Alfa', position: 'GOL' },
+        { ...meia, name: 'Atacante Beta', position: 'ATA' },
+        { ...meia, name: 'Meia Delta', position: 'MEI' },
+      ]) {
+        const response = await request(app.getHttpServer())
+          .post('/api/v1/players')
+          .send(player)
+          .expect(201);
+        created.push(response.body);
+        await app.get(PrismaService).jogadores.update({
+          where: { id: response.body.id },
+          data: { clube_id: club.body.id },
+        });
+        await app.get(PrismaService).contratos.create({
+          data: {
+            jogador_id: response.body.id,
+            clube_id: club.body.id,
+            valor_compra: '25.50',
+            fidelidade_ate: loyaltyUntil,
+            situacao: 'ATIVO',
+          },
+        });
+      }
+
+      const removed = await request(app.getHttpServer())
+        .post('/api/v1/players')
+        .send({ ...meia, name: 'Meia Ausente' })
+        .expect(201);
+      await app.get(PrismaService).jogadores.update({
+        where: { id: removed.body.id },
+        data: { clube_id: club.body.id, excluido_em: new Date() },
+      });
+      await app.get(PrismaService).contratos.create({
+        data: {
+          jogador_id: removed.body.id,
+          clube_id: club.body.id,
+          valor_compra: '10.00',
+          fidelidade_ate: loyaltyUntil,
+          situacao: 'ATIVO',
+        },
+      });
+
+      const detail = await request(app.getHttpServer())
+        .get(`/api/v1/clubs/${club.body.id}`)
+        .expect(200);
+
+      expect(detail.body.players.map((player: { name: string }) => player.name)).toEqual([
+        'Goleiro Alfa',
+        'Meia Delta',
+        'Meia Épsilon',
+        'Atacante Beta',
+      ]);
+      expect(detail.body.players.map((player: { position: string }) => player.position)).toEqual([
+        'GOL',
+        'MEI',
+        'MEI',
+        'ATA',
+      ]);
+      expect(
+        created
+          .filter((player) => player.position === 'MEI')
+          .map((player) => player.market_value),
+      ).toEqual([40, 40]);
+      const squadValue =
+        created[0].market_value +
+        created[1].market_value +
+        created[2].market_value +
+        created[3].market_value;
+      expect(detail.body.squad_value).toBe(squadValue);
+      expect(detail.body.net_worth).toBe(300 + squadValue);
+      expect(detail.body.players[0].contract).toMatchObject({
+        purchase_value: 25.5,
+        remaining_days: 3,
+      });
+      expect(detail.body.players[0].contract.loyalty_until).toMatch(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}-03:00$/,
+      );
+      expect(
+        detail.body.players.some(
+          (player: { name: string }) => player.name === 'Meia Ausente',
+        ),
+      ).toBe(false);
+      expect(created).toHaveLength(4);
+    });
+
     it('rejects an empty, repeated or unknown sort', async () => {
       for (const sort of ['', 'name,net_worth_asc', 'NAME', 'net_worth_asc ']) {
         const response = await request(app.getHttpServer())
@@ -342,17 +473,11 @@ describe('Clubs', () => {
 });
 
 async function emptyLeague(prisma: PrismaService): Promise<void> {
-  const blocked =
-    (await prisma.contratos.count()) +
-    (await prisma.transacoes.count()) +
-    (await prisma.escalacoes.count()) +
-    (await prisma.partidas.count());
-  if (blocked > 0) {
-    throw new Error(
-      'A liga de teste tem contratos, transações, escalações ou partidas',
-    );
-  }
-
+  await prisma.duelos_partida.deleteMany();
+  await prisma.partidas.deleteMany();
+  await prisma.escalacoes.deleteMany();
+  await prisma.transacoes.deleteMany();
+  await prisma.contratos.deleteMany();
   await prisma.jogadores.updateMany({
     where: { clube_id: { not: null } },
     data: { clube_id: null },

@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Money } from '../../../shared/domain/money.js';
-import {
-  PLAYERS_REPOSITORY,
-  type PlayersRepository,
-} from '../../../players/application/repositories/players-repository.js';
+import { squadValueOf } from '../../domain/entities/squad.js';
 import { arrangeClubs } from '../queries/arrange-clubs.js';
 import { type ClubListQuery } from '../queries/club-list-query.js';
 import { clubViewOf, type ClubView } from '../read-models/club-view.js';
@@ -22,25 +19,20 @@ export interface ListClubsPort {
 export class ListClubs implements ListClubsPort {
   constructor(
     @Inject(CLUBS_REPOSITORY) private readonly clubs: ClubsRepository,
-    @Inject(PLAYERS_REPOSITORY) private readonly players: PlayersRepository,
   ) {}
 
   async execute(query: ClubListQuery): Promise<ClubView[]> {
     const clubs = await this.clubs.list();
-    const centsByClub = new Map<number, number>();
-    for (const player of await this.players.findActive()) {
-      if (player.clubId === null) {
-        continue;
-      }
-      centsByClub.set(
-        player.clubId,
-        (centsByClub.get(player.clubId) ?? 0) + player.marketValue.cents,
-      );
+    const membersByClub = new Map<number, Money[]>();
+    for (const member of await this.clubs.squad()) {
+      const values = membersByClub.get(member.clubId) ?? [];
+      values.push(member.player.marketValue);
+      membersByClub.set(member.clubId, values);
     }
 
     const listed = clubs.map((club) => ({
       club,
-      squadValue: Money.fromCents(centsByClub.get(club.id) ?? 0),
+      squadValue: squadValueOf(membersByClub.get(club.id) ?? []),
     }));
     return arrangeClubs(listed, query.sort).map((item) =>
       clubViewOf(item.club, item.squadValue),

@@ -1,8 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { Player } from '../../../players/domain/entities/player.js';
+import {
+  type Condition,
+  type Position,
+} from '../../../players/domain/types/player-types.js';
 import { DomainError } from '../../../shared/domain/domain-error.js';
 import { Money } from '../../../shared/domain/money.js';
 import { Club, MAX_CLUBS } from '../../domain/entities/club.js';
-import { type ClubsRepository } from '../../application/repositories/clubs-repository.js';
+import {
+  type ClubsRepository,
+  type SquadMember,
+} from '../../application/repositories/clubs-repository.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 
 type ClubRow = {
@@ -67,6 +75,40 @@ export class PrismaClubsRepository implements ClubsRepository {
     return clubs.map(toClub);
   }
 
+  async squad(): Promise<SquadMember[]> {
+    const rows = await this.prisma.jogadores.findMany({
+      where: {
+        excluido_em: null,
+        clube_id: { not: null },
+        contratos: { some: { situacao: 'ATIVO' } },
+      },
+      include: {
+        contratos: {
+          where: { situacao: 'ATIVO' },
+          orderBy: { iniciado_em: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    return rows.flatMap((row) => {
+      const contract = row.contratos[0];
+      if (!contract || row.clube_id === null) {
+        return [];
+      }
+      return [
+        {
+          clubId: row.clube_id,
+          player: toSquadPlayer(row),
+          purchaseValue: Money.roundHalfAwayFromZero(
+            contract.valor_compra.toString(),
+          ),
+          loyaltyUntil: contract.fidelidade_ate,
+        },
+      ];
+    });
+  }
+
   async acronymTaken(acronym: string): Promise<boolean> {
     const club = await this.prisma.clubes.findUnique({
       where: { sigla: acronym },
@@ -82,6 +124,45 @@ function toClub(row: ClubRow): Club {
     name: row.nome,
     acronym: row.sigla.trim(),
     cash: Money.roundHalfAwayFromZero(row.caixa.toString()),
+  });
+}
+
+type SquadRow = {
+  id: number;
+  nome: string;
+  posicao: Position;
+  agilidade: number;
+  idade: number;
+  valor_base: { toString(): string };
+  condicao: Condition;
+  velocidade: number;
+  finalizacao: number;
+  passe: number;
+  drible: number;
+  defesa: number;
+  fisico: number;
+  potencial: number;
+  clube_id: number | null;
+};
+
+function toSquadPlayer(row: SquadRow): Player {
+  return Player.reconstitute({
+    id: row.id,
+    name: row.nome,
+    position: row.posicao,
+    agility: row.agilidade,
+    age: row.idade,
+    condition: row.condicao,
+    baseValue: Money.roundHalfAwayFromZero(row.valor_base.toString()),
+    pace: row.velocidade,
+    shooting: row.finalizacao,
+    passing: row.passe,
+    dribbling: row.drible,
+    defending: row.defesa,
+    physical: row.fisico,
+    potential: row.potencial,
+    clubId: row.clube_id,
+    excluded: false,
   });
 }
 

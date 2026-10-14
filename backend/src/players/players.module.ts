@@ -31,7 +31,6 @@ import {
 @Module({
   imports: [PrismaModule],
   controllers: [PlayersController],
-  exports: [PLAYERS_REPOSITORY],
   providers: [
     { provide: CREATE_PLAYER, useClass: CreatePlayer },
     { provide: FIND_PLAYER, useClass: FindPlayer },

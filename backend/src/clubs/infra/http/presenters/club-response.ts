@@ -1,5 +1,7 @@
+import { presentPlayer } from '../../../../players/infra/http/presenters/player-response.js';
 import { ClubView } from '../../../application/read-models/club-view.js';
 import { ClubDetailView } from '../../../application/use-cases/find-club.use-case.js';
+import { formatBrasilia } from './brasilia-time.js';
 
 export type ClubResponse = {
   id: number;
@@ -22,7 +24,25 @@ export function presentClub(view: ClubView): ClubResponse {
 }
 
 export function presentClubDetail(view: ClubDetailView): ClubResponse & {
-  players: ClubDetailView['players'];
+  players: Array<
+    ReturnType<typeof presentPlayer> & {
+      contract: {
+        purchase_value: number;
+        loyalty_until: string;
+        remaining_days: number;
+      };
+    }
+  >;
 } {
-  return { ...presentClub(view), players: view.players };
+  return {
+    ...presentClub(view),
+    players: view.players.map((player) => ({
+      ...presentPlayer(player),
+      contract: {
+        purchase_value: player.contract.purchaseValue,
+        loyalty_until: formatBrasilia(player.contract.loyaltyUntil),
+        remaining_days: player.contract.remainingDays,
+      },
+    })),
+  };
 }

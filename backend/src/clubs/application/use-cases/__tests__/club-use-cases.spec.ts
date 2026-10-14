@@ -5,11 +5,14 @@ import {
   CLUBS_REPOSITORY,
   type ClubsRepository,
 } from '../../repositories/clubs-repository.js';
+import { Money } from '../../../../shared/domain/money.js';
 import { Player, type RegisterPlayer } from '../../../../players/domain/entities/player.js';
 import {
-  PLAYERS_REPOSITORY,
-  type PlayersRepository,
-} from '../../../../players/application/repositories/players-repository.js';
+  CLOCK,
+} from '../../clock.js';
+import {
+  type SquadMember,
+} from '../../repositories/clubs-repository.js';
 import { CreateClub } from '../create-club.use-case.js';
 import { FindClub } from '../find-club.use-case.js';
 import { ListClubs } from '../list-clubs.use-case.js';
@@ -24,7 +27,7 @@ function stored(name: string, acronym: string, id: number): Club {
   });
 }
 
-function repository(clubs: Club[] = []) {
+function repository(clubs: Club[] = [], squad: SquadMember[] = []) {
   const saved: Club[] = [];
   let nextId = clubs.reduce((max, club) => Math.max(max, club.id), 0) + 1;
   const repo: ClubsRepository = {
@@ -50,6 +53,9 @@ function repository(clubs: Club[] = []) {
     async list() {
       return clubs;
     },
+    async squad() {
+      return squad;
+    },
   };
   return { repo, saved };
 }
@@ -68,8 +74,8 @@ const pricedMeia: RegisterPlayer = {
   potential: 86,
 };
 
-function member(clubId: number | null, id: number): Player {
-  const draft = Player.register(pricedMeia);
+function member(clubId: number, id: number, name = pricedMeia.name): Player {
+  const draft = Player.register({ ...pricedMeia, name });
   return Player.reconstitute({
     id,
     name: draft.name,
@@ -90,21 +96,19 @@ function member(clubId: number | null, id: number): Player {
   });
 }
 
-function playersRepository(players: Player[]): PlayersRepository {
+function contracted(
+  player: Player,
+  loyaltyUntil: Date,
+  purchaseValue = Money.fromCents(2550),
+): SquadMember {
+  if (player.clubId === null) {
+    throw new Error('Elenco de teste sem clube');
+  }
   return {
-    async add(player) {
-      return player;
-    },
-    async findActiveById(id) {
-      return players.find((player) => player.id === id) ?? null;
-    },
-    async findActive() {
-      return players.filter((player) => !player.excluded);
-    },
-    async clubExists() {
-      return false;
-    },
-    async save() {},
+    clubId: player.clubId,
+    player,
+    purchaseValue,
+    loyaltyUntil,
   };
 }
 
@@ -113,7 +117,14 @@ async function useCase<T>(
   repo: ClubsRepository,
 ) {
   const module = await Test.createTestingModule({
-    providers: [token, { provide: CLUBS_REPOSITORY, useValue: repo }],
+    providers: [
+      token,
+      { provide: CLUBS_REPOSITORY, useValue: repo },
+      {
+        provide: CLOCK,
+        useValue: { now: () => new Date('2027-03-02T15:00:00.000Z') },
+      },
+    ],
   }).compile();
   return module.get(token);
 }
@@ -192,14 +203,7 @@ describe('club use cases', () => {
       stored('Águias FC', 'AFC', 2),
     ];
     const { repo } = repository(clubs);
-    const module = await Test.createTestingModule({
-      providers: [
-        ListClubs,
-        { provide: CLUBS_REPOSITORY, useValue: repo },
-        { provide: PLAYERS_REPOSITORY, useValue: playersRepository([]) },
-      ],
-    }).compile();
-    const list = module.get(ListClubs);
+    const list = await useCase(ListClubs, repo);
 
     const listed = await list.execute({ sort: 'name' });
 
@@ -222,18 +226,8 @@ describe('club use cases', () => {
       stored('Aguias FC', 'AGU', 7),
       stored('Águias FC', 'AGI', 2),
     ];
-    const { repo } = repository(clubs);
-    const module = await Test.createTestingModule({
-      providers: [
-        ListClubs,
-        { provide: CLUBS_REPOSITORY, useValue: repo },
-        {
-          provide: PLAYERS_REPOSITORY,
-          useValue: playersRepository([member(9, 1), member(null, 2)]),
-        },
-      ],
-    }).compile();
-    const list = module.get(ListClubs);
+    const { repo } = repository(clubs, [contracted(member(9, 1), new Date('2027-06-01T15:00:00.000Z'))]);
+    const list = await useCase(ListClubs, repo);
 
     const ascending = await list.execute({ sort: 'net_worth_asc' });
     expect(ascending.map((club) => club.name)).toEqual([
@@ -258,6 +252,44 @@ describe('club use cases', () => {
       'Aguias FC',
       'Zulu FC',
     ]);
+  });
+
+  it('shows the ordered squad, the contract and the calculated totals', async () => {
+    const club = stored('Águias FC', 'AFC', 1);
+    const { repo } = repository(
+      [club],
+      [
+        contracted(
+          member(1, 3, 'Meia Épsilon'),
+          new Date('2027-03-04T15:00:00.001Z'),
+        ),
+        contracted(
+          member(1, 2, 'Meia Delta'),
+          new Date('2027-03-04T15:00:00.000Z'),
+        ),
+      ],
+    );
+    const find = await useCase(FindClub, repo);
+
+    const detail = await find.execute(1);
+
+    expect(detail.squadValue).toBe(80);
+    expect(detail.netWorth).toBe(380);
+    expect(detail.players.map((player) => player.name)).toEqual([
+      'Meia Delta',
+      'Meia Épsilon',
+    ]);
+    expect(detail.players[0]).toMatchObject({
+      id: 2,
+      position: 'MEI',
+      marketValue: 40,
+      clubId: 1,
+      contract: { purchaseValue: 25.5, remainingDays: 2 },
+    });
+    expect(detail.players[0].contract.loyaltyUntil).toEqual(
+      new Date('2027-03-04T15:00:00.000Z'),
+    );
+    expect(detail.players[1].contract.remainingDays).toBe(3);
   });
 
   it('answers that a missing club does not exist', async () => {
