@@ -2,9 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DomainError } from '../../../shared/domain/domain-error.js';
 import { type PlayersRepository } from '../repositories/players-repository.js';
 import { PLAYERS_REPOSITORY } from '../repositories/players-repository.js';
-import { arrangePlayers } from './player-list.js';
-import { type PlayerListQuery } from './player-list-query.js';
-import { playerViewOf, type PlayerListView } from './player-view.js';
+import { arrangePlayers } from '../queries/player-list.js';
+import { type PlayerListQuery } from '../queries/player-list-query.js';
+import {
+  playerViewOf,
+  type PlayerListView,
+} from '../read-models/player-view.js';
 
 export const LIST_PLAYERS = Symbol('LIST_PLAYERS');
 

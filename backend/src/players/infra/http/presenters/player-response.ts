@@ -1,8 +1,8 @@
-import { Condition, Position } from '../../domain/entities/player-types.js';
+import { Condition, Position } from '../../../domain/types/player-types.js';
 import {
   PlayerListView,
   PlayerView,
-} from '../../application/use-cases/player-view.js';
+} from '../../../application/read-models/player-view.js';
 
 export type PlayerResponse = {
   id: number;

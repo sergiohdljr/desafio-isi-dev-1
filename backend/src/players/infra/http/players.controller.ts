@@ -18,34 +18,37 @@ import type { FastifyReply } from 'fastify';
 import {
   CHANGE_PLAYER_CONDITION,
   type ChangePlayerConditionPort,
-} from '../../application/use-cases/change-player-condition.js';
+} from '../../application/use-cases/change-player-condition.use-case.js';
 import {
   CREATE_PLAYER,
   type CreatePlayerPort,
-} from '../../application/use-cases/create-player.js';
+} from '../../application/use-cases/create-player.use-case.js';
 import {
   DELETE_PLAYER,
   type DeletePlayerPort,
-} from '../../application/use-cases/delete-player.js';
+} from '../../application/use-cases/delete-player.use-case.js';
 import {
   FIND_PLAYER,
   type FindPlayerPort,
-} from '../../application/use-cases/find-player.js';
+} from '../../application/use-cases/find-player.use-case.js';
 import {
   LIST_PLAYERS,
   type ListPlayersPort,
-} from '../../application/use-cases/list-players.js';
-import type { PlayerListQuery } from '../../application/use-cases/player-list-query.js';
+} from '../../application/use-cases/list-players.use-case.js';
+import type { PlayerListQuery } from '../../application/queries/player-list-query.js';
 import {
   UPDATE_PLAYER,
   type UpdatePlayerPort,
-} from '../../application/use-cases/update-player.js';
+} from '../../application/use-cases/update-player.use-case.js';
 import { CreatePlayerDto } from './dto/create-player.dto.js';
 import { UpdateConditionDto } from './dto/update-condition.dto.js';
 import { UpdatePlayerDto } from './dto/update-player.dto.js';
-import { ListPlayersQueryPipe } from './list-players-query.pipe.js';
-import { parsePlayerId } from './parse-player-id.js';
-import { presentPlayer, presentPlayerList } from './player-response.js';
+import { ListPlayersQueryPipe } from './input/list-players-query.pipe.js';
+import { parsePlayerId } from './input/parse-player-id.js';
+import {
+  presentPlayer,
+  presentPlayerList,
+} from './presenters/player-response.js';
 
 @Controller('players')
 export class PlayersController {

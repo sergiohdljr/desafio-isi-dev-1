@@ -13,8 +13,8 @@ import {
 import {
   POSITIONS,
   type Position,
-} from '../../../domain/entities/player-types.js';
-import { codePointLength } from '../player-text.js';
+} from '../../../domain/types/player-types.js';
+import { codePointLength } from '../input/player-text.js';
 
 @ValidatorConstraint({ name: 'playerName' })
 export class PlayerNameConstraint implements ValidatorConstraintInterface {

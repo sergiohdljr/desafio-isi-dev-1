@@ -1,4 +1,4 @@
-import { Condition, Position } from '../../domain/entities/player-types.js';
+import { Condition, Position } from '../../domain/types/player-types.js';
 
 export type PlayerSort =
   'name' | 'value_asc' | 'value_desc' | 'age_asc' | 'age_desc' | 'position';

@@ -11,7 +11,7 @@ import {
 import {
   POSITIONS,
   type Position,
-} from '../../../domain/entities/player-types.js';
+} from '../../../domain/types/player-types.js';
 import { normalizeName, PlayerNameConstraint } from './create-player.dto.js';
 
 export class UpdatePlayerDto {

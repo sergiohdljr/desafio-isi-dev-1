@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { type RevisePlayer } from '../../domain/entities/player.js';
 import { type PlayersRepository } from '../repositories/players-repository.js';
 import { PLAYERS_REPOSITORY } from '../repositories/players-repository.js';
-import { playerViewOf, type PlayerView } from './player-view.js';
-import { requireActivePlayer } from './require-active-player.js';
+import { playerViewOf, type PlayerView } from '../read-models/player-view.js';
+import { requireActivePlayer } from '../services/require-active-player.js';
 
 export const UPDATE_PLAYER = Symbol('UPDATE_PLAYER');
 

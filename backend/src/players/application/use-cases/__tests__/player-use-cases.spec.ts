@@ -7,13 +7,13 @@ import {
   PLAYERS_REPOSITORY,
   type PlayersRepository,
 } from '../../repositories/players-repository.js';
-import { ChangePlayerCondition } from '../change-player-condition.js';
-import { CreatePlayer } from '../create-player.js';
-import { DeletePlayer } from '../delete-player.js';
-import { FindPlayer } from '../find-player.js';
-import { ListPlayers } from '../list-players.js';
-import { type PlayerListQuery } from '../player-list-query.js';
-import { UpdatePlayer } from '../update-player.js';
+import { type PlayerListQuery } from '../../queries/player-list-query.js';
+import { ChangePlayerCondition } from '../change-player-condition.use-case.js';
+import { CreatePlayer } from '../create-player.use-case.js';
+import { DeletePlayer } from '../delete-player.use-case.js';
+import { FindPlayer } from '../find-player.use-case.js';
+import { ListPlayers } from '../list-players.use-case.js';
+import { UpdatePlayer } from '../update-player.use-case.js';
 
 const meia: RegisterPlayer = {
   name: 'Meia Lua',

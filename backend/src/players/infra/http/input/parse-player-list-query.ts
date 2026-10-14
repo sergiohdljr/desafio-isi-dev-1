@@ -2,8 +2,8 @@ import { BadRequestException } from '@nestjs/common';
 import {
   type PlayerListQuery,
   type PlayerSort,
-} from '../../application/use-cases/player-list-query.js';
-import { CONDITIONS, POSITIONS } from '../../domain/entities/player-types.js';
+} from '../../../application/queries/player-list-query.js';
+import { CONDITIONS, POSITIONS } from '../../../domain/types/player-types.js';
 import { codePointLength } from './player-text.js';
 
 const MAX_INT32 = 2_147_483_647;

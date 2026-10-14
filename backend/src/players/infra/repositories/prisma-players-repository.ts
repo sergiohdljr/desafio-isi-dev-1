@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Money } from '../../../shared/domain/money.js';
 import { Player } from '../../domain/entities/player.js';
-import { Condition, Position } from '../../domain/entities/player-types.js';
+import { Condition, Position } from '../../domain/types/player-types.js';
 import { type PlayersRepository } from '../../application/repositories/players-repository.js';
 import { PrismaService } from '../../../prisma/prisma.service.js';
 

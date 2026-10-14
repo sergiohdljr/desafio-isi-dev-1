@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Player, type RegisterPlayer } from '../../domain/entities/player.js';
 import { type PlayersRepository } from '../repositories/players-repository.js';
 import { PLAYERS_REPOSITORY } from '../repositories/players-repository.js';
-import { playerViewOf, type PlayerView } from './player-view.js';
+import { playerViewOf, type PlayerView } from '../read-models/player-view.js';
 
 export const CREATE_PLAYER = Symbol('CREATE_PLAYER');
 

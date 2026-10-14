@@ -1,5 +1,5 @@
 import { Player } from '../../domain/entities/player.js';
-import { Position } from '../../domain/entities/player-types.js';
+import { Position } from '../../domain/types/player-types.js';
 import { PlayerListQuery, PlayerSort } from './player-list-query.js';
 
 const positionOrder: Record<Position, number> = {

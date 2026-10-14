@@ -6,27 +6,27 @@ import { PrismaPlayersRepository } from './infra/repositories/prisma-players-rep
 import {
   CHANGE_PLAYER_CONDITION,
   ChangePlayerCondition,
-} from './application/use-cases/change-player-condition.js';
+} from './application/use-cases/change-player-condition.use-case.js';
 import {
   CREATE_PLAYER,
   CreatePlayer,
-} from './application/use-cases/create-player.js';
+} from './application/use-cases/create-player.use-case.js';
 import {
   DELETE_PLAYER,
   DeletePlayer,
-} from './application/use-cases/delete-player.js';
+} from './application/use-cases/delete-player.use-case.js';
 import {
   FIND_PLAYER,
   FindPlayer,
-} from './application/use-cases/find-player.js';
+} from './application/use-cases/find-player.use-case.js';
 import {
   LIST_PLAYERS,
   ListPlayers,
-} from './application/use-cases/list-players.js';
+} from './application/use-cases/list-players.use-case.js';
 import {
   UPDATE_PLAYER,
   UpdatePlayer,
-} from './application/use-cases/update-player.js';
+} from './application/use-cases/update-player.use-case.js';
 
 @Module({
   imports: [PrismaModule],

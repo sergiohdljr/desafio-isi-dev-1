@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { type PlayersRepository } from '../repositories/players-repository.js';
 import { PLAYERS_REPOSITORY } from '../repositories/players-repository.js';
-import { requireActivePlayer } from './require-active-player.js';
+import { requireActivePlayer } from '../services/require-active-player.js';
 
 export const DELETE_PLAYER = Symbol('DELETE_PLAYER');
 

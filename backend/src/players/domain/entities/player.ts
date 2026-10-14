@@ -1,13 +1,17 @@
 import { DomainError } from '../../../shared/domain/domain-error.js';
 import { Money } from '../../../shared/domain/money.js';
-import { baseValueOf, marketValueOf, overallOf } from './player-valuation.js';
+import {
+  baseValueOf,
+  marketValueOf,
+  overallOf,
+} from '../services/player-valuation.js';
 import {
   CONDITIONS,
   POSITIONS,
   type Condition,
   type PlayerSkills,
   type Position,
-} from './player-types.js';
+} from '../types/player-types.js';
 
 export { CONDITIONS, POSITIONS };
 export type { Condition, PlayerSkills, Position };
