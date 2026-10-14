@@ -14,6 +14,8 @@ import {
   type MarketRepository,
   type PurchaseReceipt,
   type SaleReceipt,
+  type StoredTransaction,
+  type TransactionPage,
 } from '../../application/repositories/market-repository.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
 
@@ -237,6 +239,52 @@ export class PrismaMarketRepository implements MarketRepository {
       };
     });
   }
+
+  async list(clubId: number): Promise<TransactionPage> {
+    const club = await this.prisma.clubes.findUnique({
+      where: { id: clubId },
+      select: { id: true },
+    });
+    if (!club) {
+      return { clubFound: false, transactions: [] };
+    }
+
+    const rows = await this.prisma.transacoes.findMany({
+      where: { clube_id: clubId },
+      orderBy: [{ criado_em: 'desc' }, { id: 'desc' }],
+    });
+    return { clubFound: true, transactions: rows.map(toStoredTransaction) };
+  }
+}
+
+function toStoredTransaction(row: {
+  id: number;
+  clube_id: number;
+  jogador_id: number;
+  nome_jogador: string;
+  tipo: 'COMPRA' | 'VENDA';
+  valor: { toString(): string };
+  taxa: { toString(): string };
+  multa: { toString(): string };
+  lucro: { toString(): string } | null;
+  variacao_caixa: { toString(): string };
+  criado_em: Date;
+}): StoredTransaction {
+  return {
+    id: row.id,
+    clubId: row.clube_id,
+    playerId: row.jogador_id,
+    playerName: row.nome_jogador,
+    type: row.tipo,
+    value: Money.roundHalfAwayFromZero(row.valor.toString()),
+    fee: Money.roundHalfAwayFromZero(row.taxa.toString()),
+    penalty: Money.roundHalfAwayFromZero(row.multa.toString()),
+    profit: row.lucro
+      ? Money.roundHalfAwayFromZero(row.lucro.toString())
+      : null,
+    cashChange: Money.roundHalfAwayFromZero(row.variacao_caixa.toString()),
+    createdAt: row.criado_em,
+  };
 }
 
 function toPurchasePlayer(row: PlayerRow) {

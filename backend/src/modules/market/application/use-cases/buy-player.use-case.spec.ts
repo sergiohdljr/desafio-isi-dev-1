@@ -42,6 +42,9 @@ function repository(initial: PurchaseFacts) {
     async sale() {
       throw new Error('venda fora deste teste');
     },
+    async list() {
+      throw new Error('histórico fora deste teste');
+    },
   };
   return { market, stored };
 }
