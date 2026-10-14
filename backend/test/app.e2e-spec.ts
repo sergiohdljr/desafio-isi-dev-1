@@ -5,6 +5,7 @@ import {
 } from '@nestjs/platform-fastify';
 import request from 'supertest';
 import { AppModule } from './../src/app.module.js';
+import { configureApp } from './../src/configure-app.js';
 import { PrismaService } from './../src/prisma/prisma.service.js';
 
 describe('AppController (e2e)', () => {
@@ -24,13 +25,14 @@ describe('AppController (e2e)', () => {
     app = moduleFixture.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter(),
     );
+    configureApp(app);
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
   });
 
   it('/ (GET)', () => {
     return request(app.getHttpServer())
-      .get('/')
+      .get('/api/v1')
       .expect(200)
       .expect('Hello World!');
   });

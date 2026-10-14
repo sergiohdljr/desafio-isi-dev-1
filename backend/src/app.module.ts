@@ -1,11 +1,13 @@
-import { Module, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_PIPE } from '@nestjs/core';
+import { ValidationError } from 'class-validator';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
 import { appConfig } from './config/app.config.js';
 import { databaseConfig } from './config/database.config.js';
 import { validateEnv } from './config/env.validation.js';
 import { HelloModule } from './hello/hello.module.js';
+import { PlayersModule } from './players/players.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 
 @Module({
@@ -17,17 +19,20 @@ import { PrismaModule } from './prisma/prisma.module.js';
     }),
     PrismaModule,
     HelloModule,
+    PlayersModule,
   ],
   providers: [
     {
       provide: APP_PIPE,
       useValue: new ValidationPipe({
         whitelist: true,
-        forbidNonWhitelisted: true,
+        forbidNonWhitelisted: false,
         transform: true,
         transformOptions: {
-          enableImplicitConversion: true,
+          enableImplicitConversion: false,
         },
+        exceptionFactory: (errors: ValidationError[]) =>
+          new BadRequestException(flattenValidationErrors(errors).join('; ')),
       }),
     },
     {
@@ -37,3 +42,13 @@ import { PrismaModule } from './prisma/prisma.module.js';
   ],
 })
 export class AppModule {}
+
+function flattenValidationErrors(errors: ValidationError[]): string[] {
+  return errors.flatMap((error) => {
+    const own = error.constraints ? Object.values(error.constraints) : [];
+    const nested = error.children?.length
+      ? flattenValidationErrors(error.children)
+      : [];
+    return [...own, ...nested];
+  });
+}

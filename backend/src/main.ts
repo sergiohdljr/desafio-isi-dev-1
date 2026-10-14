@@ -5,6 +5,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module.js';
+import { configureApp } from './configure-app.js';
 
 async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';
@@ -17,7 +18,7 @@ async function bootstrap() {
         : ['error', 'warn', 'log', 'debug', 'verbose'],
     },
   );
-  app.enableShutdownHooks();
+  configureApp(app);
 
   const configService = app.get(ConfigService);
   await app.listen(configService.getOrThrow<number>('app.port'), '0.0.0.0');
