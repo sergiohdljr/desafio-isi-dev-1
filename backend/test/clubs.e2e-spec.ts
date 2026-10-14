@@ -185,6 +185,160 @@ describe('Clubs', () => {
     expect(refused.body.message.length).toBeGreaterThan(0);
     expect(await prisma.clubes.count()).toBe(20);
   });
+
+  describe('list', () => {
+    beforeAll(async () => {
+      await emptyLeague(app.get(PrismaService));
+    });
+
+    it('returns an empty array when there are no clubs', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/clubs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/);
+
+      expect(response.body).toEqual([]);
+    });
+
+    it('sorts by folded name, breaks ties by id, and omits the squad', async () => {
+      const created: { id: number; name: string }[] = [];
+      for (const club of [
+        { name: 'Gama FC', acronym: 'GAM' },
+        { name: 'Águias FC', acronym: 'AFC' },
+        { name: 'Ana-Maria FC', acronym: 'AMF' },
+        { name: 'Aguias FC', acronym: 'AGU' },
+        { name: 'Delta FC', acronym: 'DEL' },
+        { name: 'Épsilon FC', acronym: 'EPS' },
+        { name: 'Ana Lima', acronym: 'ALI' },
+      ]) {
+        const response = await request(app.getHttpServer())
+          .post('/api/v1/clubs')
+          .send(club)
+          .expect(201);
+        created.push(response.body);
+      }
+
+      const response = await request(app.getHttpServer())
+        .get('/api/v1/clubs')
+        .query({ sort: 'name', extra: '1' })
+        .expect(200);
+
+      expect(response.body.map((club: { name: string }) => club.name)).toEqual([
+        'Águias FC',
+        'Aguias FC',
+        'Ana Lima',
+        'Ana-Maria FC',
+        'Delta FC',
+        'Épsilon FC',
+        'Gama FC',
+      ]);
+      const aguias = created.find((club) => club.name === 'Águias FC');
+      const aguiasSemAcento = created.find((club) => club.name === 'Aguias FC');
+      expect(response.body.map((club: { id: number }) => club.id)).toEqual([
+        aguias.id,
+        aguiasSemAcento.id,
+        created.find((club) => club.name === 'Ana Lima').id,
+        created.find((club) => club.name === 'Ana-Maria FC').id,
+        created.find((club) => club.name === 'Delta FC').id,
+        created.find((club) => club.name === 'Épsilon FC').id,
+        created.find((club) => club.name === 'Gama FC').id,
+      ]);
+      expect(response.body[0]).not.toHaveProperty('players');
+      expect(response.body[0]).toMatchObject({
+        squad_value: 0,
+        net_worth: 300,
+      });
+    });
+
+    it('sorts by calculated net worth and ignores a deleted player', async () => {
+      const zulu = await request(app.getHttpServer())
+        .post('/api/v1/clubs')
+        .send({ name: 'Zulu FC', acronym: 'ZUL' })
+        .expect(201);
+      const alpha = await request(app.getHttpServer())
+        .post('/api/v1/clubs')
+        .send({ name: 'Alpha FC', acronym: 'ALF' })
+        .expect(201);
+
+      const player = await request(app.getHttpServer())
+        .post('/api/v1/players')
+        .send({
+          name: 'Meia Lista',
+          position: 'MEI',
+          agility: 50,
+          age: 25,
+          pace: 70,
+          shooting: 70,
+          passing: 80,
+          dribbling: 80,
+          defending: 50,
+          physical: 70,
+          potential: 86,
+        })
+        .expect(201);
+      const ghost = await request(app.getHttpServer())
+        .post('/api/v1/players')
+        .send({
+          name: 'Meia Fantasma',
+          position: 'MEI',
+          agility: 50,
+          age: 25,
+          pace: 70,
+          shooting: 70,
+          passing: 80,
+          dribbling: 80,
+          defending: 50,
+          physical: 70,
+          potential: 86,
+        })
+        .expect(201);
+
+      const prisma = app.get(PrismaService);
+      await prisma.jogadores.update({
+        where: { id: player.body.id },
+        data: { clube_id: alpha.body.id },
+      });
+      await prisma.jogadores.update({
+        where: { id: ghost.body.id },
+        data: { clube_id: zulu.body.id, excluido_em: new Date() },
+      });
+
+      const ascending = await request(app.getHttpServer())
+        .get('/api/v1/clubs')
+        .query({ sort: 'net_worth_asc' })
+        .expect(200);
+      const names = ascending.body.map((club: { name: string }) => club.name);
+      expect(names.indexOf('Zulu FC')).toBeLessThan(names.indexOf('Alpha FC'));
+      expect(names.indexOf('Águias FC')).toBeLessThan(names.indexOf('Aguias FC'));
+      expect(names.at(-1)).toBe('Alpha FC');
+
+      const alphaRow = ascending.body.find(
+        (club: { name: string }) => club.name === 'Alpha FC',
+      );
+      const zuluRow = ascending.body.find(
+        (club: { name: string }) => club.name === 'Zulu FC',
+      );
+      expect(alphaRow).toMatchObject({ squad_value: 40, net_worth: 340 });
+      expect(zuluRow).toMatchObject({ squad_value: 0, net_worth: 300 });
+
+      const descending = await request(app.getHttpServer())
+        .get('/api/v1/clubs')
+        .query({ sort: 'net_worth_desc' })
+        .expect(200);
+      expect(descending.body[0].name).toBe('Alpha FC');
+      expect(descending.body[1].name).toBe('Águias FC');
+    });
+
+    it('rejects an empty, repeated or unknown sort', async () => {
+      for (const sort of ['', 'name,net_worth_asc', 'NAME', 'net_worth_asc ']) {
+        const response = await request(app.getHttpServer())
+          .get('/api/v1/clubs')
+          .query({ sort })
+          .expect(400);
+        expect(response.body.message.length).toBeGreaterThan(0);
+      }
+    });
+  });
 });
 
 async function emptyLeague(prisma: PrismaService): Promise<void> {

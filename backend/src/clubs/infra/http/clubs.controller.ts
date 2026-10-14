@@ -7,6 +7,7 @@ import {
   Inject,
   Param,
   Post,
+  Query,
   Res,
 } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
@@ -19,9 +20,15 @@ import {
   FIND_CLUB,
   type FindClubPort,
 } from '../../application/use-cases/find-club.use-case.js';
+import {
+  LIST_CLUBS,
+  type ListClubsPort,
+} from '../../application/use-cases/list-clubs.use-case.js';
 import { createClubSchema } from './dto/create-club.schema.js';
 import type { CreateClubBody } from './dto/create-club.schema.js';
 import { clubIdSchema } from './input/club-id.schema.js';
+import { type ClubListQuery } from '../../application/queries/club-list-query.js';
+import { clubListQuerySchema } from './input/club-list-query.schema.js';
 import { presentClub, presentClubDetail } from './presenters/club-response.js';
 
 @Controller('clubs')
@@ -29,7 +36,16 @@ export class ClubsController {
   constructor(
     @Inject(CREATE_CLUB) private readonly createClub: CreateClubPort,
     @Inject(FIND_CLUB) private readonly findClub: FindClubPort,
+    @Inject(LIST_CLUBS) private readonly listClubs: ListClubsPort,
   ) {}
+
+  @Get()
+  async findAll(
+    @Query(new ZodPipe(clubListQuerySchema))
+    query: ClubListQuery,
+  ) {
+    return (await this.listClubs.execute(query)).map(presentClub);
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

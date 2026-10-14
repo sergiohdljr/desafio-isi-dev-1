@@ -8,4 +8,5 @@ export interface ClubsRepository {
   count(): Promise<number>;
   nameTaken(name: string): Promise<boolean>;
   acronymTaken(acronym: string): Promise<boolean>;
+  list(): Promise<Club[]>;
 }

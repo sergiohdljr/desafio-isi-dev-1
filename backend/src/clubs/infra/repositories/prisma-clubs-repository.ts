@@ -62,6 +62,11 @@ export class PrismaClubsRepository implements ClubsRepository {
     return club !== null;
   }
 
+  async list(): Promise<Club[]> {
+    const clubs = await this.prisma.clubes.findMany();
+    return clubs.map(toClub);
+  }
+
   async acronymTaken(acronym: string): Promise<boolean> {
     const club = await this.prisma.clubes.findUnique({
       where: { sigla: acronym },

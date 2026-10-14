@@ -1,3 +1,4 @@
+import { compareNames, foldName } from '../../../shared/domain/name-order.js';
 import { Player } from '../../domain/entities/player.js';
 import { Position } from '../../domain/types/player-types.js';
 import { PlayerListQuery, PlayerSort } from './player-list-query.js';
@@ -119,25 +120,6 @@ function compareBy(left: Player, right: Player, sort: PlayerSort): number {
     case 'position':
       return positionOrder[left.position] - positionOrder[right.position];
   }
-}
-
-function compareNames(left: string, right: string): number {
-  const foldedLeft = foldName(left);
-  const foldedRight = foldName(right);
-  if (foldedLeft < foldedRight) {
-    return -1;
-  }
-  if (foldedLeft > foldedRight) {
-    return 1;
-  }
-  return 0;
-}
-
-function foldName(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/\p{Mn}/gu, '')
-    .toLowerCase();
 }
 
 function cents(value: number): number {
