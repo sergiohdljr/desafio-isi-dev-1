@@ -28,6 +28,7 @@
     "@nestjs/platform-fastify": "^12.0.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
+    "@scalar/fastify-api-reference": "^1.74.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "zod": "^4.6.7"
