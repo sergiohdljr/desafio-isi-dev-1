@@ -72,16 +72,24 @@ export class PrismaPlayersRepository implements PlayersRepository {
   }
 
   async save(player: Player): Promise<void> {
-    await this.prisma.jogadores.update({
-      where: { id: player.id },
-      data: {
-        nome: player.name,
-        posicao: player.position,
-        agilidade: player.agility,
-        idade: player.age,
-        condicao: player.condition,
-        ...(player.excluded ? { excluido_em: new Date() } : {}),
-      },
+    await this.prisma.$transaction(async (tx) => {
+      if (player.clubId !== null && player.condition === 'DOENTE') {
+        await tx.$queryRaw`SELECT id FROM clubes WHERE id = ${player.clubId} FOR UPDATE`;
+      }
+      await tx.jogadores.update({
+        where: { id: player.id },
+        data: {
+          nome: player.name,
+          posicao: player.position,
+          agilidade: player.agility,
+          idade: player.age,
+          condicao: player.condition,
+          ...(player.excluded ? { excluido_em: new Date() } : {}),
+        },
+      });
+      if (player.condition === 'DOENTE') {
+        await tx.escalacoes.deleteMany({ where: { jogador_id: player.id } });
+      }
     });
   }
 }

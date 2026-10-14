@@ -9,7 +9,10 @@ import {
   type PurchaseFacts,
   type PurchaseWrite,
 } from '../../application/policies/decide-purchase.js';
-import { type SaleFacts, type SaleWrite } from '../../application/policies/decide-sale.js';
+import {
+  type SaleFacts,
+  type SaleWrite,
+} from '../../application/policies/decide-sale.js';
 import {
   type MarketRepository,
   type PurchaseReceipt,
@@ -194,6 +197,7 @@ export class PrismaMarketRepository implements MarketRepository {
         where: { id: playerId },
         data: { clube_id: null },
       });
+      await tx.escalacoes.deleteMany({ where: { jogador_id: playerId } });
       await tx.clubes.update({
         where: { id: write.clubId },
         data: { caixa: clubCash.toDecimalString() },

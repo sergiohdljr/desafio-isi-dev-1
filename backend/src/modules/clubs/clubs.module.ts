@@ -27,5 +27,6 @@ import { PrismaClubsRepository } from './infra/repositories/prisma-clubs-reposit
     { provide: CLUBS_REPOSITORY, useClass: PrismaClubsRepository },
     { provide: CLOCK, useClass: SystemClock },
   ],
+  exports: [CLOCK],
 })
 export class ClubsModule {}
