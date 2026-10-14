@@ -460,6 +460,67 @@ describe('Clubs', () => {
       expect(created).toHaveLength(4);
     });
 
+    it('shows the active contract of the player current club', async () => {
+      const home = await request(app.getHttpServer())
+        .post('/api/v1/clubs')
+        .send({ name: 'Casa FC', acronym: 'CFC' })
+        .expect(201);
+      const other = await request(app.getHttpServer())
+        .post('/api/v1/clubs')
+        .send({ name: 'Outro Clube', acronym: 'OCL' })
+        .expect(201);
+      const player = await request(app.getHttpServer())
+        .post('/api/v1/players')
+        .send({
+          name: 'Meia Casa',
+          position: 'MEI',
+          agility: 50,
+          age: 25,
+          pace: 70,
+          shooting: 70,
+          passing: 80,
+          dribbling: 80,
+          defending: 50,
+          physical: 70,
+          potential: 86,
+        })
+        .expect(201);
+      const prisma = app.get(PrismaService);
+      const loyaltyUntil = new Date(Date.now() + 49 * 60 * 60 * 1000);
+      await prisma.jogadores.update({
+        where: { id: player.body.id },
+        data: { clube_id: home.body.id },
+      });
+      await prisma.contratos.create({
+        data: {
+          jogador_id: player.body.id,
+          clube_id: home.body.id,
+          valor_compra: '25.50',
+          fidelidade_ate: loyaltyUntil,
+          situacao: 'ATIVO',
+          iniciado_em: new Date(Date.now() - 60 * 60 * 1000),
+        },
+      });
+      await prisma.contratos.create({
+        data: {
+          jogador_id: player.body.id,
+          clube_id: other.body.id,
+          valor_compra: '10.00',
+          fidelidade_ate: loyaltyUntil,
+          situacao: 'ATIVO',
+          iniciado_em: new Date(),
+        },
+      });
+
+      const detail = await request(app.getHttpServer())
+        .get(`/api/v1/clubs/${home.body.id}`)
+        .expect(200);
+
+      expect(detail.body.players).toHaveLength(1);
+      expect(detail.body.players[0].contract.purchase_value).toBe(25.5);
+      expect(detail.body.squad_value).toBe(40);
+    });
+
     it('rejects an empty, repeated or unknown sort', async () => {
       for (const sort of ['', 'name,net_worth_asc', 'NAME', 'net_worth_asc ']) {
         const response = await request(app.getHttpServer())

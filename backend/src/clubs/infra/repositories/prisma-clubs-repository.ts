@@ -80,19 +80,19 @@ export class PrismaClubsRepository implements ClubsRepository {
       where: {
         excluido_em: null,
         clube_id: { not: null },
-        contratos: { some: { situacao: 'ATIVO' } },
       },
       include: {
         contratos: {
           where: { situacao: 'ATIVO' },
           orderBy: { iniciado_em: 'desc' },
-          take: 1,
         },
       },
     });
 
     return rows.flatMap((row) => {
-      const contract = row.contratos[0];
+      const contract = row.contratos.find(
+        (item) => item.clube_id === row.clube_id,
+      );
       if (!contract || row.clube_id === null) {
         return [];
       }
