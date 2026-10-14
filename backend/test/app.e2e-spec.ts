@@ -5,6 +5,7 @@ import {
 } from '@nestjs/platform-fastify';
 import request from 'supertest';
 import { AppModule } from './../src/app.module.js';
+import { PrismaService } from './../src/prisma/prisma.service.js';
 
 describe('AppController (e2e)', () => {
   let app: NestFastifyApplication;
@@ -12,7 +13,13 @@ describe('AppController (e2e)', () => {
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(PrismaService)
+      .useValue({
+        $connect: () => Promise.resolve(),
+        $disconnect: () => Promise.resolve(),
+      })
+      .compile();
 
     app = moduleFixture.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter(),

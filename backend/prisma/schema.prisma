@@ -1,0 +1,205 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// GOL, ZAG, LAT, MEI ou ATA.
+enum posicao {
+  GOL
+  ZAG
+  LAT
+  MEI
+  ATA
+}
+
+/// APTO, MAL_CONDICIONADO ou DOENTE.
+enum condicao {
+  APTO
+  MAL_CONDICIONADO
+  DOENTE
+}
+
+/// Condição registrada no duelo: doente não entra em campo.
+enum condicao_duelo {
+  APTO
+  MAL_CONDICIONADO
+}
+
+enum situacao_contrato {
+  ATIVO
+  ENCERRADO
+  RESCINDIDO
+}
+
+enum tipo_transacao {
+  COMPRA
+  VENDA
+}
+
+/// Valores persistidos: 3-1, 2-2, 2-1-1 e 1-2-1.
+enum formacao {
+  tres_um    @map("3-1")
+  dois_dois  @map("2-2")
+  dois_um_um @map("2-1-1")
+  um_dois_um @map("1-2-1")
+}
+
+enum atributo_duelo {
+  shooting
+  passing
+  dribbling
+  defending
+}
+
+model jogadores {
+  id            Int       @id @default(autoincrement())
+  nome          String    @db.VarChar(100)
+  posicao       posicao
+  agilidade     Int
+  idade         Int
+  valor_base    Decimal   @db.Decimal(6, 2)
+  condicao      condicao
+  clube_id      Int?
+  velocidade    Int
+  finalizacao   Int
+  passe         Int
+  drible        Int
+  defesa        Int
+  fisico        Int
+  potencial     Int
+  excluido_em   DateTime? @db.Timestamp(6)
+  criado_em     DateTime  @default(now()) @db.Timestamp(6)
+  atualizado_em DateTime  @updatedAt @db.Timestamp(6)
+
+  clube                clubes?          @relation(fields: [clube_id], references: [id])
+  contratos            contratos[]
+  transacoes           transacoes[]
+  escalacao            escalacoes?
+  duelos_como_atacante duelos_partida[] @relation("duelo_atacante")
+  duelos_como_defensor duelos_partida[] @relation("duelo_defensor")
+
+  @@index([clube_id])
+}
+
+model clubes {
+  id        Int       @id @default(autoincrement())
+  nome      String    @unique @db.VarChar(60)
+  sigla     String    @unique @db.Char(3)
+  caixa     Decimal   @default(300.00) @db.Decimal(10, 2)
+  formacao  formacao?
+  criado_em DateTime  @default(now()) @db.Timestamp(6)
+
+  elenco                  jogadores[]
+  contratos               contratos[]
+  transacoes              transacoes[]
+  escalacoes              escalacoes[]
+  partidas_como_mandante  partidas[]       @relation("partida_mandante")
+  partidas_como_visitante partidas[]       @relation("partida_visitante")
+  duelos_como_atacante    duelos_partida[]
+}
+
+model contratos {
+  id             Int               @id @default(autoincrement())
+  jogador_id     Int
+  clube_id       Int
+  valor_compra   Decimal           @db.Decimal(6, 2)
+  fidelidade_ate DateTime          @db.Timestamp(6)
+  situacao       situacao_contrato
+  iniciado_em    DateTime          @default(now()) @db.Timestamp(6)
+  encerrado_em   DateTime?         @db.Timestamp(6)
+
+  jogador jogadores @relation(fields: [jogador_id], references: [id])
+  clube   clubes    @relation(fields: [clube_id], references: [id])
+
+  @@index([jogador_id])
+  @@index([clube_id])
+}
+
+model transacoes {
+  id             Int            @id @default(autoincrement())
+  clube_id       Int
+  jogador_id     Int
+  nome_jogador   String         @db.VarChar(100)
+  tipo           tipo_transacao
+  valor          Decimal        @db.Decimal(6, 2)
+  taxa           Decimal        @db.Decimal(6, 2)
+  multa          Decimal        @db.Decimal(6, 2)
+  lucro          Decimal?       @db.Decimal(7, 2)
+  variacao_caixa Decimal        @db.Decimal(8, 2)
+  criado_em      DateTime       @default(now()) @db.Timestamp(6)
+
+  clube   clubes    @relation(fields: [clube_id], references: [id])
+  jogador jogadores @relation(fields: [jogador_id], references: [id])
+
+  @@index([clube_id])
+  @@index([jogador_id])
+}
+
+/// Um jogador está em no máximo uma escalação.
+model escalacoes {
+  clube_id   Int
+  jogador_id Int      @unique
+  criado_em  DateTime @default(now()) @db.Timestamp(6)
+
+  clube   clubes    @relation(fields: [clube_id], references: [id])
+  jogador jogadores @relation(fields: [jogador_id], references: [id])
+
+  @@id([clube_id, jogador_id])
+}
+
+model partidas {
+  id                 Int      @id @default(autoincrement())
+  mandante_id        Int
+  visitante_id       Int
+  gols_mandante      Int
+  gols_visitante     Int
+  formacao_mandante  formacao
+  formacao_visitante formacao
+  jogada_em          DateTime @default(now()) @db.Timestamp(6)
+
+  mandante  clubes           @relation("partida_mandante", fields: [mandante_id], references: [id])
+  visitante clubes           @relation("partida_visitante", fields: [visitante_id], references: [id])
+  duelos    duelos_partida[]
+
+  @@index([mandante_id])
+  @@index([visitante_id])
+}
+
+model duelos_partida {
+  id                Int            @id @default(autoincrement())
+  partida_id        Int
+  ordem             Int
+  clube_atacante_id Int
+  atacante_id       Int
+  defensor_id       Int
+  nome_atacante     String         @db.VarChar(100)
+  nome_defensor     String         @db.VarChar(100)
+  posicao_atacante  posicao
+  posicao_defensor  posicao
+  condicao_atacante condicao_duelo
+  condicao_defensor condicao_duelo
+  atributo_ataque   atributo_duelo
+  atributo_defesa   atributo_duelo
+  valor_ataque      Int
+  valor_defesa      Int
+  gol               Boolean
+
+  partida        partidas  @relation(fields: [partida_id], references: [id])
+  clube_atacante clubes    @relation(fields: [clube_atacante_id], references: [id])
+  atacante       jogadores @relation("duelo_atacante", fields: [atacante_id], references: [id])
+  defensor       jogadores @relation("duelo_defensor", fields: [defensor_id], references: [id])
+
+  @@unique([partida_id, ordem])
+  @@index([clube_atacante_id])
+  @@index([atacante_id])
+  @@index([defensor_id])
+}
