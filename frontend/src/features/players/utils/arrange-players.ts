@@ -1,59 +1,12 @@
-import type { Player, PlayerScope, PlayerSort, Position } from "@/features/players/types/player.types"
-
-const AGE_MIN = 16
-const AGE_MAX = 45
-const MARKET_VALUE_MIN = 0
-const MARKET_VALUE_MAX = 550
-
-const POSITION_ORDER: Record<Position, number> = {
-  GOL: 0,
-  ZAG: 1,
-  LAT: 2,
-  MEI: 3,
-  ATA: 4,
-}
-
-type DirectoryQuery = {
-  search?: string
-  position?: Position
-  condition?: Player["condition"]
-  clubId?: number
-  minAge?: number
-  maxAge?: number
-  minValue?: number
-  maxValue?: number
-  sort: PlayerSort
-  scope: PlayerScope
-  page: number
-  limit: number
-}
-
-type PlayerDirectory = {
-  players: Player[]
-  totalItems: number
-  totalPages: number
-  counts: {
-    all: number
-    free: number
-    signed: number
-  }
-}
-
-function foldName(value: string) {
-  return value.normalize("NFD").replace(/\p{Mn}/gu, "").toLowerCase()
-}
-
-function normalizeSearch(value: string) {
-  return foldName(value.trim().replace(/\s+/g, " "))
-}
-
-function compareNames(left: string, right: string) {
-  const foldedLeft = foldName(left)
-  const foldedRight = foldName(right)
-  if (foldedLeft < foldedRight) return -1
-  if (foldedLeft > foldedRight) return 1
-  return 0
-}
+import {
+  AGE_MAX,
+  AGE_MIN,
+  MARKET_VALUE_MAX,
+  MARKET_VALUE_MIN,
+  POSITION_ORDER,
+} from "@/features/players/consts/directory"
+import type { DirectoryQuery, Player, PlayerDirectory, PlayerSort } from "@/features/players/types/player.types"
+import { compareNames, foldName, normalizeSearch } from "@/features/players/utils/compare-names"
 
 function cents(value: number) {
   return Math.round(value * 100)
@@ -131,5 +84,4 @@ function arrangePlayers(players: Player[], query: DirectoryQuery): PlayerDirecto
   }
 }
 
-export type { DirectoryQuery, PlayerDirectory }
-export { arrangePlayers }
+export { arrangePlayers, cents, comparePlayers }

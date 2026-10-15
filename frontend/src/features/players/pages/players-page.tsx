@@ -19,7 +19,7 @@ import {
 } from "lucide-react"
 import { getLineup } from "@/features/clubs/api/clubs.api"
 import { useClubs } from "@/features/clubs/hooks/use-clubs"
-import { AVATAR_TONES, PAGE_SIZE, SORTS, money } from "@/features/players/consts/directory"
+import { AGE_MAX, AGE_MIN, AVATAR_TONES, PAGE_SIZE, SORTS, money } from "@/features/players/consts/directory"
 import { usePlayerMutations, usePlayersDirectory, useRefreshPlayers } from "@/features/players/hooks/use-players"
 import type { Condition, Player, PlayerSort, Position } from "@/features/players/types/player.types"
 import { agilityTone, conditionLabel, initials, positionLabel } from "@/features/players/utils/player-display"
@@ -106,8 +106,8 @@ function PlayersPage() {
     return () => window.clearTimeout(timeout)
   }, [searchInput])
 
-  const parsedMinAge = optionalInteger(minAge, 16, 45)
-  const parsedMaxAge = optionalInteger(maxAge, 16, 45)
+  const parsedMinAge = optionalInteger(minAge, AGE_MIN, AGE_MAX)
+  const parsedMaxAge = optionalInteger(maxAge, AGE_MIN, AGE_MAX)
   const parsedMinValue = optionalMoney(minValue)
   const parsedMaxValue = optionalMoney(maxValue)
   const ageInvalid =
@@ -156,7 +156,7 @@ function PlayersPage() {
   const sortLabel = SORTS.find((item) => item.value === sort)?.label ?? "nome"
   const ageSummary =
     parsedMinAge !== undefined || parsedMaxAge !== undefined
-      ? `Idade: ${parsedMinAge ?? 16} a ${parsedMaxAge ?? 45}`
+      ? `Idade: ${parsedMinAge ?? AGE_MIN} a ${parsedMaxAge ?? AGE_MAX}`
       : undefined
   const valueSummary =
     parsedMinValue !== undefined || parsedMaxValue !== undefined

@@ -9,8 +9,15 @@ import {
   listPlayers,
   updatePlayer,
 } from "@/features/players/api/players.api"
-import { arrangePlayers, type DirectoryQuery } from "@/features/players/lib/arrange-players"
-import type { Condition, CreatePlayerInput, Player, PlayerList, UpdatePlayerInput } from "@/features/players/types/player.types"
+import type {
+  Condition,
+  CreatePlayerInput,
+  DirectoryQuery,
+  Player,
+  PlayerList,
+  UpdatePlayerInput,
+} from "@/features/players/types/player.types"
+import { arrangePlayers } from "@/features/players/utils/arrange-players"
 
 const PLAYERS_KEY = ["players"] as const
 const PLAYERS_FETCH_LIMIT = 50

@@ -69,10 +69,38 @@ type UpdatePlayerInput = {
   age: number
 }
 
+type DirectoryQuery = {
+  search?: string
+  position?: Position
+  condition?: Condition
+  clubId?: number
+  minAge?: number
+  maxAge?: number
+  minValue?: number
+  maxValue?: number
+  sort: PlayerSort
+  scope: PlayerScope
+  page: number
+  limit: number
+}
+
+type PlayerDirectory = {
+  players: Player[]
+  totalItems: number
+  totalPages: number
+  counts: {
+    all: number
+    free: number
+    signed: number
+  }
+}
+
 export type {
   Condition,
   CreatePlayerInput,
+  DirectoryQuery,
   Player,
+  PlayerDirectory,
   PlayerList,
   PlayerQuery,
   PlayerScope,
