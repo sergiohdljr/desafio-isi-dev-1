@@ -267,7 +267,11 @@ function PlayersPage() {
           if (path) navigate(path)
         }}
         counts={{ players: counts.all, clubs: clubs.length }}
-        clubs={clubs.map((club) => ({ initial: club.name.charAt(0), name: club.name }))}
+        clubs={clubs.map((club) => ({
+          initial: club.name.charAt(0),
+          name: club.name,
+          href: paths.club(club.id),
+        }))}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-3">

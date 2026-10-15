@@ -12,7 +12,7 @@ function AppRouter() {
         <Route path={paths.home} element={<HomePage />} />
         <Route path={paths.players} element={<PlayersPage />} />
         <Route path={paths.clubs} element={<ClubsPage />} />
-        <Route path="/clubes/:id" element={<ClubPage />} />
+        <Route path="/club/:id" element={<ClubPage />} />
         <Route path="*" element={<Navigate to={paths.home} replace />} />
       </Routes>
     </BrowserRouter>

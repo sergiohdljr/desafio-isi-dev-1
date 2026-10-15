@@ -2,7 +2,7 @@ const paths = {
   home: "/",
   players: "/jogadores",
   clubs: "/clubes",
-  club: (id: number) => `/clubes/${id}`,
+  club: (id: number) => `/club/${id}`,
 } as const
 
 function pathForSidebar(label: string) {
