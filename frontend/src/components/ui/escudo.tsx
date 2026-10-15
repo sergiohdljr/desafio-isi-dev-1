@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 const escudoVariants = cva(
   "inline-flex shrink-0 items-center justify-center rounded-md border border-border bg-muted text-caption-xs-medium text-foreground",

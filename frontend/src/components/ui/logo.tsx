@@ -1,4 +1,4 @@
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import logoLg from "@/assets/logo-lg.svg"
 import logoMd from "@/assets/logo-md.svg"
 

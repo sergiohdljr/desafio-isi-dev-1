@@ -1,10 +1,25 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react"
-import { ChartBar, Info, Lock, UserRound, X } from "lucide-react"
-import { cn } from "cn"
+import {
+  ChartBar,
+  ChartColumn,
+  Coins,
+  HeartPulse,
+  Info,
+  Lock,
+  Pencil,
+  ShoppingCart,
+  Trash2,
+  TrendingUp,
+  UserRound,
+  Wallet,
+  X,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Select,
+  SelectContainer,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -13,6 +28,9 @@ import {
 import type { Club } from "@/features/clubs/types/club.types"
 import type { Condition, Player, Position } from "@/features/players/types/player.types"
 import { Alert } from "@/components/ui/alert"
+import { Avatar } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 const POSITIONS: { value: Position; label: string }[] = [
   { value: "GOL", label: "Goleiro" },
@@ -60,20 +78,22 @@ function Modal({
   }, [])
 
   return (
-    <dialog
-      ref={ref}
-      aria-labelledby={titleId}
-      onClose={onClose}
-      className="m-auto w-full max-w-lg rounded-xl border border-border bg-background p-6 text-foreground shadow-lg backdrop:bg-overlay"
-    >
-      <h2 id={titleId} className="text-heading-dialog">
-        {title}
-      </h2>
-      {description ? (
-        <p className="mt-2 text-body-sm text-muted-foreground">{description}</p>
-      ) : null}
-      <div className="mt-4">{children}</div>
-    </dialog>
+    <SelectContainer container={ref}>
+      <dialog
+        ref={ref}
+        aria-labelledby={titleId}
+        onClose={onClose}
+        className="m-auto w-full max-w-lg overflow-visible rounded-xl border border-border bg-background p-6 text-foreground shadow-lg backdrop:bg-overlay"
+      >
+        <h2 id={titleId} className="text-heading-dialog">
+          {title}
+        </h2>
+        {description ? (
+          <p className="mt-2 text-body-sm text-muted-foreground">{description}</p>
+        ) : null}
+        <div className="mt-4">{children}</div>
+      </dialog>
+    </SelectContainer>
   )
 }
 
@@ -112,6 +132,124 @@ function Hint({ children, error }: { children: string; error?: string }) {
     <span className={error ? "text-caption-xs text-destructive" : "text-caption-xs text-muted-foreground"}>
       {error ?? children}
     </span>
+  )
+}
+
+const AVATAR_TONES = [
+  "bg-avatar-violet text-avatar-violet-foreground",
+  "bg-avatar-pink text-avatar-pink-foreground",
+  "bg-avatar-cyan text-avatar-cyan-foreground",
+  "bg-avatar-teal text-avatar-teal-foreground",
+  "bg-avatar-zinc text-avatar-zinc-foreground",
+]
+
+const CONDITION_NOTES: Record<Condition, string> = {
+  APTO: "Sem desconto por condição.",
+  MAL_CONDICIONADO: "Desconto de 15%. Agilidade de 80 a 100 corta pela metade; de 1 a 30 soma 10 pontos.",
+  DOENTE: "Desconto de 30%, com o mesmo ajuste de agilidade.",
+}
+
+const coins = new Intl.NumberFormat("pt-BR", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+function useModalDialog() {
+  const ref = useRef<HTMLDialogElement>(null)
+  const titleId = useId()
+  useEffect(() => {
+    const dialog = ref.current
+    if (!dialog || dialog.open) return
+    dialog.showModal()
+  }, [])
+  return { ref, titleId }
+}
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  const first = parts[0]?.[0] ?? ""
+  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : ""
+  return `${first}${last}`.toLocaleUpperCase("pt-BR")
+}
+
+function positionLabel(position: Position) {
+  return POSITIONS.find((item) => item.value === position)?.label ?? position
+}
+
+function conditionLabel(condition: Condition) {
+  return CONDITIONS.find((item) => item.value === condition)?.label ?? condition
+}
+
+function conditionVariant(condition: Condition) {
+  if (condition === "APTO") return "success" as const
+  if (condition === "MAL_CONDICIONADO") return "warning" as const
+  return "destructive" as const
+}
+
+function DialogClose({ onClose }: { onClose: () => void }) {
+  return (
+    <Button type="button" variant="ghost" size="icon-sm" className="absolute top-3 right-3" aria-label="Fechar" onClick={onClose}>
+      <X />
+    </Button>
+  )
+}
+
+function PositionChoices({
+  value,
+  onChange,
+  lockedValue,
+}: {
+  value: Position | ""
+  onChange: (value: Position) => void
+  lockedValue?: Position
+}) {
+  return (
+    <div className="flex gap-2" role="radiogroup" aria-label="Posição">
+      {POSITIONS.map((item) => {
+        const selected = value === item.value
+        const disabled = lockedValue !== undefined && item.value !== lockedValue
+        return (
+          <button
+            key={item.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            disabled={disabled}
+            onClick={() => onChange(item.value)}
+            className={cn(
+              "flex flex-1 flex-col items-center rounded-md border px-1 py-2 outline-none focus-visible:shadow-focus disabled:opacity-45",
+              selected
+                ? "border-primary bg-primary-soft text-primary-soft-foreground"
+                : "border-border bg-background hover:bg-muted disabled:hover:bg-background",
+            )}
+          >
+            <span className="text-body-sm-semibold">{item.value}</span>
+            <span className={selected ? "text-caption-xs" : "text-caption-xs text-muted-foreground"}>{item.label}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function PlayerIdentity({ player, badge }: { player: Player; badge: "condition" | "free" }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl border bg-muted-subtle px-3.5 py-3">
+      <Avatar initials={initials(player.name)} className={AVATAR_TONES[player.id % AVATAR_TONES.length]} />
+      <div className="min-w-0 flex-1">
+        <p className="text-body-sm-medium">{player.name}</p>
+        <p className="text-caption-xs text-muted-foreground">
+          {player.position} · {positionLabel(player.position)} · {player.age} anos
+        </p>
+      </div>
+      {badge === "free" ? (
+        <Badge variant="secondary">Livre</Badge>
+      ) : (
+        <Badge variant={conditionVariant(player.condition)} dot>
+          {conditionLabel(player.condition)}
+        </Badge>
+      )}
+    </div>
   )
 }
 
@@ -343,33 +481,9 @@ function CreatePlayerDialog({
           </span>
           <Hint error={errors.name}>De 3 a 100 caracteres, com pelo menos duas palavras e sem números.</Hint>
         </label>
-        <div className="flex flex-col gap-2" role="radiogroup" aria-label="Posição" aria-invalid={Boolean(errors.position)}>
+        <div className="flex flex-col gap-2" aria-invalid={Boolean(errors.position)}>
           <span className="text-body-sm-medium">Posição</span>
-          <div className="flex gap-2">
-            {POSITIONS.map((item) => {
-              const selected = position === item.value
-              return (
-                <button
-                  key={item.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={selected}
-                  onClick={() => setPosition(item.value)}
-                  className={cn(
-                    "flex flex-1 flex-col items-center rounded-md border px-1 py-2 outline-none focus-visible:shadow-focus",
-                    selected
-                      ? "border-primary bg-primary-soft text-primary-soft-foreground"
-                      : "border-border bg-background hover:bg-muted",
-                  )}
-                >
-                  <span className="text-body-sm-semibold">{item.value}</span>
-                  <span className={selected ? "text-caption-xs" : "text-caption-xs text-muted-foreground"}>
-                    {item.label}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
+          <PositionChoices value={position} onChange={setPosition} />
           {errors.position ? <span className="text-caption-xs text-destructive">{errors.position}</span> : null}
         </div>
         <div className="grid grid-cols-3 gap-4">
@@ -524,57 +638,65 @@ function EditPlayerDialog({
     }
   }
 
+  const { ref, titleId } = useModalDialog()
+
   return (
-    <Modal
-      title="Editar jogador"
-      description="Edite nome, posição, idade e agilidade. Os demais dados não mudam."
+    <dialog
+      ref={ref}
+      aria-labelledby={titleId}
       onClose={onClose}
+      className="relative m-auto w-full max-w-140 overflow-hidden rounded-xl border bg-background p-6 text-foreground shadow-lg backdrop:bg-overlay open:flex open:flex-col open:gap-4"
     >
+      <header className="flex flex-col gap-1.5 pr-8">
+        <h2 id={titleId} className="text-heading-dialog">Editar jogador</h2>
+        <p className="text-body-sm text-muted-foreground">
+          Edite nome, posição, idade e agilidade. Os demais dados não mudam.
+        </p>
+      </header>
+      <DialogClose onClose={onClose} />
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {formError ? <Alert variant="destructive" description={formError} /> : null}
-        <Field label="Nome" error={errors.name}>
-          <Input value={name} onChange={(event) => setName(event.target.value)} aria-invalid={Boolean(errors.name)} />
-        </Field>
-        <Field label="Posição">
-          <Select value={position} onValueChange={(value) => value && setPosition(value as Position)} disabled={lockedPosition}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {POSITIONS.map((item) => (
-                <SelectItem key={item.value} value={item.value} disabled={lockedPosition && item.value !== player.position}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <label className="flex flex-col gap-2">
+          <span className="text-body-sm-medium">Nome</span>
+          <span className="relative">
+            <UserRound className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Input value={name} className="pl-9" aria-invalid={Boolean(errors.name)} onChange={(event) => setName(event.target.value)} />
+          </span>
+          <Hint error={errors.name}>De 3 a 100 caracteres, com pelo menos duas palavras e sem números.</Hint>
+        </label>
+        <div className="flex flex-col gap-2">
+          <span className="text-body-sm-medium">Posição</span>
+          <PositionChoices value={position} onChange={setPosition} lockedValue={lockedPosition ? player.position : undefined} />
           {lockedPosition ? (
             <span className="text-caption-xs text-muted-foreground">
               Jogador com clube não muda de posição: as outras posições ficam desabilitadas.
             </span>
           ) : null}
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Idade" error={errors.age}>
-            <Input value={age} inputMode="numeric" onChange={(event) => setAge(event.target.value)} aria-invalid={Boolean(errors.age)} />
-          </Field>
-          <Field label="Agilidade" error={errors.agility}>
-            <Input value={agility} inputMode="numeric" onChange={(event) => setAgility(event.target.value)} aria-invalid={Boolean(errors.agility)} />
-          </Field>
         </div>
-        <p className="text-caption-xs text-muted-foreground">
-          Não mudam depois do cadastro: valor base, indicadores e potencial.
-        </p>
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={pending}>
-            Salvar alterações
-          </Button>
+        <div className="grid grid-cols-2 gap-4">
+          <label className="flex flex-col gap-2">
+            <span className="text-body-sm-medium">Idade</span>
+            <Input value={age} inputMode="numeric" aria-invalid={Boolean(errors.age)} onChange={(event) => setAge(event.target.value)} />
+            <Hint error={errors.age}>{`De 16 a 45, sem diminuir (atual: ${player.age}).`}</Hint>
+          </label>
+          <label className="flex flex-col gap-2">
+            <span className="text-body-sm-medium">Agilidade</span>
+            <Input value={agility} inputMode="numeric" aria-invalid={Boolean(errors.agility)} onChange={(event) => setAgility(event.target.value)} />
+            <Hint error={errors.agility}>De 1 a 100 (até 85 com 35 anos ou mais).</Hint>
+          </label>
         </div>
+        <div className="flex items-center gap-2 rounded-lg border border-dashed border-border px-3 py-2.5">
+          <Lock className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+          <p className="text-caption-xs text-muted-foreground">
+            Não mudam depois do cadastro: valor base ({coins.format(player.base_value)}), indicadores e potencial.
+          </p>
+        </div>
+        <footer className="flex justify-end gap-2 border-t border-border pt-4">
+          <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" disabled={pending}>Salvar alterações</Button>
+        </footer>
       </form>
-    </Modal>
+    </dialog>
   )
 }
 
@@ -607,36 +729,63 @@ function ConditionDialog({
     }
   }
 
+  const { ref, titleId } = useModalDialog()
+  const blockedApto = player.condition === "DOENTE"
+
   return (
-    <Modal
-      title="Alterar condição física"
-      description="A condição muda o desconto do valor de mercado, recalculado ao salvar."
+    <dialog
+      ref={ref}
+      aria-labelledby={titleId}
       onClose={onClose}
+      className="relative m-auto w-full max-w-130 overflow-hidden rounded-xl border bg-background p-6 text-foreground shadow-lg backdrop:bg-overlay open:flex open:flex-col open:gap-4"
     >
+      <header className="flex flex-col gap-1.5 pr-8">
+        <h2 id={titleId} className="text-heading-dialog">Alterar condição física</h2>
+        <p className="text-body-sm text-muted-foreground">
+          A condição muda o desconto do valor de mercado, recalculado ao salvar.
+        </p>
+      </header>
+      <DialogClose onClose={onClose} />
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {formError ? <Alert variant="destructive" description={formError} /> : null}
-        <Select value={condition} onValueChange={(value) => value && setCondition(value as Condition)}>
-          <SelectTrigger aria-label="Condição">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {CONDITIONS.map((item) => (
-              <SelectItem key={item.value} value={item.value} disabled={player.condition === "DOENTE" && item.value === "APTO"}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={pending}>
-            Salvar condição
-          </Button>
-        </div>
+        <PlayerIdentity player={player} badge="condition" />
+        <RadioGroup value={condition} onValueChange={(value) => value && setCondition(value as Condition)} className="gap-2">
+          {CONDITIONS.map((item) => {
+            const disabled = blockedApto && item.value === "APTO"
+            const selected = condition === item.value
+            return (
+              <label
+                key={item.value}
+                className={cn(
+                  "flex items-start gap-3 rounded-lg border px-3.5 py-3",
+                  selected ? "border-primary bg-primary-soft" : "border-border bg-background",
+                  disabled && "opacity-55",
+                )}
+              >
+                <RadioGroupItem value={item.value} disabled={disabled} className="mt-0.5" />
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="flex items-center gap-2">
+                    <span className="text-body-sm-medium">{item.label}</span>
+                    {player.condition === item.value ? <Badge variant="secondary">Atual</Badge> : null}
+                  </span>
+                  <span className="text-caption-xs text-muted-foreground">{CONDITION_NOTES[item.value]}</span>
+                  {disabled ? (
+                    <span className="flex items-center gap-1.5 text-caption-xs-medium text-muted-foreground">
+                      <Lock className="size-3" aria-hidden="true" />
+                      De Doente não passa direto para Apto.
+                    </span>
+                  ) : null}
+                </span>
+              </label>
+            )
+          })}
+        </RadioGroup>
+        <footer className="flex justify-end gap-2 border-t border-border pt-4">
+          <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" disabled={pending}>Salvar condição</Button>
+        </footer>
       </form>
-    </Modal>
+    </dialog>
   )
 }
 
@@ -663,55 +812,156 @@ function DeletePlayerDialog({
     }
   }
 
+  const { ref, titleId } = useModalDialog()
+
   return (
-    <Modal
-      title={`Excluir ${player.name}?`}
-      description="O jogador sai da lista e da busca, mas as transações e as partidas antigas dele continuam como foram gravadas."
+    <dialog
+      ref={ref}
+      aria-labelledby={titleId}
       onClose={onClose}
+      className="relative m-auto w-full max-w-115 overflow-hidden rounded-xl border bg-background p-6 text-foreground shadow-lg backdrop:bg-overlay open:flex open:flex-col open:gap-4"
     >
+      <header className="flex flex-col gap-1.5 pr-8">
+        <h2 id={titleId} className="text-heading-dialog">Excluir {player.name}?</h2>
+        <p className="text-body-sm text-muted-foreground">
+          O jogador sai da lista e da busca, mas as transações e as partidas antigas dele continuam como foram gravadas.
+        </p>
+      </header>
+      <DialogClose onClose={onClose} />
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {formError ? <Alert variant="destructive" description={formError} /> : null}
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" variant="destructive" disabled={pending}>
+        <PlayerIdentity player={player} badge="free" />
+        <footer className="flex justify-end gap-2 border-t border-border pt-4">
+          <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+          <Button type="submit" variant="destructive" className="bg-destructive text-white hover:bg-destructive/90" disabled={pending}>
+            <Trash2 />
             Excluir jogador
           </Button>
-        </div>
+        </footer>
       </form>
-    </Modal>
+    </dialog>
   )
 }
 
-function DetailsDialog({ player, onClose }: { player: Player; onClose: () => void }) {
-  const rows = [
-    ["Overall", String(player.overall)],
-    ["Potencial", String(player.potential)],
-    ["Velocidade", String(player.pace)],
-    ["Finalização", String(player.shooting)],
-    ["Passe", String(player.passing)],
-    ["Drible", String(player.dribbling)],
-    ["Defesa", String(player.defending)],
-    ["Físico", String(player.physical)],
-  ]
+const DETAIL_SKILLS = [
+  { label: "Velocidade", key: "pace" },
+  { label: "Finalização", key: "shooting" },
+  { label: "Passe", key: "passing" },
+  { label: "Drible", key: "dribbling" },
+  { label: "Defesa", key: "defending" },
+  { label: "Físico", key: "physical" },
+] as const
+
+function DetailsDialog({
+  player,
+  clubName,
+  onClose,
+  onEdit,
+  onCondition,
+  onBuy,
+}: {
+  player: Player
+  clubName?: string
+  onClose: () => void
+  onEdit: () => void
+  onCondition: () => void
+  onBuy?: () => void
+}) {
+  const { ref, titleId } = useModalDialog()
+  const skills = DETAIL_SKILLS.map((skill) => ({ label: skill.label, value: player[skill.key] }))
 
   return (
-    <Modal title={player.name} description="Ver detalhes" onClose={onClose}>
-      <dl className="grid grid-cols-2 gap-2">
-        {rows.map(([label, value]) => (
-          <div key={label} className="flex flex-col">
-            <dt className="text-caption-xs text-muted-foreground">{label}</dt>
-            <dd className="text-body-sm-medium tabular-nums">{value}</dd>
+    <dialog
+      ref={ref}
+      aria-labelledby={titleId}
+      onClose={onClose}
+      className="fixed inset-y-0 right-0 left-auto m-0 h-dvh max-h-none w-120 overflow-y-auto border-y-0 border-r-0 bg-background p-6 text-foreground shadow-lg backdrop:bg-overlay open:flex open:flex-col open:gap-4.5"
+    >
+      <DialogClose onClose={onClose} />
+      <header className="flex items-center gap-3.5 pr-8">
+        <Avatar initials={initials(player.name)} size="lg" className={AVATAR_TONES[player.id % AVATAR_TONES.length]} />
+        <div className="flex min-w-0 flex-col gap-1">
+          <h2 id={titleId} className="text-heading-dialog">{player.name}</h2>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge variant="outline">{player.position}</Badge>
+            <Badge variant={conditionVariant(player.condition)} dot>{conditionLabel(player.condition)}</Badge>
+            {player.club_id === null ? <Badge variant="secondary">Livre</Badge> : null}
+          </div>
+        </div>
+      </header>
+      <div className="grid grid-cols-2 gap-3">
+        <DetailStat icon={<Coins className="size-3.5" />} label="Valor de mercado" value={coins.format(player.market_value)} hint="Calculado automaticamente" />
+        <DetailStat icon={<Wallet className="size-3.5" />} label="Valor base" value={coins.format(player.base_value)} hint="Calculado no cadastro" />
+        <DetailStat icon={<ChartColumn className="size-3.5" />} label="Overall" value={String(player.overall)} hint="Calculado pela posição" />
+        <DetailStat icon={<TrendingUp className="size-3.5" />} label="Potencial" value={String(player.potential)} hint="Informado no cadastro" />
+      </div>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-heading-card">Indicadores técnicos</h3>
+          <p className="text-caption-xs text-muted-foreground">Escala de 1 a 99</p>
+        </div>
+        {skills.map((skill) => (
+          <div key={skill.label} className="flex items-center gap-3">
+            <span className="w-24 shrink-0 text-body-sm text-muted-foreground">{skill.label}</span>
+            <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-muted">
+              <span className="absolute inset-y-0 left-0 rounded-full bg-chart-2" style={{ width: `${attributeFill(player.potential)}%` }} />
+              <span className="absolute inset-y-0 left-0 rounded-full bg-primary" style={{ width: `${attributeFill(skill.value)}%` }} />
+            </span>
+            <span className="w-7 text-right text-body-sm-medium tabular-nums">{skill.value}</span>
           </div>
         ))}
-      </dl>
-      <div className="mt-4 flex justify-end">
-        <Button type="button" variant="outline" onClick={onClose}>
-          Fechar
-        </Button>
+        <p className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-caption-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-xs bg-primary" /> Valor do atributo</span>
+          <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-xs bg-chart-2" /> Até o potencial ({player.potential}), que nenhum atributo passa</span>
+        </p>
       </div>
-    </Modal>
+      <dl className="rounded-lg border border-border text-body-sm">
+        <div className="flex items-center justify-between border-b border-border px-3.5 py-2.5">
+          <dt className="text-muted-foreground">Idade</dt>
+          <dd className="text-body-sm-medium">{player.age} anos</dd>
+        </div>
+        <div className="flex items-center justify-between border-b border-border px-3.5 py-2.5">
+          <dt className="text-muted-foreground">Agilidade</dt>
+          <dd className="text-body-sm-medium">{player.agility}</dd>
+        </div>
+        <div className="flex items-center justify-between px-3.5 py-2.5">
+          <dt className="text-muted-foreground">Clube</dt>
+          <dd className="text-body-sm-medium">{clubName ?? "Livre"}</dd>
+        </div>
+      </dl>
+      <div className="mt-auto border-t border-border pt-4">
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={onEdit}><Pencil /> Editar</Button>
+          <Button type="button" variant="outline" onClick={onCondition}><HeartPulse /> Alterar condição</Button>
+          {onBuy ? (
+            <Button type="button" className="ml-auto" onClick={onBuy}><ShoppingCart /> Comprar</Button>
+          ) : null}
+        </div>
+      </div>
+    </dialog>
+  )
+}
+
+function DetailStat({
+  icon,
+  label,
+  value,
+  hint,
+}: {
+  icon: ReactNode
+  label: string
+  value: string
+  hint: string
+}) {
+  return (
+    <div className="flex flex-col gap-1 rounded-lg border px-3.5 py-3">
+      <div className="flex items-center justify-between text-caption-xs-medium text-muted-foreground">
+        {label}
+        {icon}
+      </div>
+      <p className="text-display-kpi">{value}</p>
+      <p className="text-caption-xs text-muted-foreground">{hint}</p>
+    </div>
   )
 }
 
@@ -754,10 +1004,15 @@ function BuyPlayerDialog({
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {formError ? <Alert variant="destructive" description={formError} /> : null}
-        <Field label="Clube">
-          <Select value={clubId || null} onValueChange={(value) => setClubId(value ?? "")}>
+        <div className="flex flex-col gap-1.5 text-body-sm-medium">
+          <span>Clube</span>
+          <Select
+            value={clubId || null}
+            onValueChange={(value) => setClubId(value ?? "")}
+            items={clubs.map((club) => ({ value: String(club.id), label: club.name }))}
+          >
             <SelectTrigger>
-              <SelectValue placeholder="Selecione" />
+              <SelectValue placeholder={clubs.length === 0 ? "Nenhum clube disponível" : "Selecione"} />
             </SelectTrigger>
             <SelectContent>
               {clubs.map((club) => (
@@ -767,7 +1022,7 @@ function BuyPlayerDialog({
               ))}
             </SelectContent>
           </Select>
-        </Field>
+        </div>
         <Field label="Fidelidade até">
           <Input type="datetime-local" value={loyalty} onChange={(event) => setLoyalty(event.target.value)} />
         </Field>

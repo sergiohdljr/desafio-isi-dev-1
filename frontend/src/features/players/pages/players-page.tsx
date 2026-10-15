@@ -1,11 +1,10 @@
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 import {
   ArrowUpDown,
-  Calendar,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Coins,
-  Ellipsis,
   HeartPulse,
   Plus,
   RefreshCw,
@@ -13,7 +12,9 @@ import {
   Shield,
   ShoppingCart,
   Shirt,
+  UserRound,
   Users,
+  X,
 } from "lucide-react"
 import { useClubs } from "@/features/clubs/hooks/use-clubs"
 import { usePlayerMutations, usePlayersDirectory, useRefreshPlayers } from "@/features/players/hooks/use-players"
@@ -23,7 +24,6 @@ import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { MenuItem } from "@/components/ui/menu-item"
 import { PaginationItem } from "@/components/ui/pagination"
 import {
   Select,
@@ -35,6 +35,7 @@ import {
 import { Sidebar } from "@/components/ui/sidebar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Toast, ToastViewport } from "@/components/ui/toast"
+import { PlayerActionsMenu } from "@/features/players/components/player-actions-menu"
 import {
   BuyPlayerDialog,
   CONDITIONS,
@@ -130,7 +131,6 @@ function PlayersPage({ onHome }: { onHome: () => void }) {
   const [maxValue, setMaxValue] = useState("")
   const [sort, setSort] = useState<PlayerSort>("name")
   const [page, setPage] = useState(1)
-  const [menuId, setMenuId] = useState<number | null>(null)
   const [dialog, setDialog] = useState<Dialog | null>(null)
   const [notice, setNotice] = useState<Notice | null>(null)
 
@@ -192,19 +192,67 @@ function PlayersPage({ onHome }: { onHome: () => void }) {
   const rangeStart = totalItems === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
   const rangeEnd = Math.min(page * PAGE_SIZE, totalItems)
   const sortLabel = SORTS.find((item) => item.value === sort)?.label ?? "nome"
-  const activeFilters = [
-    condition ? `Condição: ${conditionLabel(condition as Condition)}` : null,
+  const ageSummary =
     parsedMinAge !== undefined || parsedMaxAge !== undefined
-      ? `Idade: ${parsedMinAge ?? "16"} a ${parsedMaxAge ?? "45"}`
-      : null,
+      ? `Idade: ${parsedMinAge ?? 16} a ${parsedMaxAge ?? 45}`
+      : undefined
+  const valueSummary =
     parsedMinValue !== undefined || parsedMaxValue !== undefined
-      ? `Valor de mercado: ${money.format(parsedMinValue ?? 0)} a ${money.format(parsedMaxValue ?? 0)}`
+      ? `Valor: ${money.format(parsedMinValue ?? 0)} a ${money.format(parsedMaxValue ?? 0)}`
+      : undefined
+  const activeFilters = [
+    condition
+      ? {
+          id: "condition",
+          label: `Condição: ${conditionLabel(condition as Condition)}`,
+          clear: () => setCondition(""),
+        }
+      : null,
+    ageSummary
+      ? {
+          id: "age",
+          label: ageSummary,
+          clear: () => {
+            setMinAge("")
+            setMaxAge("")
+          },
+        }
+      : null,
+    valueSummary
+      ? {
+          id: "value",
+          label: `Valor de mercado: ${money.format(parsedMinValue ?? 0)} a ${money.format(parsedMaxValue ?? 0)}`,
+          clear: () => {
+            setMinValue("")
+            setMaxValue("")
+          },
+        }
       : null,
     appliedClubId
-      ? `Clube: ${clubs.find((club) => club.id === appliedClubId)?.name ?? ""}`
+      ? {
+          id: "club",
+          label: `Clube: ${clubs.find((club) => club.id === appliedClubId)?.name ?? ""}`,
+          clear: () => setClubId(""),
+        }
       : null,
-    position ? `Posição: ${positionLabel(position as Position)}` : null,
-  ].filter((item): item is string => Boolean(item))
+    position
+      ? {
+          id: "position",
+          label: `Posição: ${positionLabel(position as Position)}`,
+          clear: () => setPosition(""),
+        }
+      : null,
+    search
+      ? {
+          id: "search",
+          label: `Busca: ${search}`,
+          clear: () => {
+            setSearchInput("")
+            setSearch("")
+          },
+        }
+      : null,
+  ].filter((item): item is { id: string; label: string; clear: () => void } => Boolean(item))
 
   return (
     <div className="flex min-h-svh bg-background text-foreground">
@@ -235,12 +283,12 @@ function PlayersPage({ onHome }: { onHome: () => void }) {
           </Button>
         </header>
         <main className="flex flex-1 flex-col gap-4 px-6 py-5">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <span className="inline-flex size-10 items-center justify-center rounded-lg bg-primary-soft text-primary">
-                <Users className="size-4" aria-hidden />
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex min-w-0 flex-1 items-center gap-4">
+              <span className="inline-flex size-12 shrink-0 items-center justify-center rounded-xl border border-primary bg-primary-soft text-primary">
+                <Users className="size-[22px]" aria-hidden />
               </span>
-              <div>
+              <div className="flex min-w-0 flex-col gap-1">
                 <h1 className="text-heading-page">Jogadores</h1>
                 <p className="text-body-sm text-muted-foreground">
                   Cadastre jogadores, acompanhe os indicadores e compre os que estão livres.
@@ -253,15 +301,15 @@ function PlayersPage({ onHome }: { onHome: () => void }) {
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative min-w-56 flex-1">
+          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-2 shadow-xs">
+            <div className="relative min-w-48 flex-1">
               <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
               <Input
                 className="pl-9"
                 placeholder="Buscar por nome"
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                aria-label="Buscar por nome"
+                aria-label="Buscar jogador pelo nome"
               />
             </div>
             <FilterSelect
@@ -297,14 +345,16 @@ function PlayersPage({ onHome }: { onHome: () => void }) {
             />
             <RangeFilter
               label="Idade"
-              icon={<Calendar className="size-4" />}
+              valueLabel={ageSummary}
+              icon={<UserRound className="size-4" />}
               min={minAge}
               max={maxAge}
               onMinChange={setMinAge}
               onMaxChange={setMaxAge}
             />
             <RangeFilter
-              label="Valor de mercado"
+              label="Valor"
+              valueLabel={valueSummary}
               icon={<Coins className="size-4" />}
               min={minValue}
               max={maxValue}
@@ -318,21 +368,32 @@ function PlayersPage({ onHome }: { onHome: () => void }) {
               Com a aba “Livres” ativa, o filtro por clube fica desabilitado, porque essa combinação não é aceita.
             </p>
           ) : null}
-          {search ? (
-            <p className="flex flex-wrap items-center gap-2 text-body-sm">
-              Resultados para a busca: <span className="text-body-sm-medium">Busca: {search}</span>
-              <Button type="button" variant="link" onClick={clearFilters}>
-                Limpar filtros
-              </Button>
-            </p>
-          ) : null}
           {activeFilters.length > 0 ? (
-            <p className="flex flex-wrap items-center gap-2 text-body-sm">
-              <span>Filtros ativos: {activeFilters.join(" · ")}</span>
-              <Button type="button" variant="link" onClick={clearFilters}>
+            <div className="flex flex-wrap content-center items-center gap-2">
+              <p className="text-body-sm text-muted-foreground">Filtros ativos:</p>
+              {activeFilters.map((filter) => (
+                <span
+                  key={filter.id}
+                  className="inline-flex items-center gap-1 rounded-full bg-secondary py-0.5 pr-1 pl-2.5 text-caption-xs-medium text-secondary-foreground"
+                >
+                  {filter.label}
+                  <button
+                    type="button"
+                    className="inline-flex size-5 items-center justify-center rounded-md"
+                    aria-label={`Remover filtro ${filter.label}`}
+                    onClick={() => {
+                      filter.clear()
+                      setPage(1)
+                    }}
+                  >
+                    <X className="size-4" aria-hidden />
+                  </button>
+                </span>
+              ))}
+              <Button type="button" variant="link" size="sm" className="h-8 px-3" onClick={clearFilters}>
                 Limpar filtros
               </Button>
-            </p>
+            </div>
           ) : null}
           {ageInvalid ? (
             <Alert variant="warning" description="A idade mínima não pode ser maior que a máxima." />
@@ -454,36 +515,15 @@ function PlayersPage({ onHome }: { onHome: () => void }) {
                           </span>
                         )}
                       </td>
-                      <td className="relative px-3 py-2">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          aria-label={`Ações de ${player.name}`}
-                          aria-expanded={menuId === player.id}
-                          onClick={() => setMenuId((current) => (current === player.id ? null : player.id))}
-                        >
-                          <Ellipsis />
-                        </Button>
-                        {menuId === player.id ? (
-                          <div className="absolute top-10 right-3 z-10 flex w-44 flex-col rounded-lg border border-border bg-popover p-1 shadow-md">
-                            <MenuItem onClick={() => { setDialog({ type: "details", player }); setMenuId(null) }}>
-                              Ver detalhes
-                            </MenuItem>
-                            <MenuItem onClick={() => { setDialog({ type: "edit", player }); setMenuId(null) }}>
-                              Editar
-                            </MenuItem>
-                            <MenuItem onClick={() => { setDialog({ type: "condition", player }); setMenuId(null) }}>
-                              Alterar condição
-                            </MenuItem>
-                            <MenuItem
-                              disabled={player.club_id !== null}
-                              onClick={() => { setDialog({ type: "delete", player }); setMenuId(null) }}
-                            >
-                              Excluir
-                            </MenuItem>
-                          </div>
-                        ) : null}
+                      <td className="px-3 py-2">
+                        <PlayerActionsMenu
+                          player={player}
+                          onDetails={() => setDialog({ type: "details", player })}
+                          onEdit={() => setDialog({ type: "edit", player })}
+                          onCondition={() => setDialog({ type: "condition", player })}
+                          onBuy={() => setDialog({ type: "buy", player })}
+                          onDelete={() => setDialog({ type: "delete", player })}
+                        />
                       </td>
                     </tr>
                   )
@@ -568,7 +608,14 @@ function PlayersPage({ onHome }: { onHome: () => void }) {
         />
       ) : null}
       {dialog?.type === "details" ? (
-        <DetailsDialog player={dialog.player} onClose={() => setDialog(null)} />
+        <DetailsDialog
+          player={dialog.player}
+          clubName={clubs.find((club) => club.id === dialog.player.club_id)?.name}
+          onClose={() => setDialog(null)}
+          onEdit={() => setDialog({ type: "edit", player: dialog.player })}
+          onCondition={() => setDialog({ type: "condition", player: dialog.player })}
+          onBuy={dialog.player.club_id === null ? () => setDialog({ type: "buy", player: dialog.player }) : undefined}
+        />
       ) : null}
       {dialog?.type === "buy" ? (
         <BuyPlayerDialog
@@ -620,9 +667,9 @@ function FilterSelect({
 
   return (
     <Select value={value || null} onValueChange={(next) => onChange(!next || next === "all" ? "" : next)} disabled={disabled}>
-      <SelectTrigger className="w-auto" aria-label={label}>
-        {icon}
-        <SelectValue placeholder={label}>{selected?.label}</SelectValue>
+      <SelectTrigger className="w-auto shrink-0" aria-label={label}>
+        <span className="text-muted-foreground">{icon}</span>
+        <SelectValue placeholder={label}>{selected ? `${label}: ${selected.label}` : null}</SelectValue>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="all">{label}</SelectItem>
@@ -638,6 +685,7 @@ function FilterSelect({
 
 function RangeFilter({
   label,
+  valueLabel,
   icon,
   min,
   max,
@@ -645,6 +693,7 @@ function RangeFilter({
   onMaxChange,
 }: {
   label: string
+  valueLabel?: string
   icon: ReactNode
   min: string
   max: string
@@ -652,12 +701,31 @@ function RangeFilter({
   onMaxChange: (value: string) => void
 }) {
   const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function closeOnOutside(event: PointerEvent) {
+      if (event.target instanceof Node && rootRef.current?.contains(event.target)) return
+      setOpen(false)
+    }
+    document.addEventListener("pointerdown", closeOnOutside)
+    return () => document.removeEventListener("pointerdown", closeOnOutside)
+  }, [open])
+
   return (
-    <div className="relative">
-      <Button type="button" variant="outline" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
-        {icon}
-        {label}
-      </Button>
+    <div ref={rootRef} className="relative shrink-0">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-label={label}
+        className="flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-body-sm shadow-xs outline-none hover:border-ring focus-visible:border-ring focus-visible:shadow-focus"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="text-muted-foreground">{icon}</span>
+        <span className={valueLabel ? "text-foreground" : "text-muted-foreground"}>{valueLabel ?? label}</span>
+        <ChevronDown className="size-4 text-muted-foreground" aria-hidden />
+      </button>
       {open ? (
         <div className="absolute top-11 z-10 flex w-56 flex-col gap-2 rounded-lg border border-border bg-popover p-3 shadow-md">
           <label className="flex flex-col gap-1 text-caption-xs text-muted-foreground">

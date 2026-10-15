@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { Clock, ListOrdered, Plus, Shield, Swords, Trophy, Users } from "lucide-react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import logoSidebar from "@/assets/logo-sidebar.svg"
 import { Button } from "@/components/ui/button"
 

@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from "react"
 import { CircleCheck, CircleX, Info, X } from "lucide-react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 const toastIcons = {
   success: CircleCheck,

@@ -111,9 +111,8 @@ function comparePlayers(left: Player, right: Player, sort: PlayerSort) {
 
 function arrangePlayers(players: Player[], query: DirectoryQuery): PlayerDirectory {
   const shared = players.filter((player) => matchesShared(player, query))
-  const signed = shared.filter(
-    (player) => player.club_id !== null && (query.clubId === undefined || player.club_id === query.clubId),
-  )
+  const inClub = (player: Player) => query.clubId === undefined || player.club_id === query.clubId
+  const signed = shared.filter((player) => player.club_id !== null && inClub(player))
   const visible = shared
     .filter((player) => matchesScope(player, query))
     .sort((left, right) => comparePlayers(left, right, query.sort))
@@ -125,7 +124,7 @@ function arrangePlayers(players: Player[], query: DirectoryQuery): PlayerDirecto
     totalItems,
     totalPages: totalItems === 0 ? 0 : Math.ceil(totalItems / query.limit),
     counts: {
-      all: shared.length,
+      all: shared.filter(inClub).length,
       free: shared.filter((player) => player.club_id === null).length,
       signed: signed.length,
     },

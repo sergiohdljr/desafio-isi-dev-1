@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { Wallet } from "lucide-react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 
 function SummaryCard({
   className,

@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
 import formacao121 from "@/assets/formacao-1-2-1.svg"
 import formacao211 from "@/assets/formacao-2-1-1.svg"
 import formacao22 from "@/assets/formacao-2-2.svg"

@@ -1,6 +1,19 @@
+import { createContext, useContext, type ReactNode, type RefObject } from "react"
 import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { Check, ChevronDown } from "lucide-react"
-import { cn } from "cn"
+import { cn } from "@/lib/utils"
+
+const SelectContainerContext = createContext<RefObject<HTMLElement | null> | null>(null)
+
+function SelectContainer({
+  container,
+  children,
+}: {
+  container: RefObject<HTMLElement | null>
+  children: ReactNode
+}) {
+  return <SelectContainerContext.Provider value={container}>{children}</SelectContainerContext.Provider>
+}
 
 function Select({ ...props }: SelectPrimitive.Root.Props<string>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />
@@ -46,8 +59,10 @@ function SelectContent({
   children,
   ...props
 }: SelectPrimitive.Popup.Props) {
+  const container = useContext(SelectContainerContext)
+
   return (
-    <SelectPrimitive.Portal>
+    <SelectPrimitive.Portal container={container ?? undefined}>
       <SelectPrimitive.Positioner sideOffset={4} className="z-50">
         <SelectPrimitive.Popup
           data-slot="select-content"
@@ -88,4 +103,4 @@ function SelectItem({
   )
 }
 
-export { Select, SelectTrigger, SelectValue, SelectContent, SelectItem }
+export { Select, SelectContainer, SelectTrigger, SelectValue, SelectContent, SelectItem }
