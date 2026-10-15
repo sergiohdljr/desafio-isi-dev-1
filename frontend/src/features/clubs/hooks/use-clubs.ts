@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { createClub, getClub, listClubs } from "@/features/clubs/api/clubs.api"
+import { createClub, getClub, listClubTransactions, listClubs } from "@/features/clubs/api/clubs.api"
 import type { ClubSort, CreateClubInput } from "@/features/clubs/types/club.types"
 
 const CLUBS_KEY = ["clubs"] as const
@@ -33,6 +33,16 @@ function useClub(id: number) {
   }
 }
 
+function useClubTransactions(id: number) {
+  const query = useQuery({
+    queryKey: [...CLUBS_KEY, "transactions", id],
+    queryFn: () => listClubTransactions(id),
+    enabled: Number.isInteger(id) && id > 0,
+  })
+
+  return { count: query.data?.length ?? 0 }
+}
+
 function useRefreshClubs() {
   const queryClient = useQueryClient()
   return () => queryClient.invalidateQueries({ queryKey: CLUBS_KEY })
@@ -47,4 +57,4 @@ function useCreateClub() {
   }
 }
 
-export { useClub, useClubs, useCreateClub, useRefreshClubs }
+export { useClub, useClubTransactions, useClubs, useCreateClub, useRefreshClubs }

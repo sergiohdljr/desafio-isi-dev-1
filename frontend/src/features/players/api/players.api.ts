@@ -32,6 +32,10 @@ function deletePlayer(id: number) {
   return api.delete<void>(`/players/${id}`).then((response) => response.data)
 }
 
+function sellPlayer(id: number) {
+  return api.post(`/players/${id}/sell`).then((response) => response.data)
+}
+
 function buyPlayer(id: number, clubId: number, loyaltyUntil: string) {
   return api
     .post(`/players/${id}/buy`, { club_id: clubId, loyalty_until: loyaltyUntil })
@@ -55,4 +59,4 @@ function playerParams(query: PlayerQuery) {
   }
 }
 
-export { buyPlayer, changePlayerCondition, createPlayer, deletePlayer, listPlayers, updatePlayer }
+export { buyPlayer, changePlayerCondition, createPlayer, deletePlayer, listPlayers, sellPlayer, updatePlayer }

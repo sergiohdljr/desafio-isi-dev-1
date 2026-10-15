@@ -9,13 +9,15 @@ import {
   RefreshCw,
   Shirt,
   ShoppingCart,
+  Users,
   Wallet,
 } from "lucide-react"
 import { useLocation, useNavigate, useParams } from "react-router"
 import { pathForSidebar, paths } from "@/app/routes"
 import { CreateClubDialog } from "@/features/clubs/components/create-club-dialog"
 import { EmptySquad } from "@/features/clubs/components/empty-squad"
-import { useClub, useClubs, useCreateClub, useRefreshClubs } from "@/features/clubs/hooks/use-clubs"
+import { SquadTable } from "@/features/clubs/components/squad-table"
+import { useClub, useClubTransactions, useClubs, useCreateClub, useRefreshClubs } from "@/features/clubs/hooks/use-clubs"
 import { usePlayersDirectory } from "@/features/players/hooks/use-players"
 import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +48,7 @@ function ClubPage() {
     () => Boolean((location.state as { created?: boolean } | null)?.created),
   )
   const { club, isPending, error } = useClub(id)
+  const { count: historyCount } = useClubTransactions(id)
   const { clubs } = useClubs("name")
   const { counts } = usePlayersDirectory({
     sort: "name",
@@ -194,12 +197,15 @@ function ClubPage() {
                     <History className="size-4" aria-hidden />
                     Histórico
                     <span className="inline-flex h-[18px] items-center rounded-full bg-muted px-[6px] text-caption-xs-medium text-muted-foreground">
-                      0
+                      {historyCount}
                     </span>
                   </button>
                 </div>
                 {section === "elenco" && squadSize === 0 && !isPending ? (
                   <EmptySquad onBrowse={() => navigate(paths.players)} />
+                ) : null}
+                {section === "elenco" && club && squadSize > 0 ? (
+                  <SquadTable players={club.players} onSold={refreshClubs} />
                 ) : null}
               </>
             ) : null}

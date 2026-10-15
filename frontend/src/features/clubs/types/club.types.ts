@@ -1,3 +1,5 @@
+import type { Player } from "@/features/players/types/player.types"
+
 const CLUB_SORTS = ["name", "net_worth_desc", "net_worth_asc"] as const
 
 type ClubSort = (typeof CLUB_SORTS)[number]
@@ -16,9 +18,19 @@ type CreateClubInput = {
   acronym: string
 }
 
-type ClubDetail = Club & {
-  players: { id: number; name: string }[]
+type ClubContract = {
+  purchase_value: number
+  loyalty_until: string
+  remaining_days: number
 }
 
-export type { Club, ClubDetail, ClubSort, CreateClubInput }
+type SquadPlayer = Player & {
+  contract: ClubContract
+}
+
+type ClubDetail = Club & {
+  players: SquadPlayer[]
+}
+
+export type { Club, ClubContract, ClubDetail, ClubSort, CreateClubInput, SquadPlayer }
 export { CLUB_SORTS }

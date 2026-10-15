@@ -13,4 +13,8 @@ function getClub(id: number) {
   return api.get<ClubDetail>(`/clubs/${id}`).then((response) => response.data)
 }
 
-export { createClub, getClub, listClubs }
+function listClubTransactions(id: number) {
+  return api.get<{ data: unknown[] }>(`/clubs/${id}/transactions`).then((response) => response.data.data)
+}
+
+export { createClub, getClub, listClubTransactions, listClubs }
