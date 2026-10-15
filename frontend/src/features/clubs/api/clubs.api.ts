@@ -1,8 +1,12 @@
 import { api } from "@/lib/http"
-import type { Club } from "@/features/clubs/types/club.types"
+import type { Club, ClubSort, CreateClubInput } from "@/features/clubs/types/club.types"
 
-function listClubs() {
-  return api.get<Club[]>("/clubs").then((response) => response.data)
+function listClubs(sort?: ClubSort) {
+  return api.get<Club[]>("/clubs", { params: { sort } }).then((response) => response.data)
 }
 
-export { listClubs }
+function createClub(input: CreateClubInput) {
+  return api.post<Club>("/clubs", input).then((response) => response.data)
+}
+
+export { createClub, listClubs }

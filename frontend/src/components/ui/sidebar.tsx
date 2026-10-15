@@ -133,6 +133,7 @@ function Sidebar({
   collapsed = false,
   onNavigate,
   onHome,
+  onCreateClub,
   counts,
   clubs: clubItems = [...clubs],
 }: {
@@ -141,6 +142,7 @@ function Sidebar({
   collapsed?: boolean
   onNavigate?: (label: string) => void
   onHome?: () => void
+  onCreateClub?: () => void
   counts?: { players?: number; clubs?: number; matches?: number }
   clubs?: { initial: string; name: string }[]
 }) {
@@ -214,6 +216,7 @@ function Sidebar({
             size="icon-sm"
             aria-label="Novo clube"
             className="size-8"
+            onClick={onCreateClub}
           >
             <Plus />
           </Button>
