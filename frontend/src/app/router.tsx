@@ -1,17 +1,18 @@
-import { useState } from "react"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router"
 import { HomePage } from "@/features/home/pages/home-page"
 import { PlayersPage } from "@/features/players/pages/players-page"
-
-type Screen = "home" | "players"
+import { paths } from "@/app/routes"
 
 function AppRouter() {
-  const [screen, setScreen] = useState<Screen>("home")
-
-  if (screen === "home") {
-    return <HomePage onStart={() => setScreen("players")} />
-  }
-
-  return <PlayersPage onHome={() => setScreen("home")} />
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path={paths.home} element={<HomePage />} />
+        <Route path={paths.players} element={<PlayersPage />} />
+        <Route path="*" element={<Navigate to={paths.home} replace />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export { AppRouter }

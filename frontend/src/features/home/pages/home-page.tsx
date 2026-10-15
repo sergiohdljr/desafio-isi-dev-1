@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react"
+import { useNavigate } from "react-router"
+import { paths } from "@/app/routes"
 import {
   ArrowRight,
   ChevronRight,
@@ -83,7 +85,8 @@ function leagueStatus() {
   return `líder: ${league.leader}, ${league.points} pontos`
 }
 
-function HomePage({ onStart }: { onStart?: () => void }) {
+function HomePage() {
+  const navigate = useNavigate()
   const startRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -132,7 +135,7 @@ function HomePage({ onStart }: { onStart?: () => void }) {
           </p>
         </div>
         <div className="flex items-center gap-3.5">
-          <Button ref={startRef} size="lg" className="w-50" onClick={onStart}>
+          <Button ref={startRef} size="lg" className="w-50" onClick={() => navigate(paths.players)}>
             Iniciar
             <ArrowRight />
           </Button>

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useNavigate } from "react-router"
+import { pathForSidebar, paths } from "@/app/routes"
 import {
   ArrowUpDown,
   ChevronDown,
@@ -115,7 +117,8 @@ function agilityTone(value: number) {
   return "bg-muted-foreground"
 }
 
-function PlayersPage({ onHome }: { onHome: () => void }) {
+function PlayersPage() {
+  const navigate = useNavigate()
   const { clubs } = useClubs()
   const refreshPlayers = useRefreshPlayers()
   const mutations = usePlayerMutations()
@@ -258,9 +261,10 @@ function PlayersPage({ onHome }: { onHome: () => void }) {
     <div className="flex min-h-svh bg-background text-foreground">
       <Sidebar
         active="Jogadores"
-        onHome={onHome}
+        onHome={() => navigate(paths.home)}
         onNavigate={(label) => {
-          if (label !== "Jogadores") return
+          const path = pathForSidebar(label)
+          if (path) navigate(path)
         }}
         counts={{ players: counts.all, clubs: clubs.length }}
         clubs={clubs.map((club) => ({ initial: club.name.charAt(0), name: club.name }))}
