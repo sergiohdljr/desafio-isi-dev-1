@@ -1,6 +1,6 @@
 import { Escudo } from "@/components/ui/escudo"
 import { Badge } from "@/components/ui/badge"
-import type { MatchSummary } from "@/features/league/api/league.api"
+import type { MatchSummary } from "@/features/league/types/match.types"
 
 function resultLabel(result: MatchSummary["result"]) {
   if (result === "MANDANTE") return "Vitória do mandante"

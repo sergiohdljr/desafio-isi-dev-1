@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Club } from "@/features/clubs/types/club.types"
 import { MarketDialog, PendingNote } from "@/features/players/components/market-dialog"
-import { playMatch, type Match } from "@/features/league/api/league.api"
+import { playMatch } from "@/features/league/api/league.api"
+import type { Match } from "@/features/league/types/match.types"
 
 function NewMatchDialog({
   clubs,
