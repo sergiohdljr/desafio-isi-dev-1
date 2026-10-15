@@ -212,7 +212,7 @@ function ClubPage() {
                   <EmptySquad onBrowse={() => navigate(paths.players)} />
                 ) : null}
                 {section === "escalacao" && club && squadSize > 0 ? (
-                  <LineupBoard clubId={club.id} squad={club.players} />
+                  <LineupBoard clubId={club.id} clubName={club.name} squad={club.players} />
                 ) : null}
               </>
             ) : null}

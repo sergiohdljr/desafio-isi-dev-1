@@ -1,11 +1,18 @@
 import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Check, CircleCheck, TriangleAlert } from "lucide-react"
+import { Check, CircleCheck, HeartPulse, Plus, Swords } from "lucide-react"
 import { getLineup, saveLineup, type Formation } from "@/features/clubs/api/clubs.api"
 import type { SquadPlayer } from "@/features/clubs/types/club.types"
 import type { Condition, Player, Position } from "@/features/players/types/player.types"
+import formation31 from "@/assets/formations/3-1.svg"
+import formation22 from "@/assets/formations/2-2.svg"
+import formation211 from "@/assets/formations/2-1-1.svg"
+import formation121 from "@/assets/formations/1-2-1.svg"
+import { Alert } from "@/components/ui/alert"
+import { Toast, ToastViewport } from "@/components/ui/toast"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import {
   Select,
   SelectContent,
@@ -14,11 +21,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-const FORMATIONS: { value: Formation; defense: string; attack: string }[] = [
-  { value: "3-1", defense: "Defesa 3, ataque 1", attack: "" },
-  { value: "2-2", defense: "Defesa 2, ataque 2", attack: "" },
-  { value: "2-1-1", defense: "Defesa 2, meio 1,", attack: "ataque 1" },
-  { value: "1-2-1", defense: "Defesa 1, meio 2,", attack: "ataque 1" },
+const FORMATIONS: { value: Formation; note: string; diagram: string }[] = [
+  { value: "3-1", note: "Defesa 3, ataque 1", diagram: formation31 },
+  { value: "2-2", note: "Defesa 2, ataque 2", diagram: formation22 },
+  { value: "2-1-1", note: "Defesa 2, meio 1, ataque 1", diagram: formation211 },
+  { value: "1-2-1", note: "Defesa 1, meio 2, ataque 1", diagram: formation121 },
 ]
 
 type SlotKind = "GOL" | "DEF" | "MEI" | "ATA"
@@ -70,11 +77,11 @@ const PITCH: Record<Formation, { top: string; left: string }[]> = {
     { top: "18%", left: "70%" },
   ],
   "2-1-1": [
-    { top: "78%", left: "50%" },
-    { top: "54%", left: "28%" },
-    { top: "54%", left: "72%" },
-    { top: "34%", left: "50%" },
-    { top: "14%", left: "50%" },
+    { top: "84%", left: "50%" },
+    { top: "66%", left: "28%" },
+    { top: "66%", left: "72%" },
+    { top: "46%", left: "50%" },
+    { top: "22%", left: "50%" },
   ],
   "1-2-1": [
     { top: "78%", left: "50%" },
@@ -88,7 +95,15 @@ const PITCH: Record<Formation, { top: string; left: string }[]> = {
 const STARTER_COUNT = 5
 const DEFAULT_FORMATION: Formation = "2-1-1"
 
-function LineupBoard({ clubId, squad }: { clubId: number; squad: SquadPlayer[] }) {
+function LineupBoard({
+  clubId,
+  clubName,
+  squad,
+}: {
+  clubId: number
+  clubName: string
+  squad: SquadPlayer[]
+}) {
   const lineup = useQuery({
     queryKey: ["clubs", "lineup", clubId],
     queryFn: () => getLineup(clubId),
@@ -98,6 +113,8 @@ function LineupBoard({ clubId, squad }: { clubId: number; squad: SquadPlayer[] }
   const [saved, setSaved] = useState<{ formation: Formation; starters: (number | null)[] } | null>(null)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [savedNotice, setSavedNotice] = useState<string | null>(null)
+  const [refusal, setRefusal] = useState<string | null>(null)
 
   useEffect(() => {
     if (!lineup.data) return
@@ -114,13 +131,12 @@ function LineupBoard({ clubId, squad }: { clubId: number; squad: SquadPlayer[] }
   const reserves = squad.filter((player) => !starters.includes(player.id))
 
   function chooseFormation(next: Formation) {
+    const selected = starters
+      .map((id) => squad.find((player) => player.id === id))
+      .filter((player): player is SquadPlayer => player !== undefined)
     setFormation(next)
-    setStarters((current) =>
-      SLOTS[next].map((slot, index) => {
-        const player = squad.find((item) => item.id === current[index])
-        return player && fits(slot.kind, player.position) ? player.id : null
-      }),
-    )
+    setStarters(placeStarters(next, selected))
+    setRefusal(null)
   }
 
   async function save() {
@@ -136,6 +152,7 @@ function LineupBoard({ clubId, squad }: { clubId: number; squad: SquadPlayer[] }
       const nextStarters = placeStarters(formation, stored.players)
       setSaved({ formation, starters: nextStarters })
       setStarters(nextStarters)
+      setSavedNotice(`${clubName} está escalado na formação ${formation}.`)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Não foi possível salvar a escalação.")
     } finally {
@@ -159,37 +176,58 @@ function LineupBoard({ clubId, squad }: { clubId: number; squad: SquadPlayer[] }
             </Badge>
           ) : null}
         </header>
-        <div>
-          <h3 className="text-body-sm-medium">Formação</h3>
-          <p className="text-caption-xs text-muted-foreground">
-            Os números contam os jogadores de linha de trás para frente. O goleiro fica fora da conta.
-          </p>
-          <div className="mt-3 grid grid-cols-2 gap-2 xl:grid-cols-4">
+        {refusal ? (
+          <Alert variant="destructive" title="A escalação foi recusada" description={refusal} />
+        ) : null}
+        <div className="-mx-4 flex flex-col gap-2.5 border-b border-border px-5 py-4">
+          <div>
+            <h3 className="text-body-sm-medium">Formação</h3>
+            <p className="text-caption-xs text-muted-foreground">
+              Os números contam os jogadores de linha de trás para frente. O goleiro fica fora da conta.
+            </p>
+          </div>
+          <RadioGroup
+            value={formation}
+            onValueChange={(value) => {
+              if (value === "3-1" || value === "2-2" || value === "2-1-1" || value === "1-2-1") {
+                chooseFormation(value)
+              }
+            }}
+            className="grid grid-cols-2 gap-3 xl:grid-cols-4"
+            aria-label="Formação"
+          >
             {FORMATIONS.map((item) => {
               const selected = item.value === formation
               return (
-                <button
+                <label
                   key={item.value}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => chooseFormation(item.value)}
                   className={
                     selected
-                      ? "flex items-center gap-2 rounded-lg border border-primary bg-primary-soft px-3 py-2 text-left"
-                      : "flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-left"
+                      ? "flex gap-2 rounded-lg border-2 border-primary bg-primary-soft px-3 py-2.5"
+                      : "flex gap-2 rounded-lg border border-border bg-background px-3 py-2.5"
                   }
                 >
-                  <span className={selected ? "size-4 rounded-full border border-primary bg-primary shadow-[inset_0_0_0_3px_white]" : "size-4 rounded-full border border-input"} />
-                  <span>
-                    <span className="block text-body-sm-medium">{item.value}</span>
-                    <span className="block text-caption-xs text-muted-foreground">
-                      {item.defense} {item.attack}
+                  <img src={item.diagram} alt="" width={40} height={52} />
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-1.5">
+                      <RadioGroupItem value={item.value} />
+                      <span className={selected ? "text-body-sm-semibold text-primary-soft-foreground" : "text-body-sm-semibold"}>
+                        {item.value}
+                      </span>
                     </span>
+                    <span className="block text-caption-xs text-muted-foreground">{item.note}</span>
                   </span>
-                </button>
+                </label>
               )
             })}
-          </div>
+          </RadioGroup>
+          {!complete ? (
+            <Alert
+              variant="warning"
+              title={`Escalação incompleta: o ${clubName} não pode jogar partidas`}
+              description={`O elenco tem ${squad.length} ${squad.length === 1 ? "jogador" : "jogadores"}, e a escalação precisa de 5: 1 goleiro e 4 jogadores de linha. Compre jogadores e salve a escalação com os 5 titulares.`}
+            />
+          ) : null}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse text-left">
@@ -208,7 +246,6 @@ function LineupBoard({ clubId, squad }: { clubId: number; squad: SquadPlayer[] }
                 const options = squad.filter(
                   (item) =>
                     fits(slot.kind, item.position) &&
-                    item.condition !== "DOENTE" &&
                     (item.id === player?.id || !starters.includes(item.id)),
                 )
                 return (
@@ -222,12 +259,19 @@ function LineupBoard({ clubId, squad }: { clubId: number; squad: SquadPlayer[] }
                         value={player ? String(player.id) : null}
                         onValueChange={(value) => {
                           if (!value) return
+                          const next = squad.find((item) => item.id === Number(value))
+                          if (!next) return
+                          if (next.condition === "DOENTE") {
+                            setRefusal(`${next.name} está DOENTE e não pode ser escalado.`)
+                            return
+                          }
+                          setRefusal(null)
                           setStarters((current) =>
-                            current.map((id, slotIndex) => (slotIndex === index ? Number(value) : id)),
+                            current.map((id, slotIndex) => (slotIndex === index ? next.id : id)),
                           )
                         }}
                       >
-                        <SelectTrigger className="w-[220px]" aria-label={slot.label}>
+                        <SelectTrigger className="w-full max-w-[240px]" aria-label={slot.label}>
                           <SelectValue placeholder="Escolher">{player ? `${player.name} (${player.position})` : "Escolher"}</SelectValue>
                         </SelectTrigger>
                         <SelectContent>
@@ -255,13 +299,11 @@ function LineupBoard({ clubId, squad }: { clubId: number; squad: SquadPlayer[] }
           </table>
         </div>
         {unfit.length > 0 ? (
-          <p className="flex items-start gap-2 rounded-lg border border-warning-soft-border bg-warning-soft px-4 py-3 text-body-sm text-warning-soft-foreground">
-            <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
-            <span>
-              <span className="block font-medium">{unfit.map((player) => player!.name).join(" e ")} {unfit.length === 1 ? "está" : "estão"} mal condicionados</span>
-              Podem jogar, mas cada atributo vale 15% a menos durante a partida.
-            </span>
-          </p>
+          <Alert
+            variant="warning"
+            title={`${unfit.map((player) => player!.name).join(" e ")} ${unfit.length === 1 ? "está" : "estão"} mal condicionados`}
+            description="Podem jogar, mas cada atributo vale 15% a menos durante a partida."
+          />
         ) : null}
         {error ? <p className="text-caption-xs text-destructive">{error}</p> : null}
         <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
@@ -290,30 +332,66 @@ function LineupBoard({ clubId, squad }: { clubId: number; squad: SquadPlayer[] }
         </footer>
       </section>
       <div className="flex flex-col gap-4">
-        <section className="rounded-[12px] border border-border bg-card p-4 shadow-xs">
-          <h2 className="text-body-sm-semibold">Em campo</h2>
-          <p className="text-caption-xs text-muted-foreground">Prévia da formação {formation}, do goleiro ao ataque.</p>
-          <div className="relative mt-3 h-[280px] overflow-hidden rounded-xl bg-[#157347]">
-            <span className="absolute inset-x-8 top-1/2 h-px bg-white/40" />
-            <span className="absolute top-1/2 left-1/2 size-16 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/40" />
-            {chosen.map((player, index) =>
-              player ? (
-                <span
-                  key={player.id}
-                  className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center"
-                  style={{ top: PITCH[formation][index].top, left: PITCH[formation][index].left }}
-                >
-                  <span className="inline-flex size-8 items-center justify-center rounded-full bg-primary text-caption-xs-medium text-primary-foreground">
-                    {initials(player.name)}
+        <section className="overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
+          <header className="border-b border-border px-5 py-4">
+            <h2 className="text-heading-card">Em campo</h2>
+            <p className="text-caption-xs text-muted-foreground">Prévia da formação {formation}, do goleiro ao ataque.</p>
+          </header>
+          <div className="p-4">
+            <div className="relative h-[360px] overflow-hidden rounded-[10px] bg-pitch" aria-hidden>
+              <span className="absolute inset-x-0 top-10 h-10 bg-pitch-stripe" />
+              <span className="absolute inset-x-0 top-[120px] h-10 bg-pitch-stripe" />
+              <span className="absolute inset-x-0 top-[200px] h-10 bg-pitch-stripe" />
+              <span className="absolute inset-x-0 top-[280px] h-10 bg-pitch-stripe" />
+              <svg className="absolute inset-3 h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)]" viewBox="0 0 260 336" fill="none">
+                <rect x="1" y="1" width="258" height="334" stroke="white" strokeOpacity="0.75" />
+                <line x1="1" y1="168" x2="259" y2="168" stroke="white" strokeOpacity="0.75" />
+                <circle cx="130" cy="168" r="28" stroke="white" strokeOpacity="0.75" />
+                <rect x="70" y="250" width="120" height="85" stroke="white" strokeOpacity="0.75" />
+                <rect x="100" y="308" width="60" height="27" stroke="white" strokeOpacity="0.75" />
+              </svg>
+              {SLOTS[formation].map((slot, index) => {
+                const player = chosen[index]
+                return (
+                  <span
+                    key={`${slot.kind}-${index}`}
+                    className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-1.5"
+                    style={{ top: PITCH[formation][index].top, left: PITCH[formation][index].left }}
+                  >
+                    {player ? (
+                      <span className="relative inline-flex size-8 items-center justify-center rounded-full border-2 border-background bg-primary text-caption-xs-medium text-primary-foreground shadow-md">
+                        {initials(player.name)}
+                        {player.condition === "MAL_CONDICIONADO" ? (
+                          <span className="absolute -top-1.5 -left-1.5 inline-flex size-4 items-center justify-center rounded-full border-[1.5px] border-background bg-warning text-white">
+                            <HeartPulse className="size-2.5" />
+                          </span>
+                        ) : null}
+                      </span>
+                    ) : (
+                      <span className="inline-flex size-8 items-center justify-center rounded-full border-[1.5px] border-dashed border-pitch-line text-pitch-line">
+                        <Plus className="size-3.5" />
+                      </span>
+                    )}
+                    <span
+                      className={
+                        player
+                          ? "rounded-full bg-pitch-label px-2 py-0.5 text-caption-xs-medium text-pitch-foreground"
+                          : "rounded-full bg-pitch-label px-2 py-0.5 text-caption-xs-medium text-pitch-muted-foreground"
+                      }
+                    >
+                      {player ? lastName(player.name) : slot.label}
+                    </span>
                   </span>
-                  <span className="mt-1 rounded bg-black/60 px-1 text-caption-xs text-white">{lastName(player.name)}</span>
-                </span>
-              ) : null,
-            )}
+                )
+              })}
+            </div>
           </div>
-          <p className="mt-3 text-caption-xs text-muted-foreground">
-            Na partida, atacam os 3 jogadores de linha mais avançados e defendem o goleiro e os 2 mais recuados. É gol quando o ataque é maior que a defesa.
-          </p>
+          <footer className="flex items-start gap-2 border-t border-border bg-muted-subtle px-4 py-3">
+            <Swords className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+            <p className="text-caption-xs text-muted-foreground">
+              Na partida, atacam os 3 jogadores de linha mais avançados e defendem o goleiro e os 2 mais recuados. É gol quando o ataque é maior que a defesa.
+            </p>
+          </footer>
         </section>
         <section className="rounded-[12px] border border-border bg-card p-4 shadow-xs">
           <h2 className="text-body-sm-semibold">Reservas</h2>
@@ -334,6 +412,16 @@ function LineupBoard({ clubId, squad }: { clubId: number; squad: SquadPlayer[] }
           <p className="mt-3 text-caption-xs text-muted-foreground">Doente não pode ser escalado.</p>
         </section>
       </div>
+      {savedNotice ? (
+        <ToastViewport>
+          <Toast
+            variant="success"
+            title="Escalação salva"
+            description={savedNotice}
+            onClose={() => setSavedNotice(null)}
+          />
+        </ToastViewport>
+      ) : null}
     </div>
   )
 }

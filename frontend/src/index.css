@@ -53,6 +53,12 @@
     --color-border: var(--border);
     --color-accent-foreground: var(--accent-foreground);
     --color-accent: var(--accent);
+    --color-pitch-muted-foreground: var(--pitch-muted-foreground);
+    --color-pitch-line: var(--pitch-line);
+    --color-pitch-foreground: var(--pitch-foreground);
+    --color-pitch-label: var(--pitch-label);
+    --color-pitch-stripe: var(--pitch-stripe);
+    --color-pitch: var(--pitch);
     --color-muted-subtle: var(--muted-subtle);
     --color-muted-foreground: var(--muted-foreground);
     --color-muted: var(--muted);
@@ -144,6 +150,12 @@
     --muted: #f4f4f5;
     --muted-foreground: #686872;
     --muted-subtle: #fafafa;
+    --pitch: #0d542b;
+    --pitch-stripe: rgb(255 255 255 / 0.05);
+    --pitch-label: rgb(0 0 0 / 0.3);
+    --pitch-foreground: #ffffff;
+    --pitch-muted-foreground: rgb(255 255 255 / 0.8);
+    --pitch-line: rgb(255 255 255 / 0.4);
     --accent: #f4f4f5;
     --accent-foreground: #18181b;
     --success: #00813a;
