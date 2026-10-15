@@ -40,7 +40,13 @@ function useClubTransactions(id: number) {
     enabled: Number.isInteger(id) && id > 0,
   })
 
-  return { transactions: query.data ?? [], count: query.data?.length ?? 0 }
+  return {
+    transactions: query.data?.data ?? [],
+    summary: query.data?.summary ?? null,
+    count: query.data?.data.length ?? 0,
+    isPending: query.isPending,
+    error: query.error instanceof Error ? query.error.message : query.error ? "Não foi possível carregar o histórico." : null,
+  }
 }
 
 function useRefreshClubs() {

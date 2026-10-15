@@ -12,6 +12,7 @@ import {
 import { useLocation, useNavigate, useParams } from "react-router"
 import { useAppChrome } from "@/app/app-layout"
 import { paths } from "@/app/routes"
+import { ClubHistory } from "@/features/clubs/components/club-history"
 import { EmptySquad } from "@/features/clubs/components/empty-squad"
 import { LineupBoard } from "@/features/clubs/components/lineup-board"
 import { SquadTable } from "@/features/clubs/components/squad-table"
@@ -41,7 +42,7 @@ function ClubPage() {
     () => Boolean((location.state as { created?: boolean } | null)?.created),
   )
   const { club, isPending, error } = useClub(id)
-  const { transactions, count: historyCount } = useClubTransactions(id)
+  const { count: historyCount } = useClubTransactions(id)
   useAppChrome({
     crumbs: [
       { label: "Mercado" },
@@ -169,23 +170,7 @@ function ClubPage() {
                 {section === "escalacao" && club && squadSize > 0 ? (
                   <LineupBoard clubId={club.id} clubName={club.name} squad={club.players} />
                 ) : null}
-                {section === "historico" && club ? (
-                  <ul className="overflow-hidden rounded-[12px] border border-border">
-                    {transactions.length === 0 ? (
-                      <li className="px-4 py-6 text-body-sm text-muted-foreground">Nenhuma transação ainda.</li>
-                    ) : (
-                      transactions.map((item, index) => (
-                        <li key={`${item.player_id}-${item.created_at}-${index}`} className="flex items-center justify-between border-b border-border px-4 py-3 text-body-sm last:border-b-0">
-                          <span>
-                            <span className="text-body-sm-medium">{item.type === "VENDA" ? "Venda" : "Compra"}</span>
-                            <span className="text-muted-foreground"> · {item.player_name}</span>
-                          </span>
-                          <span className="text-caption-xs text-muted-foreground">{item.created_at}</span>
-                        </li>
-                      ))
-                    )}
-                  </ul>
-                ) : null}
+                {section === "historico" && club ? <ClubHistory clubId={club.id} players={club.players} /> : null}
               </>
             ) : null}
           </main>

@@ -23,15 +23,57 @@ function getClub(id: number) {
   return api.get<ClubDetail>(`/clubs/${id}`).then((response) => response.data)
 }
 
+type TransactionType = "COMPRA" | "VENDA"
+
 type ClubTransaction = {
+  id: number
+  club_id: number
   player_id: number
   player_name: string
-  type: "COMPRA" | "VENDA"
+  type: TransactionType
+  value: number
+  fee: number
+  penalty: number
+  profit: number
+  cash_change: number
   created_at: string
 }
 
-function listClubTransactions(id: number) {
-  return api.get<{ data: ClubTransaction[] }>(`/clubs/${id}/transactions`).then((response) => response.data.data)
+type TransactionSummary = {
+  total_spent: number
+  total_received: number
+  total_fees: number
+  total_penalties: number
+  total_profit: number
+}
+
+type TransactionList = {
+  data: ClubTransaction[]
+  summary: TransactionSummary
+}
+
+type TransactionFilter = {
+  types?: TransactionType[]
+  playerId?: number
+}
+
+function transactionParams(filter?: TransactionFilter) {
+  return {
+    type: filter?.types && filter.types.length > 0 && filter.types.length < 2 ? filter.types.join(",") : undefined,
+    player_id: filter?.playerId,
+  }
+}
+
+function listClubTransactions(id: number, filter?: TransactionFilter) {
+  return api
+    .get<TransactionList>(`/clubs/${id}/transactions`, { params: transactionParams(filter) })
+    .then((response) => response.data)
+}
+
+function exportClubTransactions(id: number, filter?: TransactionFilter) {
+  return api
+    .get<Blob>(`/clubs/${id}/transactions/export`, { params: transactionParams(filter), responseType: "blob" })
+    .then((response) => response.data)
 }
 
 function getLineup(id: number) {
@@ -44,5 +86,5 @@ function saveLineup(id: number, formation: Formation, playerIds: number[]) {
     .then((response) => response.data)
 }
 
-export type { ClubTransaction, Formation, Lineup }
-export { createClub, getClub, getLineup, listClubTransactions, listClubs, saveLineup }
+export type { ClubTransaction, Formation, Lineup, TransactionFilter, TransactionList, TransactionSummary, TransactionType }
+export { createClub, exportClubTransactions, getClub, getLineup, listClubTransactions, listClubs, saveLineup }

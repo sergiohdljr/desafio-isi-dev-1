@@ -174,7 +174,7 @@ function LineupBoard({
     formation: savedFormation,
     savedCount,
     squad,
-    sales: transactions.data ?? [],
+    sales: transactions.data?.data ?? [],
   })
 
   function chooseFormation(next: Formation) {
