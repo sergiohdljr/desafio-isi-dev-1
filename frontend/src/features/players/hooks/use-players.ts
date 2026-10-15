@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query"
-import type { Lineup } from "@/features/clubs/api/clubs.api"
+import type { Lineup } from "@/features/clubs/types/lineup.types"
 import type { Club, ClubDetail } from "@/features/clubs/types/club.types"
 import {
   buyPlayer,

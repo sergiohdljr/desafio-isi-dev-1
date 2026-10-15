@@ -1,15 +1,7 @@
 import { api } from "@/lib/http"
-import type { Player } from "@/features/players/types/player.types"
 import type { Club, ClubDetail, ClubSort, CreateClubInput } from "@/features/clubs/types/club.types"
-
-type Formation = "3-1" | "2-2" | "2-1-1" | "1-2-1"
-
-type Lineup = {
-  club_id: number
-  formation: Formation | null
-  complete: boolean
-  players: Player[]
-}
+import type { Formation, Lineup } from "@/features/clubs/types/lineup.types"
+import type { TransactionFilter, TransactionList } from "@/features/clubs/types/transactions.types"
 
 function listClubs(sort?: ClubSort) {
   return api.get<Club[]>("/clubs", { params: { sort } }).then((response) => response.data)
@@ -21,40 +13,6 @@ function createClub(input: CreateClubInput) {
 
 function getClub(id: number) {
   return api.get<ClubDetail>(`/clubs/${id}`).then((response) => response.data)
-}
-
-type TransactionType = "COMPRA" | "VENDA"
-
-type ClubTransaction = {
-  id: number
-  club_id: number
-  player_id: number
-  player_name: string
-  type: TransactionType
-  value: number
-  fee: number
-  penalty: number
-  profit: number
-  cash_change: number
-  created_at: string
-}
-
-type TransactionSummary = {
-  total_spent: number
-  total_received: number
-  total_fees: number
-  total_penalties: number
-  total_profit: number
-}
-
-type TransactionList = {
-  data: ClubTransaction[]
-  summary: TransactionSummary
-}
-
-type TransactionFilter = {
-  types?: TransactionType[]
-  playerId?: number
 }
 
 function transactionParams(filter?: TransactionFilter) {
@@ -86,5 +44,4 @@ function saveLineup(id: number, formation: Formation, playerIds: number[]) {
     .then((response) => response.data)
 }
 
-export type { ClubTransaction, Formation, Lineup, TransactionFilter, TransactionList, TransactionSummary, TransactionType }
 export { createClub, exportClubTransactions, getClub, getLineup, listClubTransactions, listClubs, saveLineup }

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { ArrowLeft, ArrowRight, HeartPulse } from "lucide-react"
-import { getLineup, type Formation } from "@/features/clubs/api/clubs.api"
+import { getLineup } from "@/features/clubs/api/clubs.api"
+import type { Formation } from "@/features/clubs/types/lineup.types"
 import type { Player, Position } from "@/features/players/types/player.types"
 import { initials } from "@/features/players/utils/player-display"
 import type { Match } from "@/features/league/api/league.api"
