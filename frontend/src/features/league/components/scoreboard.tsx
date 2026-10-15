@@ -1,17 +1,8 @@
 import { Escudo } from "@/components/ui/escudo"
 import { Badge } from "@/components/ui/badge"
 import type { MatchSummary } from "@/features/league/types/match.types"
-
-function resultLabel(result: MatchSummary["result"]) {
-  if (result === "MANDANTE") return "Vitória do mandante"
-  if (result === "VISITANTE") return "Vitória do visitante"
-  return "Empate"
-}
-
-function resultVariant(result: MatchSummary["result"]) {
-  if (result === "EMPATE") return "secondary" as const
-  return "success" as const
-}
+import { resultLabel, resultVariant } from "@/features/league/utils/match-result-display"
+import { formatPlayedAt } from "@/features/league/utils/played-at"
 
 function Scoreboard({
   match,
@@ -32,7 +23,9 @@ function Scoreboard({
         <Escudo sigla={homeAcronym} size="lg" />
       </div>
       <div className="flex w-36 flex-col items-center gap-1 px-4">
-        <p className="text-heading-page tabular-nums">{match.home.goals} × {match.away.goals}</p>
+        <p className="text-heading-page tabular-nums">
+          {match.home.goals} × {match.away.goals}
+        </p>
         <p className="text-caption-xs text-muted-foreground">{formatPlayedAt(match.played_at)}</p>
         <Badge variant={resultVariant(match.result)}>{resultLabel(match.result)}</Badge>
       </div>
@@ -47,16 +40,4 @@ function Scoreboard({
   )
 }
 
-function formatPlayedAt(value: string) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(value)
-  if (!match) return value
-  return `${match[3]}/${match[2]}/${match[1]}, ${match[4]}:${match[5]}`
-}
-
-function splitPlayedAt(value: string) {
-  const formatted = formatPlayedAt(value)
-  const [date, time] = formatted.split(", ")
-  return { date: date ?? formatted, time: time ?? "" }
-}
-
-export { Scoreboard, formatPlayedAt, resultLabel, resultVariant, splitPlayedAt }
+export { Scoreboard }

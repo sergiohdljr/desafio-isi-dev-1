@@ -7,7 +7,7 @@ import { paths } from "@/app/routes"
 import { useClubs } from "@/features/clubs/hooks/use-clubs"
 import { listMatches, listStandings } from "@/features/league/api/league.api"
 import { NewMatchDialog } from "@/features/league/components/new-match-dialog"
-import { formatPlayedAt } from "@/features/league/components/scoreboard"
+import { formatPlayedAt } from "@/features/league/utils/played-at"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 
