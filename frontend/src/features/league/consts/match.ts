@@ -10,6 +10,13 @@ const RESULT_LABELS = {
   EMPATE: "Empate",
 } as const satisfies Record<(typeof MATCH_RESULTS)[number], string>
 
+const DUEL_ATTRIBUTE_LABELS = {
+  shooting: "Finalização",
+  passing: "Passe",
+  dribbling: "Drible",
+  defending: "Defesa",
+} as const satisfies Record<(typeof DUEL_ATTRIBUTES)[number], string>
+
 const PITCH_COLUMNS: Record<Formation, { position: Position | "DEF"; top: string }[][]> = {
   "3-1": [
     [{ position: "GOL", top: "46%" }],
@@ -54,4 +61,12 @@ const PITCH_COLUMNS: Record<Formation, { position: Position | "DEF"; top: string
 const HOME_LEFT = ["8%", "18%", "30%", "40%"]
 const AWAY_LEFT = ["92%", "82%", "70%", "60%"]
 
-export { AWAY_LEFT, DUEL_ATTRIBUTES, HOME_LEFT, MATCH_RESULTS, PITCH_COLUMNS, RESULT_LABELS }
+export {
+  AWAY_LEFT,
+  DUEL_ATTRIBUTE_LABELS,
+  DUEL_ATTRIBUTES,
+  HOME_LEFT,
+  MATCH_RESULTS,
+  PITCH_COLUMNS,
+  RESULT_LABELS,
+}

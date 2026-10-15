@@ -6,7 +6,9 @@ import { useAppChrome } from "@/app/app-layout"
 import { paths } from "@/app/routes"
 import { useClubs } from "@/features/clubs/hooks/use-clubs"
 import { listMatches, listStandings } from "@/features/league/api/league.api"
+import { ClubAcronym } from "@/features/league/components/club-acronym"
 import { NewMatchDialog } from "@/features/league/components/new-match-dialog"
+import { clubAcronym } from "@/features/league/utils/club-acronym"
 import { formatPlayedAt } from "@/features/league/utils/played-at"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -29,9 +31,7 @@ function StandingsPage() {
   })
   const error = table.error instanceof Error ? table.error.message : table.error ? "Não foi possível carregar a classificação." : null
 
-  function acronym(id: number, name: string) {
-    return clubs.find((club) => club.id === id)?.acronym ?? name.slice(0, 3).toUpperCase()
-  }
+  const acronym = (id: number, name: string) => clubAcronym(clubs, id, name)
 
   return (
     <main className="flex flex-1 flex-col gap-6 px-8 pt-7 pb-10">
@@ -66,7 +66,7 @@ function StandingsPage() {
                   </td>
                   <td className="px-2">
                     <button type="button" className="text-body-sm-medium hover:underline" onClick={() => navigate(paths.club(row.club_id))}>
-                      <span className="mr-2 inline-flex rounded-md border border-border px-1 text-caption-xs-medium">{acronym(row.club_id, row.club_name)}</span>
+                      <ClubAcronym className="mr-2">{acronym(row.club_id, row.club_name)}</ClubAcronym>
                       {row.club_name}
                     </button>
                   </td>
