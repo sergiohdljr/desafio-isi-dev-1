@@ -1,4 +1,6 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react"
+import { ChartBar, Info, Lock, UserRound, X } from "lucide-react"
+import { cn } from "cn"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -62,7 +64,7 @@ function Modal({
       ref={ref}
       aria-labelledby={titleId}
       onClose={onClose}
-      className="w-full max-w-lg rounded-xl border border-border bg-background p-6 text-foreground shadow-lg backdrop:bg-overlay"
+      className="m-auto w-full max-w-lg rounded-xl border border-border bg-background p-6 text-foreground shadow-lg backdrop:bg-overlay"
     >
       <h2 id={titleId} className="text-heading-dialog">
         {title}
@@ -96,6 +98,73 @@ function Field({
 function parseInteger(value: string) {
   if (!/^\d+$/.test(value)) return null
   return Number(value)
+}
+
+const SKILL_SCALE = 99
+
+function attributeFill(value: number | null) {
+  if (value === null || value < 1) return 0
+  return Math.min(100, (value / SKILL_SCALE) * 100)
+}
+
+function Hint({ children, error }: { children: string; error?: string }) {
+  return (
+    <span className={error ? "text-caption-xs text-destructive" : "text-caption-xs text-muted-foreground"}>
+      {error ?? children}
+    </span>
+  )
+}
+
+function CalculatedValue({ label, hint }: { label: string; hint: string }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-body-sm-medium text-muted-foreground">{label}</span>
+      <div className="flex h-9 items-center gap-1.5 rounded-md border border-dashed border-border bg-muted px-3 text-body-sm text-muted-foreground">
+        <Lock className="size-3.5 shrink-0" aria-hidden="true" />
+        Após salvar
+      </div>
+      <span className="text-caption-xs text-muted-foreground">{hint}</span>
+    </div>
+  )
+}
+
+function AttributePreview({
+  values,
+  potential,
+}: {
+  values: { label: string; value: number | null }[]
+  potential: number | null
+}) {
+  const potentialLabel = potential === null ? "—" : String(potential)
+  return (
+    <aside className="flex w-61 shrink-0 flex-col gap-2.5 rounded-xl border bg-muted-subtle p-3">
+      <p className="flex items-center gap-1.5 text-caption-xs-medium text-muted-foreground">
+        <ChartBar className="size-3.5" aria-hidden="true" />
+        Prévia dos atributos
+      </p>
+      {values.map((item) => (
+        <div key={item.label} className="flex items-center gap-1.5">
+          <span className="w-17.5 shrink-0 text-caption-xs text-muted-foreground">{item.label}</span>
+          <span className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+            <span
+              className="absolute inset-y-0 left-0 rounded-full bg-chart-2"
+              style={{ width: `${attributeFill(potential)}%` }}
+            />
+            <span
+              className="absolute inset-y-0 left-0 rounded-full bg-primary"
+              style={{ width: `${attributeFill(item.value)}%` }}
+            />
+          </span>
+          <span className="w-5 text-right text-caption-xs-medium tabular-nums">
+            {item.value === null ? "—" : item.value}
+          </span>
+        </div>
+      ))}
+      <p className="text-caption-xs text-muted-foreground">
+        Faixa clara: até o potencial ({potentialLabel}). A prévia só desenha os valores digitados; não calcula overall nem valor base.
+      </p>
+    </aside>
+  )
 }
 
 function validateName(name: string) {
@@ -217,73 +286,190 @@ function CreatePlayerDialog({
     }
   }
 
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const titleId = useId()
+  const potentialNumber = parseInteger(potential)
+  const previewValues = SKILLS.map((skill) => ({
+    label: skill.label,
+    value: parseInteger(skills[skill.key]),
+  }))
+  const firstSkills = SKILLS.slice(0, 4)
+  const secondSkills = SKILLS.slice(4)
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog || dialog.open) return
+    dialog.showModal()
+  }, [])
+
   return (
-    <Modal
-      title="Novo jogador"
-      description="Preencha os dados e os indicadores técnicos. O valor base, o overall e o valor de mercado são calculados ao salvar. O jogador começa livre e Apto."
+    <dialog
+      ref={dialogRef}
+      aria-labelledby={titleId}
       onClose={onClose}
+      className="relative m-auto w-full max-h-none max-w-213 overflow-hidden rounded-xl border bg-background p-6 text-foreground shadow-lg backdrop:bg-overlay open:flex open:flex-col open:gap-4"
     >
+      <header className="flex flex-col gap-1.5 pr-8">
+        <h2 id={titleId} className="text-heading-dialog">
+          Novo jogador
+        </h2>
+        <p className="text-body-sm text-muted-foreground">
+          Preencha os dados e os indicadores técnicos. O valor base, o overall e o valor de mercado são calculados ao salvar.
+        </p>
+      </header>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        className="absolute top-3 right-3"
+        aria-label="Fechar"
+        onClick={onClose}
+      >
+        <X />
+      </Button>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {formError ? <Alert variant="destructive" description={formError} /> : null}
-        <Field label="Nome" error={errors.name}>
-          <Input value={name} onChange={(event) => setName(event.target.value)} aria-invalid={Boolean(errors.name)} />
-        </Field>
-        <Field label="Posição" error={errors.position}>
-          <Select value={position || null} onValueChange={(value) => setPosition((value ?? "") as Position | "")}>
-            <SelectTrigger aria-invalid={Boolean(errors.position)}>
-              <SelectValue placeholder="GOL a ATA" />
-            </SelectTrigger>
-            <SelectContent>
-              {POSITIONS.map((item) => (
-                <SelectItem key={item.value} value={item.value}>
-                  {item.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Idade" error={errors.age}>
-            <Input value={age} inputMode="numeric" onChange={(event) => setAge(event.target.value)} aria-invalid={Boolean(errors.age)} />
-          </Field>
-          <Field label="Agilidade" error={errors.agility}>
-            <Input value={agility} inputMode="numeric" onChange={(event) => setAgility(event.target.value)} aria-invalid={Boolean(errors.agility)} />
-          </Field>
+        <label className="flex flex-col gap-2">
+          <span className="text-body-sm-medium">Nome</span>
+          <span className="relative">
+            <UserRound className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Input
+              value={name}
+              placeholder="Davi Melo"
+              className="pl-9"
+              aria-invalid={Boolean(errors.name)}
+              onChange={(event) => setName(event.target.value)}
+            />
+          </span>
+          <Hint error={errors.name}>De 3 a 100 caracteres, com pelo menos duas palavras e sem números.</Hint>
+        </label>
+        <div className="flex flex-col gap-2" role="radiogroup" aria-label="Posição" aria-invalid={Boolean(errors.position)}>
+          <span className="text-body-sm-medium">Posição</span>
+          <div className="flex gap-2">
+            {POSITIONS.map((item) => {
+              const selected = position === item.value
+              return (
+                <button
+                  key={item.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setPosition(item.value)}
+                  className={cn(
+                    "flex flex-1 flex-col items-center rounded-md border px-1 py-2 outline-none focus-visible:shadow-focus",
+                    selected
+                      ? "border-primary bg-primary-soft text-primary-soft-foreground"
+                      : "border-border bg-background hover:bg-muted",
+                  )}
+                >
+                  <span className="text-body-sm-semibold">{item.value}</span>
+                  <span className={selected ? "text-caption-xs" : "text-caption-xs text-muted-foreground"}>
+                    {item.label}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+          {errors.position ? <span className="text-caption-xs text-destructive">{errors.position}</span> : null}
         </div>
-        <fieldset className="flex flex-col gap-3">
-          <legend className="text-body-sm-medium">Indicadores técnicos</legend>
-          <p className="text-caption-xs text-muted-foreground">
+        <div className="grid grid-cols-3 gap-4">
+          <label className="flex flex-col gap-2">
+            <span className="text-body-sm-medium">Idade</span>
+            <Input
+              value={age}
+              inputMode="numeric"
+              placeholder="23"
+              aria-invalid={Boolean(errors.age)}
+              onChange={(event) => setAge(event.target.value)}
+            />
+            <Hint error={errors.age}>De 16 a 45 anos.</Hint>
+          </label>
+          <label className="flex flex-col gap-2">
+            <span className="text-body-sm-medium">Agilidade</span>
+            <Input
+              value={agility}
+              inputMode="numeric"
+              placeholder="70"
+              aria-invalid={Boolean(errors.agility)}
+              onChange={(event) => setAgility(event.target.value)}
+            />
+            <Hint error={errors.agility}>De 1 a 100 (até 85 com 35 anos ou mais).</Hint>
+          </label>
+          <CalculatedValue label="Valor base (moedas)" hint="Calculado no cadastro." />
+        </div>
+        <div className="h-px bg-border" />
+        <div className="flex flex-col gap-0.5">
+          <h3 className="text-heading-card">Indicadores técnicos</h3>
+          <p className="text-body-sm text-muted-foreground">
             Seis atributos e o potencial, de 1 a 99. Não mudam depois do cadastro; a soma dos seis atributos não pode passar de 480.
           </p>
           {errors.skills ? <p className="text-caption-xs text-destructive">{errors.skills}</p> : null}
-          <div className="grid grid-cols-2 gap-3">
-            {SKILLS.map((skill) => (
-              <Field key={skill.key} label={skill.label} error={errors[skill.key]}>
-                <Input
-                  value={skills[skill.key]}
-                  inputMode="numeric"
-                  aria-invalid={Boolean(errors[skill.key])}
-                  onChange={(event) =>
-                    setSkills((current) => ({ ...current, [skill.key]: event.target.value }))
-                  }
-                />
-              </Field>
-            ))}
-            <Field label="Potencial" error={errors.potential}>
-              <Input value={potential} inputMode="numeric" onChange={(event) => setPotential(event.target.value)} aria-invalid={Boolean(errors.potential)} />
-            </Field>
-          </div>
-        </fieldset>
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={pending}>
-            Salvar jogador
-          </Button>
         </div>
+        <div className="flex items-start gap-5">
+          <div className="flex min-w-0 flex-1 flex-col gap-3">
+            <div className="grid grid-cols-4 gap-3">
+              {firstSkills.map((skill) => (
+                <label key={skill.key} className="flex flex-col gap-2">
+                  <span className="text-body-sm-medium">{skill.label}</span>
+                  <Input
+                    value={skills[skill.key]}
+                    inputMode="numeric"
+                    aria-invalid={Boolean(errors[skill.key])}
+                    onChange={(event) =>
+                      setSkills((current) => ({ ...current, [skill.key]: event.target.value }))
+                    }
+                  />
+                  {errors[skill.key] ? <span className="text-caption-xs text-destructive">{errors[skill.key]}</span> : null}
+                </label>
+              ))}
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {secondSkills.map((skill) => (
+                <label key={skill.key} className="flex flex-col gap-2">
+                  <span className="text-body-sm-medium">{skill.label}</span>
+                  <Input
+                    value={skills[skill.key]}
+                    inputMode="numeric"
+                    aria-invalid={Boolean(errors[skill.key])}
+                    onChange={(event) =>
+                      setSkills((current) => ({ ...current, [skill.key]: event.target.value }))
+                    }
+                  />
+                  {errors[skill.key] ? <span className="text-caption-xs text-destructive">{errors[skill.key]}</span> : null}
+                </label>
+              ))}
+              <label className="flex flex-col gap-2">
+                <span className="text-body-sm-medium">Potencial</span>
+                <Input
+                  value={potential}
+                  inputMode="numeric"
+                  placeholder="82"
+                  aria-invalid={Boolean(errors.potential)}
+                  onChange={(event) => setPotential(event.target.value)}
+                />
+                <Hint error={errors.potential}>≥ maior atributo; igual a ele com 33+ anos</Hint>
+              </label>
+              <CalculatedValue label="Overall" hint="Calculado automaticamente" />
+            </div>
+          </div>
+          <AttributePreview values={previewValues} potential={potentialNumber} />
+        </div>
+        <footer className="flex items-center justify-between border-t border-border pt-4">
+          <p className="flex items-center gap-2 text-caption-xs text-muted-foreground">
+            <Info className="size-3.5" aria-hidden="true" />
+            O jogador começa livre e Apto.
+          </p>
+          <div className="flex gap-2">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={pending}>
+              Salvar jogador
+            </Button>
+          </div>
+        </footer>
       </form>
-    </Modal>
+    </dialog>
   )
 }
 
