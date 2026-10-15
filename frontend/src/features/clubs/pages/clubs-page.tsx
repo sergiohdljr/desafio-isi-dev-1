@@ -63,7 +63,11 @@ function ClubsPage() {
         }}
         onCreateClub={() => setCreating(true)}
         counts={{ players: counts.all, clubs: clubs.length }}
-        clubs={clubs.map((club) => ({ initial: club.name.charAt(0), name: club.name }))}
+        clubs={clubs.map((club) => ({
+          initial: club.name.charAt(0),
+          name: club.name,
+          href: paths.club(club.id),
+        }))}
       />
       <div className="flex min-h-svh min-w-0 flex-1 flex-col py-2 pr-2">
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-background shadow-sm">
@@ -171,7 +175,13 @@ function ClubsPage() {
                       <td className="px-[8px] text-right text-body-sm tabular-nums">{money.format(club.squad_value)}</td>
                       <td className="px-[8px] text-right text-body-sm-semibold tabular-nums">{money.format(club.net_worth)}</td>
                       <td className="pr-[16px] pl-[8px] text-right">
-                        <Button type="button" variant="ghost" size="sm" className="h-[32px] gap-[6px] px-[12px]!">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-[32px] gap-[6px] px-[12px]!"
+                          onClick={() => navigate(paths.club(club.id))}
+                        >
                           Ver clube
                           <ChevronRight className="size-4" />
                         </Button>
@@ -194,7 +204,10 @@ function ClubsPage() {
       {creating ? (
         <CreateClubDialog
           onClose={() => setCreating(false)}
-          onSubmit={createClub}
+          onSubmit={async (input) => {
+            const created = await createClub(input)
+            navigate(paths.club(created.id), { state: { created: true } })
+          }}
         />
       ) : null}
     </div>

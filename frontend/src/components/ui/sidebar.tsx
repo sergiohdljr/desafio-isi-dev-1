@@ -52,18 +52,20 @@ function SidebarClub({
   className,
   initial,
   name,
+  href = `#${name}`,
   active = false,
   collapsed = false,
 }: {
   className?: string
   initial: string
   name: string
+  href?: string
   active?: boolean
   collapsed?: boolean
 }) {
   return (
     <a
-      href={`#${name}`}
+      href={href}
       data-slot="sidebar-club"
       aria-current={active ? "page" : undefined}
       aria-label={collapsed ? name : undefined}
@@ -136,6 +138,7 @@ function Sidebar({
   onCreateClub,
   counts,
   clubs: clubItems = [...clubs],
+  activeClub,
 }: {
   className?: string
   active?: string
@@ -144,7 +147,8 @@ function Sidebar({
   onHome?: () => void
   onCreateClub?: () => void
   counts?: { players?: number; clubs?: number; matches?: number }
-  clubs?: { initial: string; name: string }[]
+  clubs?: { initial: string; name: string; href?: string }[]
+  activeClub?: string
 }) {
   return (
     <aside
@@ -227,7 +231,8 @@ function Sidebar({
             key={club.name}
             initial={club.initial}
             name={club.name}
-            active={active === club.name}
+            href={"href" in club ? club.href : undefined}
+            active={activeClub === club.name}
             collapsed={collapsed}
           />
         ))}

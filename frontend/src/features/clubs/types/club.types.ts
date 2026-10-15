@@ -16,5 +16,9 @@ type CreateClubInput = {
   acronym: string
 }
 
-export type { Club, ClubSort, CreateClubInput }
+type ClubDetail = Club & {
+  players: { id: number; name: string }[]
+}
+
+export type { Club, ClubDetail, ClubSort, CreateClubInput }
 export { CLUB_SORTS }

@@ -56,7 +56,7 @@ function Toast({
           <p className="text-body-sm text-muted-foreground">{description}</p>
         ) : null}
       </div>
-      {staysOpen && onClose ? (
+      {onClose ? (
         <button
           type="button"
           aria-label="Fechar"
