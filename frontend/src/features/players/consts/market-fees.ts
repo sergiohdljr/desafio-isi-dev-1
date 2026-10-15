@@ -1,0 +1,4 @@
+const FEE_RATE = 0.05
+const FEE_THRESHOLD = 30
+
+export { FEE_RATE, FEE_THRESHOLD }
