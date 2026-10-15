@@ -42,7 +42,7 @@ import {
   coins,
   formatLoyalty,
 } from "@/features/players/components/market-dialog"
-import type { Purchase } from "@/features/players/api/players.api"
+import type { Purchase } from "@/features/players/types/player.types"
 import type { Club } from "@/features/clubs/types/club.types"
 import { AVATAR_TONES } from "@/features/players/consts/directory"
 import { CONDITIONS, POSITIONS } from "@/features/players/consts/player-options"
