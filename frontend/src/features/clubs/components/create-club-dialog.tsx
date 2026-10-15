@@ -1,19 +1,23 @@
-import { useEffect, useId, useRef, useState, type FormEvent } from "react"
-import { Circle, Wallet, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState, type FormEvent } from "react"
+import { Circle, Wallet } from "lucide-react"
 import { Alert } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import {
+  ACRONYM_HINT,
+  ACRONYM_INPUT_PATTERN,
+  ACRONYM_LENGTH,
+  CREATE_CLUB_ERROR_TITLE,
+  NAME_HINT,
+  STARTING_CASH,
+} from "@/features/clubs/consts/club-draft"
 import type { ClubField, CreateClubInput } from "@/features/clubs/types/club.types"
 import { clubErrorDescription, fieldForClubError } from "@/features/clubs/utils/club-error"
 import { normalizeAcronym, normalizeClubName } from "@/features/clubs/utils/normalize-club"
 import { validateClubDraft } from "@/features/clubs/utils/validate-club-draft"
-
-const NAME_HINT =
-  "De 3 a 60 caracteres e de 2 a 5 palavras; só letras, espaços, hífen e ponto. Não pode repetir outro clube."
-const ACRONYM_HINT =
-  "3 letras de A a Z, maiúsculas, que aparecem no nome nessa ordem; a primeira é a primeira letra do nome."
-const CREATE_ERROR_TITLE = "Não foi possível criar o clube"
-const ACRONYM_PATTERN = /[^A-Za-z]/g
+import { DialogClose } from "@/features/players/components/market-dialog/index"
+import { money } from "@/features/players/consts/directory"
+import { useModalDialog } from "@/features/players/hooks/use-modal-dialog"
 
 function CreateClubDialog({
   onClose,
@@ -22,19 +26,12 @@ function CreateClubDialog({
   onClose: () => void
   onSubmit: (input: CreateClubInput) => Promise<unknown>
 }) {
-  const ref = useRef<HTMLDialogElement>(null)
-  const titleId = useId()
+  const { ref, titleId } = useModalDialog()
   const [name, setName] = useState("")
   const [acronym, setAcronym] = useState("")
   const [invalidField, setInvalidField] = useState<ClubField | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
-
-  useEffect(() => {
-    const dialog = ref.current
-    if (!dialog || dialog.open) return
-    dialog.showModal()
-  }, [])
 
   function close() {
     ref.current?.close()
@@ -80,19 +77,10 @@ function CreateClubDialog({
         </h2>
         <p className="text-body-sm text-muted-foreground">Informe o nome e a sigla do clube.</p>
       </header>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        className="absolute top-[11px] right-[13px]"
-        aria-label="Fechar"
-        onClick={close}
-      >
-        <X />
-      </Button>
+      <DialogClose onClose={close} />
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {formError ? (
-          <Alert variant="destructive" title={CREATE_ERROR_TITLE} description={formError} />
+          <Alert variant="destructive" title={CREATE_CLUB_ERROR_TITLE} description={formError} />
         ) : null}
         <label className="flex flex-col gap-2">
           <span className="text-body-sm-medium">Nome</span>
@@ -120,11 +108,13 @@ function CreateClubDialog({
             value={acronym}
             autoComplete="off"
             spellCheck={false}
-            maxLength={3}
+            maxLength={ACRONYM_LENGTH}
             aria-invalid={invalidField === "acronym"}
             className="aria-invalid:shadow-[0_0_0_3px_rgba(228,0,22,0.2)]!"
             onChange={(event) => {
-              setAcronym(event.target.value.toUpperCase().replace(ACRONYM_PATTERN, "").slice(0, 3))
+              setAcronym(
+                event.target.value.toUpperCase().replace(ACRONYM_INPUT_PATTERN, "").slice(0, ACRONYM_LENGTH),
+              )
               setInvalidField((current) => (current === "acronym" ? null : current))
             }}
           />
@@ -132,7 +122,7 @@ function CreateClubDialog({
         </label>
         <p className="flex items-center gap-2.5 rounded-lg border border-border bg-muted-subtle px-3 py-2.5 text-body-sm text-muted-foreground">
           <Wallet className="size-4 shrink-0" aria-hidden />
-          O clube começa com 300,00 em caixa e sem jogadores.
+          O clube começa com {money.format(STARTING_CASH)} em caixa e sem jogadores.
         </p>
         <footer className="flex items-center justify-end gap-2 border-t border-border pt-4">
           <Button type="button" variant="outline" disabled={pending} onClick={close}>

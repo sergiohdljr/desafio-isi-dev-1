@@ -17,7 +17,7 @@ import {
   SummaryRow,
   coins,
   formatLoyalty,
-} from "@/features/players/components/market-dialog"
+} from "@/features/players/components/market-dialog/index"
 import { FEE_RATE, FEE_THRESHOLD } from "@/features/players/consts/market-fees"
 import type { Purchase } from "@/features/players/types/market.types"
 import type { Player } from "@/features/players/types/player.types"

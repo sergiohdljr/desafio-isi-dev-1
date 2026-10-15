@@ -4,4 +4,10 @@ function formatLoyalty(value: string) {
   return `${match[3]}/${match[2]}/${match[1]}, ${match[4]}:${match[5]}`
 }
 
-export { formatLoyalty }
+function splitLoyalty(value: string) {
+  const formatted = formatLoyalty(value)
+  const [date, time] = formatted.split(", ")
+  return { date: date ?? formatted, time: time ?? "" }
+}
+
+export { formatLoyalty, splitLoyalty }

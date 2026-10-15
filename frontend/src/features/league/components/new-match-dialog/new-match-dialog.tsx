@@ -8,7 +8,7 @@ import { DIFFERENT_CLUBS_MESSAGE } from "@/features/league/consts/new-match"
 import type { Match } from "@/features/league/types/match.types"
 import { hasDifferentClubs, matchFailureKind } from "@/features/league/utils/match-failure"
 import type { Club } from "@/features/clubs/types/club.types"
-import { MarketDialog, PendingNote } from "@/features/players/components/market-dialog"
+import { MarketDialog, PendingNote } from "@/features/players/components/market-dialog/index"
 
 function NewMatchDialog({
   clubs,

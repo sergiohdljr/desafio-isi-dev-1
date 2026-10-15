@@ -2,7 +2,7 @@ import { ChartColumn, Coins, HeartPulse, Pencil, ShoppingCart, TrendingUp, Walle
 import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { DialogClose, coins } from "@/features/players/components/market-dialog"
+import { DialogClose, coins } from "@/features/players/components/market-dialog/index"
 import { DetailStat } from "@/features/players/components/player-dialogs/detail-stat"
 import { AVATAR_TONES } from "@/features/players/consts/directory"
 import { SKILLS } from "@/features/players/consts/skills"
