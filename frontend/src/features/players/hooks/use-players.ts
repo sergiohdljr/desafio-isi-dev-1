@@ -114,8 +114,9 @@ function usePlayerMutations() {
       await refresh()
     },
     buyPlayer: async (id: number, clubId: number, loyaltyUntil: string) => {
-      await buyPlayer(id, clubId, loyaltyUntil)
+      const purchase = await buyPlayer(id, clubId, loyaltyUntil)
       await refresh()
+      return purchase
     },
   }
 }

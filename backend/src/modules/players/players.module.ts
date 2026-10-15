@@ -40,5 +40,6 @@ import {
     { provide: DELETE_PLAYER, useClass: DeletePlayer },
     { provide: PLAYERS_REPOSITORY, useClass: PrismaPlayersRepository },
   ],
+  exports: [CREATE_PLAYER],
 })
 export class PlayersModule {}

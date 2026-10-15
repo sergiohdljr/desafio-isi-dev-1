@@ -36,12 +36,12 @@ function ClubPage() {
   const params = useParams()
   const id = Number(params.id)
   const refreshClubs = useRefreshClubs()
-  const [section, setSection] = useState<"elenco" | "escalacao">("elenco")
+  const [section, setSection] = useState<"elenco" | "escalacao" | "historico">("elenco")
   const [created, setCreated] = useState(
     () => Boolean((location.state as { created?: boolean } | null)?.created),
   )
   const { club, isPending, error } = useClub(id)
-  const { count: historyCount } = useClubTransactions(id)
+  const { transactions, count: historyCount } = useClubTransactions(id)
   useAppChrome({
     crumbs: [
       { label: "Mercado" },
@@ -136,8 +136,13 @@ function ClubPage() {
                   <button
                     type="button"
                     role="tab"
-                    aria-selected="false"
-                    className="flex h-[44px] items-center gap-[8px] px-[2px] text-body-sm-medium text-muted-foreground"
+                    aria-selected={section === "historico"}
+                    className={
+                      section === "historico"
+                        ? "-mb-px flex h-[44px] items-center gap-[8px] border-b-2 border-primary px-[2px] text-body-sm-medium text-foreground"
+                        : "flex h-[44px] items-center gap-[8px] px-[2px] text-body-sm-medium text-muted-foreground"
+                    }
+                    onClick={() => setSection("historico")}
                   >
                     <History className="size-4" aria-hidden />
                     Histórico
@@ -150,13 +155,36 @@ function ClubPage() {
                   <EmptySquad onBrowse={() => navigate(paths.players)} />
                 ) : null}
                 {section === "elenco" && club && squadSize > 0 ? (
-                  <SquadTable players={club.players} onSold={refreshClubs} />
+                  <SquadTable
+                    players={club.players}
+                    clubId={club.id}
+                    clubName={club.name}
+                    onSold={refreshClubs}
+                    onViewHistory={() => setSection("historico")}
+                  />
                 ) : null}
                 {section === "escalacao" && club && squadSize === 0 ? (
                   <EmptySquad onBrowse={() => navigate(paths.players)} />
                 ) : null}
                 {section === "escalacao" && club && squadSize > 0 ? (
                   <LineupBoard clubId={club.id} clubName={club.name} squad={club.players} />
+                ) : null}
+                {section === "historico" && club ? (
+                  <ul className="overflow-hidden rounded-[12px] border border-border">
+                    {transactions.length === 0 ? (
+                      <li className="px-4 py-6 text-body-sm text-muted-foreground">Nenhuma transação ainda.</li>
+                    ) : (
+                      transactions.map((item, index) => (
+                        <li key={`${item.player_id}-${item.created_at}-${index}`} className="flex items-center justify-between border-b border-border px-4 py-3 text-body-sm last:border-b-0">
+                          <span>
+                            <span className="text-body-sm-medium">{item.type === "VENDA" ? "Venda" : "Compra"}</span>
+                            <span className="text-muted-foreground"> · {item.player_name}</span>
+                          </span>
+                          <span className="text-caption-xs text-muted-foreground">{item.created_at}</span>
+                        </li>
+                      ))
+                    )}
+                  </ul>
                 ) : null}
               </>
             ) : null}

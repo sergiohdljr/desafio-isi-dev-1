@@ -27,5 +27,6 @@ import { PrismaMarketRepository } from './infra/repositories/prisma-market-repos
     { provide: LIST_TRANSACTIONS, useClass: ListTransactions },
     { provide: MARKET_REPOSITORY, useClass: PrismaMarketRepository },
   ],
+  exports: [BUY_PLAYER],
 })
 export class MarketModule {}

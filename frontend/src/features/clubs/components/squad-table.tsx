@@ -1,6 +1,8 @@
 import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { Check, Tag } from "lucide-react"
-import { sellPlayer } from "@/features/players/api/players.api"
+import { getLineup } from "@/features/clubs/api/clubs.api"
+import { SellPlayerDialog } from "@/features/players/components/sell-player-dialog"
 import type { Condition } from "@/features/players/types/player.types"
 import { penaltyRateFor } from "@/features/clubs/lib/penalty-rate"
 import type { SquadPlayer } from "@/features/clubs/types/club.types"
@@ -23,26 +25,23 @@ const money = new Intl.NumberFormat("pt-BR", {
 
 function SquadTable({
   players,
+  clubId,
+  clubName,
   onSold,
+  onViewHistory,
 }: {
   players: SquadPlayer[]
+  clubId: number
+  clubName: string
   onSold: () => Promise<unknown>
+  onViewHistory: () => void
 }) {
-  const [sellingId, setSellingId] = useState<number | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  async function sell(player: SquadPlayer) {
-    setError(null)
-    setSellingId(player.id)
-    try {
-      await sellPlayer(player.id)
-      await onSold()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Não foi possível vender o jogador.")
-    } finally {
-      setSellingId(null)
-    }
-  }
+  const [target, setTarget] = useState<SquadPlayer | null>(null)
+  const lineup = useQuery({
+    queryKey: ["clubs", "lineup", clubId],
+    queryFn: () => getLineup(clubId),
+  })
+  const starter = target ? (lineup.data?.players.some((item) => item.id === target.id) ?? false) : false
 
   return (
     <section className="w-full overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
@@ -105,8 +104,7 @@ function SquadTable({
                       variant="outline"
                       size="sm"
                       className="h-8 gap-1.5 px-3!"
-                      disabled={sellingId === player.id}
-                      onClick={() => void sell(player)}
+                      onClick={() => setTarget(player)}
                     >
                       <Tag className="size-3.5" />
                       Vender
@@ -118,10 +116,22 @@ function SquadTable({
           </tbody>
         </table>
       </div>
-      {error ? <p className="px-4 py-3 text-caption-xs text-destructive">{error}</p> : null}
       <p className="px-4 py-3 text-caption-xs text-muted-foreground">
         Valor de mercado, dias restantes e % de multa calculados para uma venda agora. A multa tem teto de 10,00.
       </p>
+      {target ? (
+        <SellPlayerDialog
+          player={target}
+          clubName={clubName}
+          starter={starter}
+          onClose={() => setTarget(null)}
+          onSold={onSold}
+          onViewHistory={() => {
+            setTarget(null)
+            onViewHistory()
+          }}
+        />
+      ) : null}
     </section>
   )
 }

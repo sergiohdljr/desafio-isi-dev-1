@@ -40,7 +40,7 @@ function useClubTransactions(id: number) {
     enabled: Number.isInteger(id) && id > 0,
   })
 
-  return { count: query.data?.length ?? 0 }
+  return { transactions: query.data ?? [], count: query.data?.length ?? 0 }
 }
 
 function useRefreshClubs() {

@@ -1,12 +1,17 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react"
+import { useNavigate } from "react-router"
 import {
+  ArrowRight,
+  Calendar,
   ChartBar,
   ChartColumn,
+  Clock,
   Coins,
   HeartPulse,
   Info,
   Lock,
   Pencil,
+  Shield,
   ShoppingCart,
   Trash2,
   TrendingUp,
@@ -25,6 +30,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { paths } from "@/app/routes"
+import { ApiError } from "@/lib/http"
+import {
+  MarketDialog,
+  PendingNote,
+  PlayerMarketCard,
+  RulesNote,
+  SuccessMark,
+  SummaryRow,
+  coins,
+  formatLoyalty,
+} from "@/features/players/components/market-dialog"
+import type { Purchase } from "@/features/players/api/players.api"
 import type { Club } from "@/features/clubs/types/club.types"
 import { AVATAR_TONES } from "@/features/players/consts/directory"
 import { CONDITIONS, POSITIONS } from "@/features/players/consts/player-options"
@@ -129,11 +147,6 @@ const CONDITION_NOTES: Record<Condition, string> = {
   MAL_CONDICIONADO: "Desconto de 15%. Agilidade de 80 a 100 corta pela metade; de 1 a 30 soma 10 pontos.",
   DOENTE: "Desconto de 30%, com o mesmo ajuste de agilidade.",
 }
-
-const coins = new Intl.NumberFormat("pt-BR", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
 
 function useModalDialog() {
   const ref = useRef<HTMLDialogElement>(null)
@@ -940,6 +953,9 @@ function DetailStat({
   )
 }
 
+const FEE_RATE = 0.05
+const FEE_THRESHOLD = 30
+
 function BuyPlayerDialog({
   player,
   clubs,
@@ -949,69 +965,149 @@ function BuyPlayerDialog({
   player: Player
   clubs: Club[]
   onClose: () => void
-  onSubmit: (clubId: number, loyaltyUntil: string) => Promise<void>
+  onSubmit: (clubId: number, loyaltyUntil: string) => Promise<Purchase>
 }) {
+  const navigate = useNavigate()
   const [clubId, setClubId] = useState<string>("")
-  const [loyalty, setLoyalty] = useState("")
-  const [formError, setFormError] = useState<string | null>(null)
+  const [date, setDate] = useState("")
+  const [time, setTime] = useState("")
+  const [fieldError, setFieldError] = useState<string | null>(null)
+  const [failure, setFailure] = useState<"network" | "refused" | null>(null)
+  const [failureMessage, setFailureMessage] = useState("")
   const [pending, setPending] = useState(false)
+  const [purchase, setPurchase] = useState<Purchase | null>(null)
+
+  const club = clubs.find((item) => String(item.id) === clubId)
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    if (!clubId || !loyalty) {
-      setFormError("Escolha o clube e a data de fidelidade.")
+    if (!clubId || !date || !time) {
+      setFieldError("Escolha o clube, a data e a hora da fidelidade.")
       return
     }
+    setFieldError(null)
+    setFailure(null)
     setPending(true)
     try {
-      await onSubmit(Number(clubId), `${loyalty}-03:00`)
+      const result = await onSubmit(Number(clubId), `${date}T${time}-03:00`)
+      setPurchase(result)
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Não foi possível comprar o jogador.")
+      const offline = error instanceof ApiError && error.status === 0
+      setFailure(offline ? "network" : "refused")
+      setFailureMessage(error instanceof Error ? error.message : "Não foi possível comprar o jogador.")
       setPending(false)
     }
   }
 
+  if (purchase && club) {
+    return (
+      <MarketDialog
+        title="Compra concluída"
+        description={`${player.name} agora é do ${club.name}.`}
+        onClose={onClose}
+        leading={<SuccessMark />}
+      >
+        <dl className="overflow-hidden rounded-[10px] border border-border text-body-sm">
+          <SummaryRow label="Valor" hint="Valor de mercado no momento da compra" value={coins.format(purchase.value)} />
+          <SummaryRow
+            label="Taxa"
+            hint={purchase.fee > 0 ? "5% do valor, porque passa de 30,00" : "Sem taxa, porque o valor não passa de 30,00"}
+            value={coins.format(purchase.fee)}
+          />
+          <SummaryRow label="Custo total" hint="Valor + taxa" value={coins.format(purchase.value + purchase.fee)} emphasis />
+          <SummaryRow label="Fim da fidelidade" value={formatLoyalty(purchase.contract.loyalty_until)} />
+          <div className="flex items-center justify-between border-b border-border px-3.5 py-2.5">
+            <dt className="text-muted-foreground">Contrato</dt>
+            <dd><Badge variant="success" dot>ATIVO</Badge></dd>
+          </div>
+          <SummaryRow label={`Novo caixa do ${club.name}`} value={coins.format(purchase.club_cash)} emphasis last />
+        </dl>
+        <div className="flex justify-end gap-2 border-t border-border pt-4">
+          <Button type="button" variant="outline" onClick={() => navigate(paths.club(club.id))}>
+            Ver clube <ArrowRight />
+          </Button>
+          <Button type="button" onClick={onClose}>Fechar</Button>
+        </div>
+      </MarketDialog>
+    )
+  }
+
   return (
-    <Modal
-      title={`Comprar ${player.name}`}
-      description="Valor + taxa, até 50% do caixa, com contrato de fidelidade."
+    <MarketDialog
+      wide
+      title="Comprar jogador"
+      description="Escolha o clube comprador e até quando vai a fidelidade do contrato."
       onClose={onClose}
     >
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        {formError ? <Alert variant="destructive" description={formError} /> : null}
-        <div className="flex flex-col gap-1.5 text-body-sm-medium">
-          <span>Clube</span>
-          <Select
-            value={clubId || null}
-            onValueChange={(value) => setClubId(value ?? "")}
-            items={clubs.map((club) => ({ value: String(club.id), label: club.name }))}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={clubs.length === 0 ? "Nenhum clube disponível" : "Selecione"} />
-            </SelectTrigger>
-            <SelectContent>
-              {clubs.map((club) => (
-                <SelectItem key={club.id} value={String(club.id)}>
-                  {club.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Field label="Fidelidade até">
-          <Input type="datetime-local" value={loyalty} onChange={(event) => setLoyalty(event.target.value)} />
-        </Field>
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button type="submit" disabled={pending}>
-            Comprar
-          </Button>
-        </div>
-      </form>
-    </Modal>
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          {failure === "network" ? (
+            <Alert variant="destructive" title="Sem conexão" description={failureMessage} />
+          ) : null}
+          {failure === "refused" ? (
+            <Alert variant="destructive" title="Compra recusada" description={failureMessage} />
+          ) : null}
+          <PlayerMarketCard player={player} />
+          <div className="flex flex-col gap-2">
+            <span className="text-body-sm-medium">Clube comprador</span>
+            <Select
+              value={clubId || null}
+              onValueChange={(value) => setClubId(value ?? "")}
+              items={clubs.map((item) => ({ value: String(item.id), label: clubOption(item) }))}
+              disabled={pending}
+            >
+              <SelectTrigger>
+                <Shield className="size-4 text-muted-foreground" aria-hidden />
+                <SelectValue placeholder={clubs.length === 0 ? "Nenhum clube disponível" : "Selecione o clube"} />
+              </SelectTrigger>
+              <SelectContent>
+                {clubs.map((item) => (
+                  <SelectItem key={item.id} value={String(item.id)}>
+                    {clubOption(item)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-caption-xs text-muted-foreground">
+              {club
+                ? `Caixa atual: ${coins.format(club.cash)}. O custo total (valor + taxa) pode ir até 50% do caixa.`
+                : "O custo total (valor + taxa) pode ir até 50% do caixa."}
+            </p>
+            {fieldError ? <p className="text-caption-xs text-destructive">{fieldError}</p> : null}
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-body-sm-medium">Fim da fidelidade</span>
+            <div className="flex gap-2">
+              <label className="relative min-w-0 flex-1">
+                <Calendar className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                <Input type="date" className="pl-9" value={date} disabled={pending} aria-label="Data da fidelidade" onChange={(event) => setDate(event.target.value)} />
+              </label>
+              <label className="relative w-32 shrink-0">
+                <Clock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+                <Input type="time" className="pl-9" value={time} disabled={pending} aria-label="Hora da fidelidade" onChange={(event) => setTime(event.target.value)} />
+              </label>
+            </div>
+            <p className="text-caption-xs text-muted-foreground">
+              Depois do momento da compra e até 1.095 dias. Horário de Brasília; enviado com o fuso (-03:00).
+            </p>
+          </div>
+          <RulesNote>
+            {`A taxa é de ${FEE_RATE * 100}% do valor de mercado, só quando ele passa de ${coins.format(FEE_THRESHOLD)}. Taxa, custo e novo caixa são calculados ao confirmar.`}
+          </RulesNote>
+          {pending ? <PendingNote>Enviando a compra. Os botões ficam desabilitados.</PendingNote> : null}
+          <div className="flex justify-end gap-2 border-t border-border pt-4">
+            <Button type="button" variant="outline" disabled={pending} onClick={onClose}>Cancelar</Button>
+            <Button type="submit" disabled={pending}>
+              <ShoppingCart />
+              {pending ? "Comprando…" : failure === "network" ? "Tentar de novo" : "Confirmar compra"}
+            </Button>
+          </div>
+        </form>
+    </MarketDialog>
   )
+}
+
+function clubOption(club: Club) {
+  return `${club.name} (${club.acronym}) · caixa ${coins.format(club.cash)}`
 }
 
 export {

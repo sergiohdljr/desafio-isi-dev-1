@@ -558,10 +558,7 @@ function PlayersPage() {
           player={dialog.player}
           clubs={clubs}
           onClose={() => setDialog(null)}
-          onSubmit={async (nextClubId, loyaltyUntil) => {
-            await mutations.buyPlayer(dialog.player.id, nextClubId, loyaltyUntil)
-            finish({ variant: "success", title: "Jogador comprado", description: `${dialog.player.name} entrou no clube.` })
-          }}
+          onSubmit={(nextClubId, loyaltyUntil) => mutations.buyPlayer(dialog.player.id, nextClubId, loyaltyUntil)}
         />
       ) : null}
       {notice ? (
