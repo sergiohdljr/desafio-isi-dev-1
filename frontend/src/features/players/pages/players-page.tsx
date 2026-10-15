@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { useAppChrome } from "@/app/app-layout"
 import {
   ArrowUpDown,
@@ -16,6 +17,7 @@ import {
   Users,
   X,
 } from "lucide-react"
+import { getLineup } from "@/features/clubs/api/clubs.api"
 import { useClubs } from "@/features/clubs/hooks/use-clubs"
 import { AVATAR_TONES, PAGE_SIZE, SORTS, money } from "@/features/players/consts/directory"
 import { usePlayerMutations, usePlayersDirectory, useRefreshPlayers } from "@/features/players/hooks/use-players"
@@ -80,6 +82,19 @@ function PlayersPage() {
   const [page, setPage] = useState(1)
   const [dialog, setDialog] = useState<Dialog | null>(null)
   const [notice, setNotice] = useState<Notice | null>(null)
+  const conditionPlayer = dialog?.type === "condition" ? dialog.player : null
+  const lineup = useQuery({
+    queryKey: ["clubs", "lineup", conditionPlayer?.club_id ?? 0],
+    queryFn: () => getLineup(conditionPlayer!.club_id!),
+    enabled: conditionPlayer?.club_id != null,
+    refetchOnMount: "always",
+  })
+  const isStarter =
+    conditionPlayer != null &&
+    (lineup.data?.players.some((item) => item.id === conditionPlayer.id) ?? false)
+  const starterClub = isStarter
+    ? (clubs.find((club) => club.id === conditionPlayer.club_id)?.name ?? "clube")
+    : null
 
   useEffect(() => {
     const value = searchInput.trim()
@@ -501,6 +516,7 @@ function PlayersPage() {
       {dialog?.type === "condition" ? (
         <ConditionDialog
           player={dialog.player}
+          starterClub={starterClub}
           onClose={() => setDialog(null)}
           onSubmit={async (next) => {
             const updated = await mutations.changeCondition(dialog.player.id, next)

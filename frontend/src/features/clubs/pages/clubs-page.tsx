@@ -65,6 +65,23 @@ function ClubsPage() {
 
           {error ? <Alert variant="destructive" description={error} /> : null}
 
+          {!isPending && clubs.length === 0 ? (
+            <section className="w-full rounded-[12px] border border-border bg-card shadow-xs">
+              <div className="flex flex-col items-center gap-[12px] px-[24px] py-[48px] text-center">
+                <span className="inline-flex rounded-[12px] bg-muted p-[12px] text-muted-foreground">
+                  <Shield className="size-6" aria-hidden />
+                </span>
+                <h2 className="text-heading-card">Nenhum clube cadastrado</h2>
+                <p className="w-[420px] max-w-full text-body-sm text-muted-foreground">
+                  Crie o primeiro clube com nome e sigla. Ele começa com 300,00 em caixa e sem jogadores.
+                </p>
+                <Button type="button" variant="outline" className="h-[36px] gap-[8px] px-[16px]!" onClick={openCreateClub}>
+                  <Plus />
+                  Novo clube
+                </Button>
+              </div>
+            </section>
+          ) : (
           <section className="w-full overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
             <div className="flex items-center justify-between border-b border-border px-[16px] py-[12px]">
               <div className="flex items-center gap-[8px]">
@@ -137,14 +154,14 @@ function ClubsPage() {
                   ))}
                 </tbody>
               </table>
-              {!isPending && clubs.length === 0 ? (
-                <p className="px-4 py-6 text-body-sm text-muted-foreground">Nenhum clube cadastrado.</p>
-              ) : null}
             </div>
           </section>
-          <p className="text-caption-xs text-muted-foreground">
-            Clubes pelo nome por padrão ou pelo patrimônio, do maior para o menor, com empate desfeito pelo nome.
-          </p>
+          )}
+          {clubs.length > 0 ? (
+            <p className="text-caption-xs text-muted-foreground">
+              Clubes pelo nome por padrão ou pelo patrimônio, do maior para o menor, com empate desfeito pelo nome.
+            </p>
+          ) : null}
         </main>
   )
 }

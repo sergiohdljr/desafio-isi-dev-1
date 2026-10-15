@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { useQuery } from "@tanstack/react-query"
-import { Check, CircleCheck, HeartPulse, Plus, Swords } from "lucide-react"
-import { getLineup, saveLineup, type Formation } from "@/features/clubs/api/clubs.api"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { Check, CircleCheck, HeartPulse, Plus, Swords, TriangleAlert } from "lucide-react"
+import { getLineup, listClubTransactions, saveLineup, type Formation } from "@/features/clubs/api/clubs.api"
 import type { SquadPlayer } from "@/features/clubs/types/club.types"
 import type { Condition, Player, Position } from "@/features/players/types/player.types"
 import formation31 from "@/assets/formations/3-1.svg"
@@ -94,6 +94,39 @@ const PITCH: Record<Formation, { top: string; left: string }[]> = {
 
 const STARTER_COUNT = 5
 const DEFAULT_FORMATION: Formation = "2-1-1"
+const LINE_PLAYERS_NEEDED = 4
+
+function incompleteLineupNotice({
+  clubName,
+  formation,
+  savedCount,
+  squad,
+  sales,
+}: {
+  clubName: string
+  formation: Formation | null
+  savedCount: number
+  squad: SquadPlayer[]
+  sales: { player_id: number; player_name: string; type: string; created_at: string }[]
+}) {
+  if (!formation || savedCount >= STARTER_COUNT) return null
+  const sold = sales
+    .filter((item) => item.type === "VENDA" && !squad.some((player) => player.id === item.player_id))
+    .sort((left, right) => right.created_at.localeCompare(left.created_at))[0]
+  const sickLine = squad.filter((player) => player.position !== "GOL" && player.condition === "DOENTE")
+  const eligibleLine = squad.filter((player) => player.position !== "GOL" && player.condition !== "DOENTE")
+  const saleText = sold
+    ? `${sold.player_name} foi vendido e saiu da escalação: a ${formation} continua salva, com ${savedCount} ${savedCount === 1 ? "titular" : "titulares"}.`
+    : `A ${formation} continua salva, com ${savedCount} ${savedCount === 1 ? "titular" : "titulares"}.`
+  const blocked =
+    sickLine.length > 0 && eligibleLine.length < LINE_PLAYERS_NEEDED
+      ? ` Com o ${sickLine.map((player) => player.name).join(" e ")} DOENTE, sobram ${eligibleLine.length} jogadores de linha que podem ser escalados, e nenhuma formação fecha: o clube precisa comprar um jogador e escalar de novo.`
+      : ""
+  return {
+    title: `Escalação incompleta: o ${clubName} não pode jogar partidas`,
+    description: `${saleText}${blocked}`,
+  }
+}
 
 function LineupBoard({
   clubId,
@@ -104,9 +137,14 @@ function LineupBoard({
   clubName: string
   squad: SquadPlayer[]
 }) {
+  const queryClient = useQueryClient()
   const lineup = useQuery({
     queryKey: ["clubs", "lineup", clubId],
     queryFn: () => getLineup(clubId),
+  })
+  const transactions = useQuery({
+    queryKey: ["clubs", "transactions", clubId],
+    queryFn: () => listClubTransactions(clubId),
   })
   const [formation, setFormation] = useState<Formation>(DEFAULT_FORMATION)
   const [starters, setStarters] = useState<(number | null)[]>(emptyStarters())
@@ -129,6 +167,15 @@ function LineupBoard({
   const unfit = chosen.filter((player) => player?.condition === "MAL_CONDICIONADO")
   const complete = chosen.every((player) => player !== null)
   const reserves = squad.filter((player) => !starters.includes(player.id))
+  const savedFormation = lineup.data?.formation ?? null
+  const savedCount = lineup.data?.players.length ?? 0
+  const incompleteNotice = incompleteLineupNotice({
+    clubName,
+    formation: savedFormation,
+    savedCount,
+    squad,
+    sales: transactions.data ?? [],
+  })
 
   function chooseFormation(next: Formation) {
     const selected = starters
@@ -149,6 +196,7 @@ function LineupBoard({
         formation,
         chosen.map((player) => player!.id),
       )
+      queryClient.setQueryData(["clubs", "lineup", clubId], stored)
       const nextStarters = placeStarters(formation, stored.players)
       setSaved({ formation, starters: nextStarters })
       setStarters(nextStarters)
@@ -170,14 +218,27 @@ function LineupBoard({
               1 goleiro e 4 jogadores de linha, na formação escolhida. Salvar troca os 5 de uma vez.
             </p>
           </div>
-          {complete ? (
+          {lineup.isPending ? null : complete ? (
             <Badge variant="success" icon={<CircleCheck className="size-3" />}>
               Completa
             </Badge>
-          ) : null}
+          ) : (
+            <Badge variant="warning" icon={<TriangleAlert className="size-3" />}>
+              Incompleta
+            </Badge>
+          )}
         </header>
         {refusal ? (
           <Alert variant="destructive" title="A escalação foi recusada" description={refusal} />
+        ) : null}
+        {incompleteNotice ? (
+          <Alert variant="warning" title={incompleteNotice.title} description={incompleteNotice.description} />
+        ) : !lineup.isPending && !complete ? (
+          <Alert
+            variant="warning"
+            title={`Escalação incompleta: o ${clubName} não pode jogar partidas`}
+            description={`O elenco tem ${squad.length} ${squad.length === 1 ? "jogador" : "jogadores"}, e a escalação precisa de 5: 1 goleiro e 4 jogadores de linha. Compre jogadores e salve a escalação com os 5 titulares.`}
+          />
         ) : null}
         <div className="-mx-4 flex flex-col gap-2.5 border-b border-border px-5 py-4">
           <div>
@@ -221,13 +282,6 @@ function LineupBoard({
               )
             })}
           </RadioGroup>
-          {!complete ? (
-            <Alert
-              variant="warning"
-              title={`Escalação incompleta: o ${clubName} não pode jogar partidas`}
-              description={`O elenco tem ${squad.length} ${squad.length === 1 ? "jogador" : "jogadores"}, e a escalação precisa de 5: 1 goleiro e 4 jogadores de linha. Compre jogadores e salve a escalação com os 5 titulares.`}
-            />
-          ) : null}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[640px] border-collapse text-left">
@@ -272,7 +326,9 @@ function LineupBoard({
                         }}
                       >
                         <SelectTrigger className="w-full max-w-[240px]" aria-label={slot.label}>
-                          <SelectValue placeholder="Escolher">{player ? `${player.name} (${player.position})` : "Escolher"}</SelectValue>
+                          <SelectValue placeholder={options.length === 0 ? `Sem ${slot.hint}` : "Escolher"}>
+                            {player ? `${player.name} (${player.position})` : options.length === 0 ? `Sem ${slot.hint}` : "Escolher"}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           {options.map((option) => (
@@ -335,7 +391,11 @@ function LineupBoard({
         <section className="overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
           <header className="border-b border-border px-5 py-4">
             <h2 className="text-heading-card">Em campo</h2>
-            <p className="text-caption-xs text-muted-foreground">Prévia da formação {formation}, do goleiro ao ataque.</p>
+            <p className="text-caption-xs text-muted-foreground">
+              {savedFormation && !complete
+                ? `Prévia da formação ${savedFormation} salva; a vaga vazia fica tracejada.`
+                : `Prévia da formação ${formation}, do goleiro ao ataque.`}
+            </p>
           </header>
           <div className="p-4">
             <div className="relative h-[360px] overflow-hidden rounded-[10px] bg-pitch" aria-hidden>

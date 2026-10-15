@@ -668,10 +668,12 @@ function EditPlayerDialog({
 
 function ConditionDialog({
   player,
+  starterClub,
   onClose,
   onSubmit,
 }: {
   player: Player
+  starterClub?: string | null
   onClose: () => void
   onSubmit: (condition: Condition) => Promise<void>
 }) {
@@ -746,6 +748,13 @@ function ConditionDialog({
             )
           })}
         </RadioGroup>
+        {condition === "DOENTE" && starterClub ? (
+          <Alert
+            variant="warning"
+            title={`${player.name} é titular`}
+            description={`Ao passar a Doente, ele sai da escalação, e o ${starterClub} só volta a jogar partidas depois de escalar de novo os 5 titulares.`}
+          />
+        ) : null}
         <footer className="flex justify-end gap-2 border-t border-border pt-4">
           <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
           <Button type="submit" disabled={pending}>Salvar condição</Button>

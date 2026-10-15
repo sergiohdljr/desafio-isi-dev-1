@@ -23,8 +23,15 @@ function getClub(id: number) {
   return api.get<ClubDetail>(`/clubs/${id}`).then((response) => response.data)
 }
 
+type ClubTransaction = {
+  player_id: number
+  player_name: string
+  type: "COMPRA" | "VENDA"
+  created_at: string
+}
+
 function listClubTransactions(id: number) {
-  return api.get<{ data: unknown[] }>(`/clubs/${id}/transactions`).then((response) => response.data.data)
+  return api.get<{ data: ClubTransaction[] }>(`/clubs/${id}/transactions`).then((response) => response.data.data)
 }
 
 function getLineup(id: number) {
@@ -37,5 +44,5 @@ function saveLineup(id: number, formation: Formation, playerIds: number[]) {
     .then((response) => response.data)
 }
 
-export type { Formation, Lineup }
+export type { ClubTransaction, Formation, Lineup }
 export { createClub, getClub, getLineup, listClubTransactions, listClubs, saveLineup }
