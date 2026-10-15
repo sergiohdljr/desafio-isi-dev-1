@@ -70,9 +70,16 @@ function Toast({
   )
 }
 
-function ToastViewport({ children }: { children: ReactNode }) {
+function ToastViewport({ children, placement = "end" }: { children: ReactNode; placement?: "end" | "top-end" }) {
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex justify-center px-4 sm:inset-x-auto sm:right-4 sm:justify-end">
+    <div
+      className={cn(
+        "pointer-events-none fixed z-50 flex px-4",
+        placement === "top-end"
+          ? "top-4 right-4 justify-end"
+          : "inset-x-0 bottom-4 justify-center sm:inset-x-auto sm:right-4 sm:justify-end",
+      )}
+    >
       <div className="pointer-events-auto flex w-full max-w-sm flex-col gap-2">
         {children}
       </div>

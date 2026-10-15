@@ -413,7 +413,7 @@ function LineupBoard({
         </section>
       </div>
       {savedNotice ? (
-        <ToastViewport>
+        <ToastViewport placement="top-end">
           <Toast
             variant="success"
             title="Escalação salva"
