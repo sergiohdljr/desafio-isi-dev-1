@@ -26,25 +26,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Club } from "@/features/clubs/types/club.types"
+import { AVATAR_TONES } from "@/features/players/consts/directory"
+import { CONDITIONS, POSITIONS } from "@/features/players/consts/player-options"
 import type { Condition, Player, Position } from "@/features/players/types/player.types"
+import { conditionLabel, initials, positionLabel } from "@/features/players/utils/player-display"
 import { Alert } from "@/components/ui/alert"
 import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-
-const POSITIONS: { value: Position; label: string }[] = [
-  { value: "GOL", label: "Goleiro" },
-  { value: "ZAG", label: "Zagueiro" },
-  { value: "LAT", label: "Lateral" },
-  { value: "MEI", label: "Meio-campo" },
-  { value: "ATA", label: "Atacante" },
-]
-
-const CONDITIONS: { value: Condition; label: string }[] = [
-  { value: "APTO", label: "Apto" },
-  { value: "MAL_CONDICIONADO", label: "Mal condicionado" },
-  { value: "DOENTE", label: "Doente" },
-]
 
 const SKILLS = [
   { key: "pace", label: "Velocidade" },
@@ -135,14 +124,6 @@ function Hint({ children, error }: { children: string; error?: string }) {
   )
 }
 
-const AVATAR_TONES = [
-  "bg-avatar-violet text-avatar-violet-foreground",
-  "bg-avatar-pink text-avatar-pink-foreground",
-  "bg-avatar-cyan text-avatar-cyan-foreground",
-  "bg-avatar-teal text-avatar-teal-foreground",
-  "bg-avatar-zinc text-avatar-zinc-foreground",
-]
-
 const CONDITION_NOTES: Record<Condition, string> = {
   APTO: "Sem desconto por condição.",
   MAL_CONDICIONADO: "Desconto de 15%. Agilidade de 80 a 100 corta pela metade; de 1 a 30 soma 10 pontos.",
@@ -163,21 +144,6 @@ function useModalDialog() {
     dialog.showModal()
   }, [])
   return { ref, titleId }
-}
-
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  const first = parts[0]?.[0] ?? ""
-  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : ""
-  return `${first}${last}`.toLocaleUpperCase("pt-BR")
-}
-
-function positionLabel(position: Position) {
-  return POSITIONS.find((item) => item.value === position)?.label ?? position
-}
-
-function conditionLabel(condition: Condition) {
-  return CONDITIONS.find((item) => item.value === condition)?.label ?? condition
 }
 
 function conditionVariant(condition: Condition) {
@@ -1046,6 +1012,4 @@ export {
   DeletePlayerDialog,
   DetailsDialog,
   EditPlayerDialog,
-  POSITIONS,
-  CONDITIONS,
 }

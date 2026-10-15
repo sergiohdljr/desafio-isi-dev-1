@@ -17,8 +17,11 @@ import {
   X,
 } from "lucide-react"
 import { useClubs } from "@/features/clubs/hooks/use-clubs"
+import { AVATAR_TONES, PAGE_SIZE, SORTS, money } from "@/features/players/consts/directory"
 import { usePlayerMutations, usePlayersDirectory, useRefreshPlayers } from "@/features/players/hooks/use-players"
 import type { Condition, Player, PlayerSort, Position } from "@/features/players/types/player.types"
+import { agilityTone, conditionLabel, initials, positionLabel } from "@/features/players/utils/player-display"
+import { optionalInteger, optionalMoney } from "@/features/players/utils/parse-filter"
 import { Alert } from "@/components/ui/alert"
 import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -37,31 +40,13 @@ import { Toast, ToastViewport } from "@/components/ui/toast"
 import { PlayerActionsMenu } from "@/features/players/components/player-actions-menu"
 import {
   BuyPlayerDialog,
-  CONDITIONS,
   ConditionDialog,
   CreatePlayerDialog,
   DeletePlayerDialog,
   DetailsDialog,
   EditPlayerDialog,
-  POSITIONS,
 } from "@/features/players/components/player-dialogs"
-
-const PAGE_SIZE = 10
-const SORTS: { value: PlayerSort; label: string }[] = [
-  { value: "name", label: "nome" },
-  { value: "value_desc", label: "maior valor de mercado" },
-  { value: "value_asc", label: "menor valor de mercado" },
-  { value: "age_desc", label: "maior idade" },
-  { value: "age_asc", label: "menor idade" },
-  { value: "position", label: "posição" },
-]
-const AVATAR_TONES = [
-  "bg-avatar-violet text-avatar-violet-foreground",
-  "bg-avatar-pink text-avatar-pink-foreground",
-  "bg-avatar-cyan text-avatar-cyan-foreground",
-  "bg-avatar-teal text-avatar-teal-foreground",
-  "bg-avatar-zinc text-avatar-zinc-foreground",
-]
+import { CONDITIONS, POSITIONS } from "@/features/players/consts/player-options"
 
 type Scope = "all" | "free" | "signed"
 type Dialog =
@@ -72,47 +57,6 @@ type Dialog =
   | { type: "details"; player: Player }
   | { type: "buy"; player: Player }
 type Notice = { variant: "success" | "error"; title: string; description?: string }
-
-const money = new Intl.NumberFormat("pt-BR", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
-
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean)
-  const first = parts[0]?.[0] ?? ""
-  const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : ""
-  return `${first}${last}`.toLocaleUpperCase("pt-BR")
-}
-
-function positionLabel(position: Position) {
-  return POSITIONS.find((item) => item.value === position)?.label ?? position
-}
-
-function conditionLabel(condition: Condition) {
-  return CONDITIONS.find((item) => item.value === condition)?.label ?? condition
-}
-
-function optionalInteger(value: string, min: number, max: number) {
-  if (!value.trim()) return undefined
-  if (!/^\d+$/.test(value.trim())) return undefined
-  const number = Number(value)
-  if (number < min || number > max) return undefined
-  return number
-}
-
-function optionalMoney(value: string) {
-  const normalized = value.trim().replace(",", ".")
-  if (!normalized) return undefined
-  if (!/^\d+(?:\.\d{1,2})?$/.test(normalized)) return undefined
-  return Number(normalized)
-}
-
-function agilityTone(value: number) {
-  if (value >= 70) return "bg-chart-positive"
-  if (value <= 30) return "bg-chart-negative"
-  return "bg-muted-foreground"
-}
 
 function PlayersPage() {
   const { clubs } = useClubs()
