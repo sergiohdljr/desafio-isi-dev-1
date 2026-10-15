@@ -61,7 +61,13 @@ function AppLayout() {
     page: 1,
     limit: 10,
   })
-  const active = location.pathname.startsWith(paths.players) ? "Jogadores" : "Clubes"
+  const active = location.pathname.startsWith(paths.players)
+    ? "Jogadores"
+    : location.pathname.startsWith(paths.matches)
+      ? "Partidas"
+      : location.pathname.startsWith(paths.standings)
+        ? "Classificação"
+        : "Clubes"
   const activeClubId = location.pathname.match(/^\/club\/(\d+)/)?.[1]
   const activeClub = clubs.find((club) => String(club.id) === activeClubId)?.name
 
