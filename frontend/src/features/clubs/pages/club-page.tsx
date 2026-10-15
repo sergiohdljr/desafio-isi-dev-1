@@ -1,30 +1,25 @@
 import { useState } from "react"
 import {
-  ChevronRight,
   ClipboardList,
   Coins,
   History,
   Landmark,
-  PanelLeft,
-  RefreshCw,
   Shirt,
   ShoppingCart,
   Users,
   Wallet,
 } from "lucide-react"
 import { useLocation, useNavigate, useParams } from "react-router"
-import { pathForSidebar, paths } from "@/app/routes"
-import { CreateClubDialog } from "@/features/clubs/components/create-club-dialog"
+import { useAppChrome } from "@/app/app-layout"
+import { paths } from "@/app/routes"
 import { EmptySquad } from "@/features/clubs/components/empty-squad"
 import { LineupBoard } from "@/features/clubs/components/lineup-board"
 import { SquadTable } from "@/features/clubs/components/squad-table"
-import { useClub, useClubTransactions, useClubs, useCreateClub, useRefreshClubs } from "@/features/clubs/hooks/use-clubs"
-import { usePlayersDirectory } from "@/features/players/hooks/use-players"
+import { useClub, useClubTransactions, useRefreshClubs } from "@/features/clubs/hooks/use-clubs"
 import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Escudo } from "@/components/ui/escudo"
-import { Sidebar } from "@/components/ui/sidebar"
 import { SummaryCard } from "@/components/ui/summary-card"
 import { Toast, ToastViewport } from "@/components/ui/toast"
 
@@ -41,76 +36,25 @@ function ClubPage() {
   const params = useParams()
   const id = Number(params.id)
   const refreshClubs = useRefreshClubs()
-  const createClub = useCreateClub()
-  const [collapsed, setCollapsed] = useState(false)
-  const [creating, setCreating] = useState(false)
   const [section, setSection] = useState<"elenco" | "escalacao">("elenco")
   const [created, setCreated] = useState(
     () => Boolean((location.state as { created?: boolean } | null)?.created),
   )
   const { club, isPending, error } = useClub(id)
   const { count: historyCount } = useClubTransactions(id)
-  const { clubs } = useClubs("name")
-  const { counts } = usePlayersDirectory({
-    sort: "name",
-    scope: "all",
-    page: 1,
-    limit: 10,
+  useAppChrome({
+    crumbs: [
+      { label: "Mercado" },
+      { label: "Clubes", to: paths.clubs },
+      { label: club?.name ?? "Clube" },
+    ],
+    onRefresh: refreshClubs,
   })
   const squadSize = club?.players.length ?? 0
 
   return (
-    <div className="flex min-h-svh bg-sidebar text-foreground">
-      <Sidebar
-        active="Clubes"
-        activeClub={club?.name}
-        collapsed={collapsed}
-        onHome={() => navigate(paths.home)}
-        onNavigate={(label) => {
-          const path = pathForSidebar(label)
-          if (path) navigate(path)
-        }}
-        onCreateClub={() => setCreating(true)}
-        counts={{ players: counts.all, clubs: clubs.length }}
-        clubs={clubs.map((item) => ({
-          initial: item.name.charAt(0),
-          name: item.name,
-          href: paths.club(item.id),
-        }))}
-      />
-      <div className="flex min-h-svh min-w-0 flex-1 flex-col py-2 pr-2">
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-background shadow-sm">
-          <header className="flex h-[56px] shrink-0 items-center gap-[8px] border-b border-border px-[16px]">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
-              onClick={() => setCollapsed((value) => !value)}
-            >
-              <PanelLeft className="size-4" />
-            </Button>
-            <span className="h-[16px] w-px shrink-0 bg-border" aria-hidden />
-            <p className="flex min-w-0 flex-1 items-center gap-[8px] pl-[4px] text-body-sm text-muted-foreground">
-              <span>Mercado</span>
-              <ChevronRight className="size-3.5" aria-hidden />
-              <button type="button" className="hover:text-foreground" onClick={() => navigate(paths.clubs)}>
-                Clubes
-              </button>
-              <ChevronRight className="size-3.5" aria-hidden />
-              <span className="truncate text-foreground">{club?.name ?? "Clube"}</span>
-            </p>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Atualizar dados"
-              onClick={() => void refreshClubs()}
-            >
-              <RefreshCw className="size-4" />
-            </Button>
-          </header>
-          <main className="flex flex-1 flex-col gap-[24px] overflow-y-auto px-[32px] pt-[28px] pb-[40px]">
+    <>
+          <main className="flex flex-1 flex-col gap-[24px] px-[32px] pt-[28px] pb-[40px]">
             {error ? <Alert variant="destructive" description={error} /> : null}
             {club ? (
               <>
@@ -217,17 +161,6 @@ function ClubPage() {
               </>
             ) : null}
           </main>
-        </div>
-      </div>
-      {creating ? (
-        <CreateClubDialog
-          onClose={() => setCreating(false)}
-          onSubmit={async (input) => {
-            const createdClub = await createClub(input)
-            navigate(paths.club(createdClub.id), { state: { created: true } })
-          }}
-        />
-      ) : null}
       {created && club ? (
         <ToastViewport>
           <Toast
@@ -238,7 +171,7 @@ function ClubPage() {
           />
         </ToastViewport>
       ) : null}
-    </div>
+    </>
   )
 }
 

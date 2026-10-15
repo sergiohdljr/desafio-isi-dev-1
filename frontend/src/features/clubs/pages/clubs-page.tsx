@@ -1,11 +1,10 @@
 import { useState } from "react"
-import { ArrowUpDown, ChevronRight, PanelLeft, Plus, RefreshCw, Shield } from "lucide-react"
+import { ArrowUpDown, ChevronRight, Plus, Shield } from "lucide-react"
 import { useNavigate } from "react-router"
-import { pathForSidebar, paths } from "@/app/routes"
-import { CreateClubDialog } from "@/features/clubs/components/create-club-dialog"
-import { useClubs, useCreateClub, useRefreshClubs } from "@/features/clubs/hooks/use-clubs"
+import { useAppChrome } from "@/app/app-layout"
+import { paths } from "@/app/routes"
+import { useClubs, useRefreshClubs } from "@/features/clubs/hooks/use-clubs"
 import type { ClubSort } from "@/features/clubs/types/club.types"
-import { usePlayersDirectory } from "@/features/players/hooks/use-players"
 import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Sidebar } from "@/components/ui/sidebar"
 
 const MAX_CLUBS = 20
 const SORTS: { value: ClubSort; label: string }[] = [
@@ -35,69 +33,18 @@ function clubCountLabel(count: number) {
   return count === 1 ? "1 clube" : `${count} clubes`
 }
 
+const CLUBS_CRUMBS = [{ label: "Mercado" }, { label: "Clubes" }]
+
 function ClubsPage() {
   const navigate = useNavigate()
   const refreshClubs = useRefreshClubs()
-  const createClub = useCreateClub()
-  const [collapsed, setCollapsed] = useState(false)
-  const [creating, setCreating] = useState(false)
+  const { openCreateClub } = useAppChrome({ crumbs: CLUBS_CRUMBS, onRefresh: refreshClubs })
   const [sort, setSort] = useState<ClubSort>("net_worth_desc")
   const { clubs, isPending, error } = useClubs(sort)
-  const { counts } = usePlayersDirectory({
-    sort: "name",
-    scope: "all",
-    page: 1,
-    limit: 10,
-  })
   const sortLabel = SORTS.find((item) => item.value === sort)?.label ?? "nome"
 
   return (
-    <div className="flex min-h-svh bg-sidebar text-foreground">
-      <Sidebar
-        active="Clubes"
-        collapsed={collapsed}
-        onHome={() => navigate(paths.home)}
-        onNavigate={(label) => {
-          const path = pathForSidebar(label)
-          if (path) navigate(path)
-        }}
-        onCreateClub={() => setCreating(true)}
-        counts={{ players: counts.all, clubs: clubs.length }}
-        clubs={clubs.map((club) => ({
-          initial: club.name.charAt(0),
-          name: club.name,
-          href: paths.club(club.id),
-        }))}
-      />
-      <div className="flex min-h-svh min-w-0 flex-1 flex-col py-2 pr-2">
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-background shadow-sm">
-        <header className="flex h-[56px] shrink-0 items-center gap-[8px] border-b border-border px-[16px]">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
-            onClick={() => setCollapsed((value) => !value)}
-          >
-            <PanelLeft className="size-4" />
-          </Button>
-          <span className="h-[16px] w-px shrink-0 bg-border" aria-hidden />
-          <p className="flex min-w-0 flex-1 items-center gap-[8px] pl-[4px] text-body-sm text-muted-foreground">
-            <span>Mercado</span>
-            <ChevronRight className="size-3.5" aria-hidden />
-            <span className="text-foreground">Clubes</span>
-          </p>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label="Atualizar dados"
-            onClick={() => void refreshClubs()}
-          >
-            <RefreshCw className="size-4" />
-          </Button>
-        </header>
-        <main className="flex flex-1 flex-col gap-[24px] overflow-y-auto px-[32px] pt-[28px] pb-[40px]">
+        <main className="flex flex-1 flex-col gap-[24px] px-[32px] pt-[28px] pb-[40px]">
           <div className="flex w-full items-center gap-[16px]">
             <div className="flex min-w-0 flex-1 items-center gap-[16px]">
               <span className="inline-flex size-[48px] shrink-0 items-center justify-center rounded-[12px] border border-primary bg-primary-soft text-primary">
@@ -110,7 +57,7 @@ function ClubsPage() {
                 </p>
               </div>
             </div>
-            <Button type="button" className="h-[36px] gap-[8px] px-[16px]!" onClick={() => setCreating(true)}>
+            <Button type="button" className="h-[36px] gap-[8px] px-[16px]!" onClick={openCreateClub}>
               <Plus />
               Novo clube
             </Button>
@@ -199,18 +146,6 @@ function ClubsPage() {
             Clubes pelo nome por padrão ou pelo patrimônio, do maior para o menor, com empate desfeito pelo nome.
           </p>
         </main>
-        </div>
-      </div>
-      {creating ? (
-        <CreateClubDialog
-          onClose={() => setCreating(false)}
-          onSubmit={async (input) => {
-            const created = await createClub(input)
-            navigate(paths.club(created.id), { state: { created: true } })
-          }}
-        />
-      ) : null}
-    </div>
   )
 }
 

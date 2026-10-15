@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
-import { useNavigate } from "react-router"
-import { pathForSidebar, paths } from "@/app/routes"
+import { useAppChrome } from "@/app/app-layout"
 import {
   ArrowUpDown,
   ChevronDown,
@@ -9,7 +8,6 @@ import {
   Coins,
   HeartPulse,
   Plus,
-  RefreshCw,
   Search,
   Shield,
   ShoppingCart,
@@ -34,7 +32,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Sidebar } from "@/components/ui/sidebar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Toast, ToastViewport } from "@/components/ui/toast"
 import { PlayerActionsMenu } from "@/features/players/components/player-actions-menu"
@@ -118,9 +115,12 @@ function agilityTone(value: number) {
 }
 
 function PlayersPage() {
-  const navigate = useNavigate()
   const { clubs } = useClubs()
   const refreshPlayers = useRefreshPlayers()
+  useAppChrome({
+    crumbs: [{ label: "Mercado" }, { label: "Jogadores" }],
+    onRefresh: refreshPlayers,
+  })
   const mutations = usePlayerMutations()
   const [scope, setScope] = useState<Scope>("all")
   const [searchInput, setSearchInput] = useState("")
@@ -258,38 +258,7 @@ function PlayersPage() {
   ].filter((item): item is { id: string; label: string; clear: () => void } => Boolean(item))
 
   return (
-    <div className="flex min-h-svh bg-background text-foreground">
-      <Sidebar
-        active="Jogadores"
-        onHome={() => navigate(paths.home)}
-        onNavigate={(label) => {
-          const path = pathForSidebar(label)
-          if (path) navigate(path)
-        }}
-        counts={{ players: counts.all, clubs: clubs.length }}
-        clubs={clubs.map((club) => ({
-          initial: club.name.charAt(0),
-          name: club.name,
-          href: paths.club(club.id),
-        }))}
-      />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-3">
-          <p className="flex items-center gap-2 text-caption-xs text-muted-foreground">
-            <span>Mercado</span>
-            <ChevronRight className="size-3.5" aria-hidden />
-            <span className="text-foreground">Jogadores</span>
-          </p>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label="Atualizar"
-            onClick={() => void refreshPlayers()}
-          >
-            <RefreshCw />
-          </Button>
-        </header>
+    <>
         <main className="flex flex-1 flex-col gap-4 px-6 py-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex min-w-0 flex-1 items-center gap-4">
@@ -565,7 +534,6 @@ function PlayersPage() {
             Overall e valor de mercado são calculados a cada consulta. A busca ignora maiúsculas, minúsculas e acentos.
           </p>
         </main>
-      </div>
 
       {dialog?.type === "create" ? (
         <CreatePlayerDialog
@@ -646,7 +614,7 @@ function PlayersPage() {
           />
         </ToastViewport>
       ) : null}
-    </div>
+    </>
   )
 }
 
