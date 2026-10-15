@@ -9,12 +9,12 @@ import {
   RefreshCw,
   Shirt,
   ShoppingCart,
-  Users,
   Wallet,
 } from "lucide-react"
 import { useLocation, useNavigate, useParams } from "react-router"
 import { pathForSidebar, paths } from "@/app/routes"
 import { CreateClubDialog } from "@/features/clubs/components/create-club-dialog"
+import { EmptySquad } from "@/features/clubs/components/empty-squad"
 import { useClub, useClubs, useCreateClub, useRefreshClubs } from "@/features/clubs/hooks/use-clubs"
 import { usePlayersDirectory } from "@/features/players/hooks/use-players"
 import { Alert } from "@/components/ui/alert"
@@ -41,6 +41,7 @@ function ClubPage() {
   const createClub = useCreateClub()
   const [collapsed, setCollapsed] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [section, setSection] = useState<"elenco" | "escalacao">("elenco")
   const [created, setCreated] = useState(
     () => Boolean((location.state as { created?: boolean } | null)?.created),
   )
@@ -156,8 +157,13 @@ function ClubPage() {
                   <button
                     type="button"
                     role="tab"
-                    aria-selected="true"
-                    className="-mb-px flex h-[44px] items-center gap-[8px] border-b-2 border-primary px-[2px] text-body-sm-medium text-foreground"
+                    aria-selected={section === "elenco"}
+                    className={
+                      section === "elenco"
+                        ? "-mb-px flex h-[44px] items-center gap-[8px] border-b-2 border-primary px-[2px] text-body-sm-medium text-foreground"
+                        : "flex h-[44px] items-center gap-[8px] px-[2px] text-body-sm-medium text-muted-foreground"
+                    }
+                    onClick={() => setSection("elenco")}
                   >
                     <Shirt className="size-4" aria-hidden />
                     Elenco
@@ -168,8 +174,13 @@ function ClubPage() {
                   <button
                     type="button"
                     role="tab"
-                    aria-selected="false"
-                    className="flex h-[44px] items-center gap-[8px] px-[2px] text-body-sm-medium text-muted-foreground"
+                    aria-selected={section === "escalacao"}
+                    className={
+                      section === "escalacao"
+                        ? "-mb-px flex h-[44px] items-center gap-[8px] border-b-2 border-primary px-[2px] text-body-sm-medium text-foreground"
+                        : "flex h-[44px] items-center gap-[8px] px-[2px] text-body-sm-medium text-muted-foreground"
+                    }
+                    onClick={() => setSection("escalacao")}
                   >
                     <ClipboardList className="size-4" aria-hidden />
                     Escalação
@@ -187,22 +198,8 @@ function ClubPage() {
                     </span>
                   </button>
                 </div>
-                {squadSize === 0 && !isPending ? (
-                  <section className="w-full rounded-[12px] border border-border bg-card shadow-xs">
-                    <div className="flex flex-col items-center gap-[12px] px-[24px] py-[48px] text-center">
-                      <span className="inline-flex rounded-[12px] bg-muted p-[12px] text-muted-foreground">
-                        <Shirt className="size-6" aria-hidden />
-                      </span>
-                      <h2 className="text-heading-card">Nenhum jogador no elenco</h2>
-                      <p className="w-[420px] max-w-full text-body-sm text-muted-foreground">
-                        Compre jogadores livres para montar o elenco. O limite é de 12 jogadores, e o custo de cada compra não pode passar de 50% do caixa.
-                      </p>
-                      <Button type="button" variant="outline" className="h-[36px] gap-[8px] px-[16px]!" onClick={() => navigate(paths.players)}>
-                        <Users />
-                        Ver jogadores livres
-                      </Button>
-                    </div>
-                  </section>
+                {section === "elenco" && squadSize === 0 && !isPending ? (
+                  <EmptySquad onBrowse={() => navigate(paths.players)} />
                 ) : null}
               </>
             ) : null}
