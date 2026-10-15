@@ -16,6 +16,7 @@ import { useLocation, useNavigate, useParams } from "react-router"
 import { pathForSidebar, paths } from "@/app/routes"
 import { CreateClubDialog } from "@/features/clubs/components/create-club-dialog"
 import { EmptySquad } from "@/features/clubs/components/empty-squad"
+import { LineupBoard } from "@/features/clubs/components/lineup-board"
 import { SquadTable } from "@/features/clubs/components/squad-table"
 import { useClub, useClubTransactions, useClubs, useCreateClub, useRefreshClubs } from "@/features/clubs/hooks/use-clubs"
 import { usePlayersDirectory } from "@/features/players/hooks/use-players"
@@ -206,6 +207,12 @@ function ClubPage() {
                 ) : null}
                 {section === "elenco" && club && squadSize > 0 ? (
                   <SquadTable players={club.players} onSold={refreshClubs} />
+                ) : null}
+                {section === "escalacao" && club && squadSize === 0 ? (
+                  <EmptySquad onBrowse={() => navigate(paths.players)} />
+                ) : null}
+                {section === "escalacao" && club && squadSize > 0 ? (
+                  <LineupBoard clubId={club.id} squad={club.players} />
                 ) : null}
               </>
             ) : null}
