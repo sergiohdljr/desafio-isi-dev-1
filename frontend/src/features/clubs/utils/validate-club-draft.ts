@@ -1,32 +1,14 @@
-const NAME_MIN_LENGTH = 3
-const NAME_MAX_LENGTH = 60
-const NAME_MIN_WORDS = 2
-const NAME_MAX_WORDS = 5
-const ACRONYM_LENGTH = 3
-
-const INVALID_NAME = "Nome inválido"
-const INVALID_ACRONYM = "Sigla inválida"
-const NAME_TAKEN = "Nome de clube já cadastrado"
-
-type ClubField = "name" | "acronym"
-
-type ClubDraft = {
-  name: string
-  acronym: string
-}
-
-type ClubDraftIssue = {
-  field: ClubField
-  message: string
-}
-
-function normalizeClubName(value: string) {
-  return value.trim().replace(/\s+/g, " ")
-}
-
-function normalizeAcronym(value: string) {
-  return value.trim().toUpperCase()
-}
+import {
+  ACRONYM_LENGTH,
+  INVALID_ACRONYM,
+  INVALID_NAME,
+  NAME_MAX_LENGTH,
+  NAME_MAX_WORDS,
+  NAME_MIN_LENGTH,
+  NAME_MIN_WORDS,
+} from "@/features/clubs/consts/club-draft"
+import type { ClubDraft, ClubDraftIssue } from "@/features/clubs/types/club.types"
+import { foldAccents, normalizeAcronym, normalizeClubName } from "@/features/clubs/utils/normalize-club"
 
 function validateClubDraft(draft: ClubDraft): ClubDraftIssue | null {
   const name = normalizeClubName(draft.name)
@@ -36,20 +18,6 @@ function validateClubDraft(draft: ClubDraft): ClubDraftIssue | null {
   if (!acronymFitsName(name, acronym)) return { field: "acronym", message: INVALID_ACRONYM }
 
   return null
-}
-
-function fieldForClubError(message: string): ClubField | null {
-  const folded = message.toLocaleLowerCase("pt-BR")
-  if (folded.includes("sigla")) return "acronym"
-  if (folded.includes("nome")) return "name"
-  return null
-}
-
-function clubErrorDescription(message: string, name: string) {
-  if (message === NAME_TAKEN) {
-    return `Já existe um clube com o nome “${normalizeClubName(name)}”.`
-  }
-  return message
 }
 
 function isClubName(value: string) {
@@ -91,9 +59,4 @@ function hasControlCharacter(value: string) {
   return /\p{Cc}/u.test(value)
 }
 
-function foldAccents(value: string) {
-  return value.normalize("NFD").replace(/\p{Mn}/gu, "")
-}
-
-export type { ClubDraft, ClubDraftIssue, ClubField }
-export { clubErrorDescription, fieldForClubError, normalizeAcronym, normalizeClubName, validateClubDraft }
+export { acronymFitsName, isClubName, validateClubDraft }

@@ -3,15 +3,10 @@ import { Circle, Wallet, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Alert } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
-import type { CreateClubInput } from "@/features/clubs/types/club.types"
-import {
-  clubErrorDescription,
-  fieldForClubError,
-  normalizeAcronym,
-  normalizeClubName,
-  validateClubDraft,
-  type ClubField,
-} from "@/features/clubs/lib/validate-club"
+import type { ClubField, CreateClubInput } from "@/features/clubs/types/club.types"
+import { clubErrorDescription, fieldForClubError } from "@/features/clubs/utils/club-error"
+import { normalizeAcronym, normalizeClubName } from "@/features/clubs/utils/normalize-club"
+import { validateClubDraft } from "@/features/clubs/utils/validate-club-draft"
 
 const NAME_HINT =
   "De 3 a 60 caracteres e de 2 a 5 palavras; só letras, espaços, hífen e ponto. Não pode repetir outro clube."

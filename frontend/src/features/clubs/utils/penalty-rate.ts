@@ -1,5 +1,4 @@
-const SHORT_LOYALTY_DAYS = 30
-const MID_LOYALTY_DAYS = 180
+import { MID_LOYALTY_DAYS, SHORT_LOYALTY_DAYS } from "@/features/clubs/consts/penalty-rate"
 
 function penaltyRateFor(days: number) {
   if (days <= 0) return 0
