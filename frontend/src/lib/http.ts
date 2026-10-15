@@ -1,3 +1,5 @@
+import axios, { isAxiosError } from "axios"
+
 const API_PREFIX = "/api/v1"
 
 class ApiError extends Error {
@@ -9,24 +11,21 @@ class ApiError extends Error {
   }
 }
 
-async function api<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_PREFIX}${path}`, {
-    ...init,
-    headers: {
-      Accept: "application/json",
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-      ...init?.headers,
-    },
-  })
+const api = axios.create({
+  baseURL: API_PREFIX,
+  headers: { Accept: "application/json" },
+})
 
-  if (response.status === 204) return undefined as T
-
-  const body: unknown = await response.json().catch(() => null)
-  if (!response.ok) {
-    throw new ApiError(errorMessage(body), response.status)
-  }
-  return body as T
-}
+api.interceptors.response.use(
+  (response) => {
+    if (response.status === 204) response.data = undefined
+    return response
+  },
+  (error: unknown) => {
+    if (!isAxiosError(error)) throw error
+    throw new ApiError(errorMessage(error.response?.data), error.response?.status ?? 0)
+  },
+)
 
 function errorMessage(body: unknown) {
   if (!body || typeof body !== "object" || !("message" in body)) {
