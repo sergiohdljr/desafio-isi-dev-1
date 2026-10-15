@@ -1,12 +1,11 @@
 import { api } from "@/lib/http"
+import type { Purchase, Sale } from "@/features/players/types/market.types"
 import type {
   Condition,
   CreatePlayerInput,
   Player,
   PlayerList,
   PlayerQuery,
-  Purchase,
-  Sale,
   UpdatePlayerInput,
 } from "@/features/players/types/player.types"
 

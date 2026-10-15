@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { penaltyRateFor } from "@/features/clubs/lib/penalty-rate"
 import type { SquadPlayer } from "@/features/clubs/types/club.types"
 import { sellPlayer } from "@/features/players/api/players.api"
-import type { Sale } from "@/features/players/types/player.types"
+import type { Sale } from "@/features/players/types/market.types"
 import {
   MarketDialog,
   PendingNote,
