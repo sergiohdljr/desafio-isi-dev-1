@@ -18,14 +18,16 @@ A imagem do banco é `postgres:17-alpine`, pública.
 
 ## 2. Banco de dados
 
-Os comandos rodam na pasta `backend`. O banco criado fica vazio: sem jogadores, clubes, transações nem partidas.
+Os comandos de migration rodam na pasta `backend`. O Compose fica na raiz. O banco criado fica vazio: sem jogadores, clubes, transações nem partidas.
 
 Criar:
 
 ```bash
 cd backend
 cp .env.example .env
+cd ..
 docker compose up -d postgres
+cd backend
 npm ci
 npx prisma migrate deploy
 ```
@@ -48,12 +50,25 @@ npm run db:reset
 
 ## 3. Instalar e executar
 
-Ubuntu 24.04, com Docker disponível. Um comando por linha.
+Ubuntu 24.04, com Docker disponível.
+
+Tudo de uma vez, na raiz do repositório. Sobe o banco da aplicação (porta 5432), o banco de teste (porta 5433), a API e o frontend. A API aplica as migrations nos dois bancos ao iniciar.
+
+```bash
+cp backend/.env.example backend/.env
+docker compose up --build
+```
+
+A API fica em `http://localhost:3000`. O frontend fica em `http://localhost:5173`.
+
+Para desenvolver na máquina, sem a imagem da API e do frontend:
 
 ```bash
 cd backend
 cp .env.example .env
+cd ..
 docker compose up -d postgres
+cd backend
 npm ci
 npx prisma migrate deploy
 npm run start:dev
