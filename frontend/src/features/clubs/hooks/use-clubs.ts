@@ -45,7 +45,12 @@ function useClubTransactions(id: number) {
     summary: query.data?.summary ?? null,
     count: query.data?.data.length ?? 0,
     isPending: query.isPending,
-    error: query.error instanceof Error ? query.error.message : query.error ? "Não foi possível carregar o histórico." : null,
+    error:
+      query.error instanceof Error
+        ? query.error.message
+        : query.error
+          ? "Não foi possível carregar o histórico."
+          : null,
   }
 }
 

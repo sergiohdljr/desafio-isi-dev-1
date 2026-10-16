@@ -32,7 +32,11 @@ function LineupPitch({
           <span className="absolute inset-x-0 top-[120px] h-10 bg-pitch-stripe" />
           <span className="absolute inset-x-0 top-[200px] h-10 bg-pitch-stripe" />
           <span className="absolute inset-x-0 top-[280px] h-10 bg-pitch-stripe" />
-          <svg className="absolute inset-3 h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)]" viewBox="0 0 260 336" fill="none">
+          <svg
+            className="absolute inset-3 h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)]"
+            viewBox="0 0 260 336"
+            fill="none"
+          >
             <rect x="1" y="1" width="258" height="334" stroke="white" strokeOpacity="0.75" />
             <line x1="1" y1="168" x2="259" y2="168" stroke="white" strokeOpacity="0.75" />
             <circle cx="130" cy="168" r="28" stroke="white" strokeOpacity="0.75" />

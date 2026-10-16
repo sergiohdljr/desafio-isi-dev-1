@@ -36,14 +36,4 @@ const money = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 2,
 })
 
-export {
-  AGE_MAX,
-  AGE_MIN,
-  AVATAR_TONES,
-  MARKET_VALUE_MAX,
-  MARKET_VALUE_MIN,
-  PAGE_SIZE,
-  POSITION_ORDER,
-  SORTS,
-  money,
-}
+export { AGE_MAX, AGE_MIN, AVATAR_TONES, MARKET_VALUE_MAX, MARKET_VALUE_MIN, PAGE_SIZE, POSITION_ORDER, SORTS, money }

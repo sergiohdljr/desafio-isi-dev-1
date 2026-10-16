@@ -10,9 +10,7 @@ import type {
 } from "@/features/players/types/player.types"
 
 function listPlayers(query: PlayerQuery) {
-  return api
-    .get<PlayerList>("/players", { params: playerParams(query) })
-    .then((response) => response.data)
+  return api.get<PlayerList>("/players", { params: playerParams(query) }).then((response) => response.data)
 }
 
 function createPlayer(input: CreatePlayerInput) {
@@ -24,9 +22,7 @@ function updatePlayer(id: number, input: UpdatePlayerInput) {
 }
 
 function changePlayerCondition(id: number, condition: Condition) {
-  return api
-    .patch<Player>(`/players/${id}/condition`, { condition })
-    .then((response) => response.data)
+  return api.patch<Player>(`/players/${id}/condition`, { condition }).then((response) => response.data)
 }
 
 function deletePlayer(id: number) {

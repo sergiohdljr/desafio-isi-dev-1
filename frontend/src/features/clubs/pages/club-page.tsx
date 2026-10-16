@@ -1,14 +1,5 @@
 import { useState } from "react"
-import {
-  ClipboardList,
-  Coins,
-  History,
-  Landmark,
-  Shirt,
-  ShoppingCart,
-  Users,
-  Wallet,
-} from "lucide-react"
+import { ClipboardList, Coins, History, Landmark, Shirt, ShoppingCart, Users, Wallet } from "lucide-react"
 import { useLocation, useNavigate, useParams } from "react-router"
 import { useAppChrome } from "@/app/app-layout"
 import { paths } from "@/app/routes"
@@ -38,17 +29,11 @@ function ClubPage() {
   const id = Number(params.id)
   const refreshClubs = useRefreshClubs()
   const [section, setSection] = useState<"elenco" | "escalacao" | "historico">("elenco")
-  const [created, setCreated] = useState(
-    () => Boolean((location.state as { created?: boolean } | null)?.created),
-  )
+  const [created, setCreated] = useState(() => Boolean((location.state as { created?: boolean } | null)?.created))
   const { club, isPending, error } = useClub(id)
   const { count: historyCount } = useClubTransactions(id)
   useAppChrome({
-    crumbs: [
-      { label: "Mercado" },
-      { label: "Clubes", to: paths.clubs },
-      { label: club?.name ?? "Clube" },
-    ],
+    crumbs: [{ label: "Mercado" }, { label: "Clubes", to: paths.clubs }, { label: club?.name ?? "Clube" }],
     onRefresh: refreshClubs,
   })
   const squadSize = club?.players.length ?? 0

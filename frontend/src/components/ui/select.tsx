@@ -5,13 +5,7 @@ import { cn } from "@/lib/utils"
 
 const SelectContainerContext = createContext<RefObject<HTMLElement | null> | null>(null)
 
-function SelectContainer({
-  container,
-  children,
-}: {
-  container: RefObject<HTMLElement | null>
-  children: ReactNode
-}) {
+function SelectContainer({ container, children }: { container: RefObject<HTMLElement | null>; children: ReactNode }) {
   return <SelectContainerContext.Provider value={container}>{children}</SelectContainerContext.Provider>
 }
 
@@ -19,11 +13,7 @@ function Select({ ...props }: SelectPrimitive.Root.Props<string>) {
   return <SelectPrimitive.Root data-slot="select" {...props} />
 }
 
-function SelectTrigger({
-  className,
-  children,
-  ...props
-}: SelectPrimitive.Trigger.Props) {
+function SelectTrigger({ className, children, ...props }: SelectPrimitive.Trigger.Props) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
@@ -45,20 +35,13 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
   return (
     <SelectPrimitive.Value
       data-slot="select-value"
-      className={cn(
-        "min-w-0 flex-1 truncate text-left data-placeholder:text-muted-foreground",
-        className,
-      )}
+      className={cn("min-w-0 flex-1 truncate text-left data-placeholder:text-muted-foreground", className)}
       {...props}
     />
   )
 }
 
-function SelectContent({
-  className,
-  children,
-  ...props
-}: SelectPrimitive.Popup.Props) {
+function SelectContent({ className, children, ...props }: SelectPrimitive.Popup.Props) {
   const container = useContext(SelectContainerContext)
 
   return (
@@ -79,11 +62,7 @@ function SelectContent({
   )
 }
 
-function SelectItem({
-  className,
-  children,
-  ...props
-}: SelectPrimitive.Item.Props) {
+function SelectItem({ className, children, ...props }: SelectPrimitive.Item.Props) {
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
@@ -93,9 +72,7 @@ function SelectItem({
       )}
       {...props}
     >
-      <SelectPrimitive.ItemText className="min-w-0 flex-1">
-        {children}
-      </SelectPrimitive.ItemText>
+      <SelectPrimitive.ItemText className="min-w-0 flex-1">{children}</SelectPrimitive.ItemText>
       <SelectPrimitive.ItemIndicator>
         <Check className="size-4" />
       </SelectPrimitive.ItemIndicator>

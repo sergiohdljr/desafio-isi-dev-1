@@ -105,8 +105,8 @@ function DetailsDialog({
             <span className="h-2 w-3 rounded-xs bg-primary" /> Valor do atributo
           </span>
           <span className="flex items-center gap-1.5">
-            <span className="h-2 w-3 rounded-xs bg-chart-2" /> Até o potencial ({player.potential}), que nenhum
-            atributo passa
+            <span className="h-2 w-3 rounded-xs bg-chart-2" /> Até o potencial ({player.potential}), que nenhum atributo
+            passa
           </span>
         </p>
       </div>

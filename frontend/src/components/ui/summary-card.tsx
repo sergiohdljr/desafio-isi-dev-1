@@ -33,13 +33,9 @@ function SummaryCard({
       </div>
       <p className="flex items-baseline gap-1.5">
         <span className="text-display-kpi tabular-nums">{value}</span>
-        {unit ? (
-          <span className="text-body-sm text-muted-foreground">{unit}</span>
-        ) : null}
+        {unit ? <span className="text-body-sm text-muted-foreground">{unit}</span> : null}
       </p>
-      {note ? (
-        <p className="text-caption-xs text-muted-foreground">{note}</p>
-      ) : null}
+      {note ? <p className="text-caption-xs text-muted-foreground">{note}</p> : null}
     </article>
   )
 }

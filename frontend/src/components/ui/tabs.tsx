@@ -3,23 +3,14 @@ import { Tabs as TabsPrimitive } from "@base-ui/react/tabs"
 import { cn } from "@/lib/utils"
 
 function Tabs({ className, ...props }: TabsPrimitive.Root.Props) {
-  return (
-    <TabsPrimitive.Root
-      data-slot="tabs"
-      className={cn("flex flex-col gap-2", className)}
-      {...props}
-    />
-  )
+  return <TabsPrimitive.Root data-slot="tabs" className={cn("flex flex-col gap-2", className)} {...props} />
 }
 
 function TabsList({ className, ...props }: TabsPrimitive.List.Props) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
-      className={cn(
-        "inline-flex h-9 items-center rounded-lg bg-muted p-[3px]",
-        className,
-      )}
+      className={cn("inline-flex h-9 items-center rounded-lg bg-muted p-[3px]", className)}
       {...props}
     />
   )
@@ -80,11 +71,7 @@ function TabsLineTrigger({
 
 function TabsPanel({ className, ...props }: TabsPrimitive.Panel.Props) {
   return (
-    <TabsPrimitive.Panel
-      data-slot="tabs-panel"
-      className={cn("text-body-sm outline-none", className)}
-      {...props}
-    />
+    <TabsPrimitive.Panel data-slot="tabs-panel" className={cn("text-body-sm outline-none", className)} {...props} />
   )
 }
 

@@ -52,9 +52,7 @@ function Toast({
       </span>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="text-body-sm-medium">{title}</p>
-        {description ? (
-          <p className="text-body-sm text-muted-foreground">{description}</p>
-        ) : null}
+        {description ? <p className="text-body-sm text-muted-foreground">{description}</p> : null}
       </div>
       {onClose ? (
         <button
@@ -80,9 +78,7 @@ function ToastViewport({ children, placement = "end" }: { children: ReactNode; p
           : "inset-x-0 bottom-4 justify-center sm:inset-x-auto sm:right-4 sm:justify-end",
       )}
     >
-      <div className="pointer-events-auto flex w-full max-w-sm flex-col gap-2">
-        {children}
-      </div>
+      <div className="pointer-events-auto flex w-full max-w-sm flex-col gap-2">{children}</div>
     </div>
   )
 }

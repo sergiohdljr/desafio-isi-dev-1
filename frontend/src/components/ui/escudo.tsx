@@ -26,11 +26,7 @@ function Escudo({
     sigla: string
   }) {
   return (
-    <span
-      data-slot="escudo"
-      aria-hidden
-      className={cn(escudoVariants({ size, className }))}
-    >
+    <span data-slot="escudo" aria-hidden className={cn(escudoVariants({ size, className }))}>
       {sigla}
     </span>
   )

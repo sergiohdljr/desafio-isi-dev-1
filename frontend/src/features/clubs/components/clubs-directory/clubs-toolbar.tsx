@@ -1,12 +1,6 @@
 import { ArrowUpDown } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CLUB_SORT_OPTIONS, MAX_CLUBS } from "@/features/clubs/consts/clubs-directory"
 import type { ClubSort } from "@/features/clubs/types/club.types"
 import { capitalizePt } from "@/features/clubs/utils/capitalize-pt"

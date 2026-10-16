@@ -32,7 +32,10 @@ function MatchesHistory({
           <h2 className="text-heading-card">Histórico de partidas</h2>
           <p className="text-caption-xs text-muted-foreground">Da mais recente para a mais antiga, com o placar.</p>
         </div>
-        <Select value={clubId || null} onValueChange={(value) => onClubIdChange(!value || value === "all" ? "" : value)}>
+        <Select
+          value={clubId || null}
+          onValueChange={(value) => onClubIdChange(!value || value === "all" ? "" : value)}
+        >
           <SelectTrigger className="w-auto" aria-label="Filtrar por clube">
             <SelectValue placeholder="Todos os clubes" />
           </SelectTrigger>
@@ -95,7 +98,9 @@ function MatchesHistory({
           </tbody>
         </table>
       )}
-      <footer className="border-t border-border px-4 py-3 text-body-sm text-muted-foreground">{rows.length} partidas</footer>
+      <footer className="border-t border-border px-4 py-3 text-body-sm text-muted-foreground">
+        {rows.length} partidas
+      </footer>
     </section>
   )
 }

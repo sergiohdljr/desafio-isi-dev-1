@@ -77,11 +77,4 @@ const PITCH: Record<Formation, { top: string; left: string }[]> = {
   ],
 }
 
-export {
-  DEFAULT_FORMATION,
-  FORMATIONS,
-  LINE_PLAYERS_NEEDED,
-  PITCH,
-  SLOTS,
-  STARTER_COUNT,
-}
+export { DEFAULT_FORMATION, FORMATIONS, LINE_PLAYERS_NEEDED, PITCH, SLOTS, STARTER_COUNT }

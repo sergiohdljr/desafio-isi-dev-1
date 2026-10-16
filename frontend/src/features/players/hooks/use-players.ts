@@ -62,7 +62,10 @@ function applyCondition(queryClient: QueryClient, previous: Player | undefined, 
   const delta = player.market_value - previous.market_value
 
   queryClient.setQueriesData<Club[]>({ queryKey: ["clubs"] }, (current) => {
-    if (!Array.isArray(current) || current.some((item) => !item || typeof item !== "object" || !("net_worth" in item) || "players" in item)) {
+    if (
+      !Array.isArray(current) ||
+      current.some((item) => !item || typeof item !== "object" || !("net_worth" in item) || "players" in item)
+    ) {
       return current
     }
     return current.map((club) =>

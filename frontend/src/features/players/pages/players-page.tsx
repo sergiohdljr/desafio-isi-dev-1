@@ -1,16 +1,6 @@
 import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import {
-  ArrowUpDown,
-  Coins,
-  HeartPulse,
-  Plus,
-  Search,
-  Shield,
-  Shirt,
-  UserRound,
-  Users,
-} from "lucide-react"
+import { ArrowUpDown, Coins, HeartPulse, Plus, Search, Shield, Shirt, UserRound, Users } from "lucide-react"
 import { useAppChrome } from "@/app/app-layout"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -69,9 +59,7 @@ function PlayersPage() {
   })
   const isStarter =
     conditionPlayer != null && (lineup.data?.players.some((item) => item.id === conditionPlayer.id) ?? false)
-  const starterClub = isStarter
-    ? (clubs.find((club) => club.id === conditionPlayer.club_id)?.name ?? "clube")
-    : null
+  const starterClub = isStarter ? (clubs.find((club) => club.id === conditionPlayer.club_id)?.name ?? "clube") : null
 
   useEffect(() => {
     const value = searchInput.trim()
@@ -87,10 +75,8 @@ function PlayersPage() {
   const parsedMaxAge = optionalInteger(maxAge, AGE_MIN, AGE_MAX)
   const parsedMinValue = optionalMoney(minValue)
   const parsedMaxValue = optionalMoney(maxValue)
-  const ageInvalid =
-    parsedMinAge !== undefined && parsedMaxAge !== undefined && parsedMinAge > parsedMaxAge
-  const valueInvalid =
-    parsedMinValue !== undefined && parsedMaxValue !== undefined && parsedMinValue > parsedMaxValue
+  const ageInvalid = parsedMinAge !== undefined && parsedMaxAge !== undefined && parsedMinAge > parsedMaxAge
+  const valueInvalid = parsedMinValue !== undefined && parsedMaxValue !== undefined && parsedMinValue > parsedMaxValue
   const appliedClubId = scope === "free" ? undefined : clubId ? Number(clubId) : undefined
 
   const { players, totalItems, totalPages, counts, isPending, error } = usePlayersDirectory({
@@ -289,9 +275,7 @@ function PlayersPage() {
             setPage(1)
           }}
         />
-        {ageInvalid ? (
-          <Alert variant="warning" description="A idade mínima não pode ser maior que a máxima." />
-        ) : null}
+        {ageInvalid ? <Alert variant="warning" description="A idade mínima não pode ser maior que a máxima." /> : null}
         {valueInvalid ? (
           <Alert variant="warning" description="O valor mínimo não pode ser maior que o máximo." />
         ) : null}

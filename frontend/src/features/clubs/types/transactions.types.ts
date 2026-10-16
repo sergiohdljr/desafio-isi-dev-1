@@ -32,10 +32,4 @@ type TransactionFilter = {
   playerId?: number
 }
 
-export type {
-  ClubTransaction,
-  TransactionFilter,
-  TransactionList,
-  TransactionSummary,
-  TransactionType,
-}
+export type { ClubTransaction, TransactionFilter, TransactionList, TransactionSummary, TransactionType }

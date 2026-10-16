@@ -1,5 +1,5 @@
 import type { Formation } from "@/features/clubs/types/lineup.types"
-import { DUEL_ATTRIBUTES, MATCH_RESULTS } from "@/features/league/consts/match"
+import { type DUEL_ATTRIBUTES, type MATCH_RESULTS } from "@/features/league/consts/match"
 import type { Condition } from "@/features/players/types/player.types"
 
 type MatchResult = (typeof MATCH_RESULTS)[number]

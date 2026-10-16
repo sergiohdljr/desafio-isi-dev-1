@@ -2,13 +2,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { FORMATIONS } from "@/features/clubs/consts/lineup"
 import type { Formation } from "@/features/clubs/types/lineup.types"
 
-function FormationPicker({
-  formation,
-  onChange,
-}: {
-  formation: Formation
-  onChange: (formation: Formation) => void
-}) {
+function FormationPicker({ formation, onChange }: { formation: Formation; onChange: (formation: Formation) => void }) {
   return (
     <div className="-mx-4 flex flex-col gap-2.5 border-b border-border px-5 py-4">
       <div>

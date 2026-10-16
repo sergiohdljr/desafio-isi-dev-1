@@ -79,9 +79,7 @@ function CreateClubDialog({
       </header>
       <DialogClose onClose={close} />
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        {formError ? (
-          <Alert variant="destructive" title={CREATE_CLUB_ERROR_TITLE} description={formError} />
-        ) : null}
+        {formError ? <Alert variant="destructive" title={CREATE_CLUB_ERROR_TITLE} description={formError} /> : null}
         <label className="flex flex-col gap-2">
           <span className="text-body-sm-medium">Nome</span>
           <span className="relative">
@@ -112,17 +110,15 @@ function CreateClubDialog({
             aria-invalid={invalidField === "acronym"}
             className="aria-invalid:shadow-[0_0_0_3px_rgba(228,0,22,0.2)]!"
             onChange={(event) => {
-              setAcronym(
-                event.target.value.toUpperCase().replace(ACRONYM_INPUT_PATTERN, "").slice(0, ACRONYM_LENGTH),
-              )
+              setAcronym(event.target.value.toUpperCase().replace(ACRONYM_INPUT_PATTERN, "").slice(0, ACRONYM_LENGTH))
               setInvalidField((current) => (current === "acronym" ? null : current))
             }}
           />
           <span className="text-caption-xs text-muted-foreground">{ACRONYM_HINT}</span>
         </label>
         <p className="flex items-center gap-2.5 rounded-lg border border-border bg-muted-subtle px-3 py-2.5 text-body-sm text-muted-foreground">
-          <Wallet className="size-4 shrink-0" aria-hidden />
-          O clube começa com {money.format(STARTING_CASH)} em caixa e sem jogadores.
+          <Wallet className="size-4 shrink-0" aria-hidden />O clube começa com {money.format(STARTING_CASH)} em caixa e
+          sem jogadores.
         </p>
         <footer className="flex items-center justify-end gap-2 border-t border-border pt-4">
           <Button type="button" variant="outline" disabled={pending} onClick={close}>

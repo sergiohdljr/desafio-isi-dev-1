@@ -77,7 +77,7 @@ function MatchesPage() {
             setCreating(false)
             void queryClient.invalidateQueries({ queryKey: ["matches"] })
             void queryClient.invalidateQueries({ queryKey: ["standings"] })
-            navigate(paths.match(match.id))
+            void navigate(paths.match(match.id))
           }}
         />
       ) : null}

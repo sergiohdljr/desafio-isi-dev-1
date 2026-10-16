@@ -96,9 +96,7 @@ function PlayersTable({
                 <td className="px-3 py-2 text-body-sm text-muted-foreground tabular-nums">
                   {money.format(player.base_value)}
                 </td>
-                <td className="px-3 py-2 text-body-sm-medium tabular-nums">
-                  {money.format(player.market_value)}
-                </td>
+                <td className="px-3 py-2 text-body-sm-medium tabular-nums">{money.format(player.market_value)}</td>
                 <td className="px-3 py-2">
                   {club ? (
                     <span className="flex items-center gap-2">

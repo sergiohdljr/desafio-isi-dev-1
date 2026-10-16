@@ -31,11 +31,7 @@ function MatchPage() {
     onRefresh: () => match.refetch(),
   })
   const error =
-    match.error instanceof Error
-      ? match.error.message
-      : match.error
-        ? "Não foi possível carregar a partida."
-        : null
+    match.error instanceof Error ? match.error.message : match.error ? "Não foi possível carregar a partida." : null
   const data = match.data
   const acronym = (clubId: number, name: string) => clubAcronym(clubs, clubId, name)
 

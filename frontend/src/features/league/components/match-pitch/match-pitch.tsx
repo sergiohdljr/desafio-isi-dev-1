@@ -51,7 +51,12 @@ function MatchPitch({ match }: { match: Match }) {
           <span className="absolute inset-y-0 left-[63%] w-[7%] bg-pitch-stripe" />
           <span className="absolute inset-y-0 left-[77%] w-[7%] bg-pitch-stripe" />
           <span className="absolute inset-y-0 left-[91%] w-[7%] bg-pitch-stripe" />
-          <svg className="absolute inset-6 h-[calc(100%-3rem)] w-[calc(100%-3rem)]" viewBox="0 0 1022 392" fill="none" aria-hidden>
+          <svg
+            className="absolute inset-6 h-[calc(100%-3rem)] w-[calc(100%-3rem)]"
+            viewBox="0 0 1022 392"
+            fill="none"
+            aria-hidden
+          >
             <rect x="1" y="1" width="1020" height="390" stroke="white" strokeOpacity="0.75" />
             <line x1="511" y1="1" x2="511" y2="391" stroke="white" strokeOpacity="0.75" />
             <circle cx="511" cy="196" r="52" stroke="white" strokeOpacity="0.75" />

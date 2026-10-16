@@ -22,13 +22,7 @@ function Input({
   fieldSize = "default",
   ...props
 }: InputPrimitive.Props & VariantProps<typeof inputVariants>) {
-  return (
-    <InputPrimitive
-      data-slot="input"
-      className={cn(inputVariants({ fieldSize, className }))}
-      {...props}
-    />
-  )
+  return <InputPrimitive data-slot="input" className={cn(inputVariants({ fieldSize, className }))} {...props} />
 }
 
 export { Input, inputVariants }

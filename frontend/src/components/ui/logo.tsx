@@ -7,13 +7,7 @@ const logoMarks = {
   lg: { src: logoLg, size: 56 },
 } as const
 
-function Logo({
-  className,
-  size = "md",
-}: {
-  className?: string
-  size?: keyof typeof logoMarks
-}) {
+function Logo({ className, size = "md" }: { className?: string; size?: keyof typeof logoMarks }) {
   const mark = logoMarks[size]
 
   return (
@@ -28,9 +22,7 @@ function Logo({
       )}
     >
       <img src={mark.src} alt="" width={mark.size} height={mark.size} />
-      <span className={size === "lg" ? "text-heading-page" : "text-heading-dialog"}>
-        Passe
-      </span>
+      <span className={size === "lg" ? "text-heading-page" : "text-heading-dialog"}>Passe</span>
     </a>
   )
 }

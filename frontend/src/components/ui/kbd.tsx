@@ -1,12 +1,6 @@
 import { cn } from "@/lib/utils"
 
-function Kbd({
-  className,
-  children,
-}: {
-  className?: string
-  children: string
-}) {
+function Kbd({ className, children }: { className?: string; children: string }) {
   return (
     <kbd
       data-slot="kbd"

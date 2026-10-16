@@ -72,11 +72,19 @@ function SellPlayerDialog({
       >
         <dl className="overflow-hidden rounded-[10px] border border-border text-body-sm">
           <SummaryRow label="Valor de compra" value={coins.format(sale.purchase_value)} />
-          <SummaryRow label="Valor de venda" hint="Valor de mercado no momento da venda" value={coins.format(sale.value)} />
+          <SummaryRow
+            label="Valor de venda"
+            hint="Valor de mercado no momento da venda"
+            value={coins.format(sale.value)}
+          />
           <SummaryRow label="Dias restantes" value={String(sale.remaining_days)} />
           <SummaryRow
             label="Multa"
-            hint={sale.penalty > 0 ? `${sale.penalty_rate}% do valor de venda, com teto de 10,00` : "Fidelidade cumprida: sem multa"}
+            hint={
+              sale.penalty > 0
+                ? `${sale.penalty_rate}% do valor de venda, com teto de 10,00`
+                : "Fidelidade cumprida: sem multa"
+            }
             value={coins.format(sale.penalty)}
           />
           <SummaryRow
@@ -89,7 +97,12 @@ function SellPlayerDialog({
             hint={sale.fee > 0 ? "10% do lucro até 10,00 + 20% do que passar" : "Sem lucro: sem comissão"}
             value={coins.format(sale.fee)}
           />
-          <SummaryRow label="Crédito no caixa" hint="Valor de venda − multa − comissão" value={signedCoins(sale.cash_change)} emphasis />
+          <SummaryRow
+            label="Crédito no caixa"
+            hint="Valor de venda − multa − comissão"
+            value={signedCoins(sale.cash_change)}
+            emphasis
+          />
           <div className="flex items-center justify-between border-b border-border px-3.5 py-2.5">
             <dt className="text-muted-foreground">Contrato</dt>
             <dd>
@@ -104,7 +117,9 @@ function SellPlayerDialog({
           <Button type="button" variant="outline" onClick={onViewHistory}>
             <History /> Ver histórico
           </Button>
-          <Button type="button" onClick={onClose}>Fechar</Button>
+          <Button type="button" onClick={onClose}>
+            Fechar
+          </Button>
         </div>
       </MarketDialog>
     )
@@ -117,8 +132,12 @@ function SellPlayerDialog({
       onClose={onClose}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        {failure === "network" ? <Alert variant="destructive" title="Sem conexão" description={failureMessage} /> : null}
-        {failure === "refused" ? <Alert variant="destructive" title="Venda recusada" description={failureMessage} /> : null}
+        {failure === "network" ? (
+          <Alert variant="destructive" title="Sem conexão" description={failureMessage} />
+        ) : null}
+        {failure === "refused" ? (
+          <Alert variant="destructive" title="Venda recusada" description={failureMessage} />
+        ) : null}
         {starter ? (
           <Alert
             variant="warning"
@@ -139,11 +158,14 @@ function SellPlayerDialog({
           </div>
         </dl>
         <RulesNote>
-          A venda é pelo valor de mercado do momento. Multa (teto de 10,00), lucro, comissão e crédito são calculados ao confirmar.
+          A venda é pelo valor de mercado do momento. Multa (teto de 10,00), lucro, comissão e crédito são calculados ao
+          confirmar.
         </RulesNote>
         {pending ? <PendingNote>Enviando a venda. Os botões ficam desabilitados até a resposta.</PendingNote> : null}
         <div className="flex justify-end gap-2 border-t border-border pt-4">
-          <Button type="button" variant="outline" disabled={pending} onClick={onClose}>Cancelar</Button>
+          <Button type="button" variant="outline" disabled={pending} onClick={onClose}>
+            Cancelar
+          </Button>
           <Button type="submit" disabled={pending}>
             <HandCoins />
             {pending ? "Vendendo…" : failure === "network" ? "Tentar de novo" : "Confirmar venda"}

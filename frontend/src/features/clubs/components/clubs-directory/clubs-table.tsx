@@ -37,9 +37,7 @@ function ClubsTable({ clubs }: { clubs: Club[] }) {
               </td>
               <td className="px-[8px] text-right text-body-sm tabular-nums">{money.format(club.cash)}</td>
               <td className="px-[8px] text-right text-body-sm tabular-nums">{money.format(club.squad_value)}</td>
-              <td className="px-[8px] text-right text-body-sm-semibold tabular-nums">
-                {money.format(club.net_worth)}
-              </td>
+              <td className="px-[8px] text-right text-body-sm-semibold tabular-nums">{money.format(club.net_worth)}</td>
               <td className="pr-[16px] pl-[8px] text-right">
                 <Button
                   type="button"

@@ -16,15 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Toast, ToastViewport } from "@/components/ui/toast"
 
-function LineupBoard({
-  clubId,
-  clubName,
-  squad,
-}: {
-  clubId: number
-  clubName: string
-  squad: SquadPlayer[]
-}) {
+function LineupBoard({ clubId, clubName, squad }: { clubId: number; clubName: string; squad: SquadPlayer[] }) {
   const queryClient = useQueryClient()
   const lineup = useQuery({
     queryKey: ["clubs", "lineup", clubId],
@@ -176,12 +168,7 @@ function LineupBoard({
         </footer>
       </section>
       <div className="flex flex-col gap-4">
-        <LineupPitch
-          formation={formation}
-          chosen={chosen}
-          complete={complete}
-          savedFormation={savedFormation}
-        />
+        <LineupPitch formation={formation} chosen={chosen} complete={complete} savedFormation={savedFormation} />
         <ReservesList reserves={reserves} />
       </div>
       {savedNotice ? (

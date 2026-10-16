@@ -26,11 +26,7 @@ function Avatar({
     initials: string
   }) {
   return (
-    <span
-      data-slot="avatar"
-      aria-hidden
-      className={cn(avatarVariants({ size, className }))}
-    >
+    <span data-slot="avatar" aria-hidden className={cn(avatarVariants({ size, className }))}>
       {initials}
     </span>
   )

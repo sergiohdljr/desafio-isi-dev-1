@@ -23,13 +23,7 @@ function PlayersPagination({
         Mostrando {rangeStart}–{rangeEnd} de {totalItems} jogadores
       </p>
       <div className="flex items-center gap-1">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={page <= 1}
-          onClick={() => onPageChange(page - 1)}
-        >
+        <Button type="button" variant="ghost" size="sm" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
           <ChevronLeft />
           Anterior
         </Button>

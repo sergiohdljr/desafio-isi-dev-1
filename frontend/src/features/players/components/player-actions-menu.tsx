@@ -60,17 +60,11 @@ function PlayerActionsMenu({
               Comprar
             </Menu.Item>
             <Menu.Separator className="my-1 h-px bg-border" />
-            <Menu.Item
-              className={cn(ITEM_CLASS, "text-destructive")}
-              disabled={!free}
-              onClick={onDelete}
-            >
+            <Menu.Item className={cn(ITEM_CLASS, "text-destructive")} disabled={!free} onClick={onDelete}>
               <Trash2 className="size-4" />
               Excluir
             </Menu.Item>
-            {free ? (
-              <p className="pr-2 pb-1.5 pl-8 text-caption-xs text-muted-foreground">{FREE_NOTE}</p>
-            ) : null}
+            {free ? <p className="pr-2 pb-1.5 pl-8 text-caption-xs text-muted-foreground">{FREE_NOTE}</p> : null}
           </Menu.Popup>
         </Menu.Positioner>
       </Menu.Portal>

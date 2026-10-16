@@ -41,9 +41,7 @@ describe("attributeLine", () => {
   it("formata o atributo por posição", () => {
     expect(attributeLine(player({ position: "ATA", shooting: 80 }))).toBe("Fin 80")
     expect(attributeLine(player({ position: "MEI", passing: 72 }))).toBe("Pas 72")
-    expect(attributeLine(player({ position: "LAT", dribbling: 61, defending: 50 }))).toBe(
-      "Dri 61 · Def 50",
-    )
+    expect(attributeLine(player({ position: "LAT", dribbling: 61, defending: 50 }))).toBe("Dri 61 · Def 50")
     expect(attributeLine(player({ position: "ZAG", defending: 77 }))).toBe("Def 77")
     expect(attributeLine(player({ position: "GOL", defending: 40 }))).toBe("Def 40")
   })

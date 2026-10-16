@@ -10,7 +10,8 @@ function EmptySquad({ onBrowse }: { onBrowse: () => void }) {
         </span>
         <h2 className="text-heading-card">Nenhum jogador no elenco</h2>
         <p className="w-[420px] max-w-full text-body-sm text-muted-foreground">
-          Compre jogadores livres para montar o elenco. O limite é de 12 jogadores, e o custo de cada compra não pode passar de 50% do caixa.
+          Compre jogadores livres para montar o elenco. O limite é de 12 jogadores, e o custo de cada compra não pode
+          passar de 50% do caixa.
         </p>
         <Button type="button" variant="outline" className="h-[36px] gap-[8px] px-[16px]!" onClick={onBrowse}>
           <Users />

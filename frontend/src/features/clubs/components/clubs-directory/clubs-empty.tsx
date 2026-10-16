@@ -12,8 +12,7 @@ function ClubsEmpty({ onCreate }: { onCreate: () => void }) {
         </span>
         <h2 className="text-heading-card">Nenhum clube cadastrado</h2>
         <p className="w-[420px] max-w-full text-body-sm text-muted-foreground">
-          Crie o primeiro clube com nome e sigla. Ele começa com {money.format(STARTING_CASH)} em caixa e sem
-          jogadores.
+          Crie o primeiro clube com nome e sigla. Ele começa com {money.format(STARTING_CASH)} em caixa e sem jogadores.
         </p>
         <Button type="button" variant="outline" className="h-[36px] gap-[8px] px-[16px]!" onClick={onCreate}>
           <Plus />

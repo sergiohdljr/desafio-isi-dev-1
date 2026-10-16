@@ -2,13 +2,7 @@ import { GroupRows } from "@/features/league/components/match-duels/group-rows"
 import type { Match } from "@/features/league/types/match.types"
 import { matchDuelGroups } from "@/features/league/utils/match-duel-groups"
 
-function MatchDuels({
-  match,
-  acronym,
-}: {
-  match: Match
-  acronym: (clubId: number, name: string) => string
-}) {
+function MatchDuels({ match, acronym }: { match: Match; acronym: (clubId: number, name: string) => string }) {
   return (
     <section className="overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
       <header className="border-b border-border px-5 py-4">

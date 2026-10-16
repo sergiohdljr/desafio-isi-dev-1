@@ -20,24 +20,6 @@ function uniqueToken() {
   return `Aaa${stamp.replace(/\d/g, "a")}`
 }
 
-function draftBody(draft: PlayerDraft) {
-  const skill = draft.skill ?? 60
-  const potential = draft.potential ?? Math.max(skill, 70)
-  return {
-    name: draft.name,
-    position: draft.position ?? "ATA",
-    age: draft.age ?? 23,
-    agility: draft.agility ?? 70,
-    pace: skill,
-    shooting: skill,
-    passing: skill,
-    dribbling: skill,
-    defending: skill,
-    physical: skill,
-    potential,
-  }
-}
-
 async function deletePlayer(request: APIRequestContext, id: number) {
   const response = await request.delete(`/api/v1/players/${id}`)
   expect(response.ok() || response.status() === 204, await response.text()).toBeTruthy()

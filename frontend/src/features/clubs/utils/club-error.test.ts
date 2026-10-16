@@ -13,9 +13,7 @@ describe("fieldForClubError", () => {
 
 describe("clubErrorDescription", () => {
   it("detalha nome duplicado", () => {
-    expect(clubErrorDescription(NAME_TAKEN, "  Real   Madrid  ")).toBe(
-      "Já existe um clube com o nome “Real Madrid”.",
-    )
+    expect(clubErrorDescription(NAME_TAKEN, "  Real   Madrid  ")).toBe("Já existe um clube com o nome “Real Madrid”.")
   })
 
   it("repassa outras mensagens", () => {

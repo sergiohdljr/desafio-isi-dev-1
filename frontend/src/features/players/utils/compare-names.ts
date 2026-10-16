@@ -1,5 +1,8 @@
 function foldName(value: string) {
-  return value.normalize("NFD").replace(/\p{Mn}/gu, "").toLowerCase()
+  return value
+    .normalize("NFD")
+    .replace(/\p{Mn}/gu, "")
+    .toLowerCase()
 }
 
 function normalizeSearch(value: string) {

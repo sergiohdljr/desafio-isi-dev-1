@@ -15,15 +15,7 @@ const formations = {
 type Formation = keyof typeof formations
 
 function Formacao({ formation }: { formation: Formation }) {
-  return (
-    <img
-      data-slot="formacao"
-      src={formations[formation]}
-      alt=""
-      width={40}
-      height={52}
-    />
-  )
+  return <img data-slot="formacao" src={formations[formation]} alt="" width={40} height={52} />
 }
 
 function FormacaoOption({

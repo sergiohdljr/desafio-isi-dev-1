@@ -130,8 +130,8 @@ function HomePage() {
             Gestão da liga, do mercado à classificação
           </h1>
           <p className="text-body-base text-muted-foreground">
-            Cadastre jogadores, monte os clubes e negocie com contrato de fidelidade. Depois,
-            escale os titulares e jogue partidas com placar calculado pelos atributos.
+            Cadastre jogadores, monte os clubes e negocie com contrato de fidelidade. Depois, escale os titulares e
+            jogue partidas com placar calculado pelos atributos.
           </p>
         </div>
         <div className="flex items-center gap-3.5">
@@ -154,10 +154,7 @@ function HomePage() {
               </li>
             )
             if (index === 0) return [item]
-            return [
-              <li key={`${stat.label}-sep`} aria-hidden className="size-0.75 rounded-full bg-border" />,
-              item,
-            ]
+            return [<li key={`${stat.label}-sep`} aria-hidden className="size-0.75 rounded-full bg-border" />, item]
           })}
           <li aria-hidden className="size-0.75 rounded-full bg-border" />
           <li className="flex items-center gap-1.5 text-caption-xs text-muted-foreground">
@@ -189,9 +186,7 @@ function HomePage() {
 
       <footer className="relative flex items-center gap-1.5 text-caption-xs text-muted-foreground">
         <Clock aria-hidden className="size-4" />
-        <p>
-          {league.name} · Horário de Brasília (UTC−3)
-        </p>
+        <p>{league.name} · Horário de Brasília (UTC−3)</p>
       </footer>
     </main>
   )

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest"
 import type { SquadPlayer } from "@/features/clubs/types/club.types"
 import { incompleteLineupNotice } from "@/features/clubs/utils/incomplete-lineup-notice"
 
-function squadPlayer(partial: Partial<SquadPlayer> & Pick<SquadPlayer, "id" | "name" | "position" | "condition">): SquadPlayer {
+function squadPlayer(
+  partial: Partial<SquadPlayer> & Pick<SquadPlayer, "id" | "name" | "position" | "condition">,
+): SquadPlayer {
   return {
     age: 25,
     agility: 50,

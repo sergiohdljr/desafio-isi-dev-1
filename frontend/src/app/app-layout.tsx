@@ -81,7 +81,7 @@ function AppLayout() {
           onHome={() => navigate(paths.home)}
           onNavigate={(label) => {
             const path = pathForSidebar(label)
-            if (path) navigate(path)
+            if (path) void navigate(path)
           }}
           onCreateClub={() => setCreating(true)}
           counts={{ players: counts.all, clubs: clubs.length }}
@@ -143,7 +143,7 @@ function AppLayout() {
           onSubmit={async (input) => {
             const created = await createClub(input)
             setCreating(false)
-            navigate(paths.club(created.id), { state: { created: true } })
+            void navigate(paths.club(created.id), { state: { created: true } })
           }}
         />
       ) : null}

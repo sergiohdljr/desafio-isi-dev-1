@@ -78,7 +78,9 @@ function BuyPlayerDialog({
           <SummaryRow label="Valor" hint="Valor de mercado no momento da compra" value={coins.format(purchase.value)} />
           <SummaryRow
             label="Taxa"
-            hint={purchase.fee > 0 ? "5% do valor, porque passa de 30,00" : "Sem taxa, porque o valor não passa de 30,00"}
+            hint={
+              purchase.fee > 0 ? "5% do valor, porque passa de 30,00" : "Sem taxa, porque o valor não passa de 30,00"
+            }
             value={coins.format(purchase.fee)}
           />
           <SummaryRow

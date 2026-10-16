@@ -28,7 +28,9 @@ function SummaryRow({
         <span className={emphasis ? "text-body-sm-semibold" : "text-muted-foreground"}>{label}</span>
         {hint ? <span className="block text-caption-xs text-muted-foreground">{hint}</span> : null}
       </dt>
-      <dd className={cn(emphasis ? "text-heading-card tabular-nums" : "text-body-sm-medium tabular-nums", valueClassName)}>
+      <dd
+        className={cn(emphasis ? "text-heading-card tabular-nums" : "text-body-sm-medium tabular-nums", valueClassName)}
+      >
         {value}
       </dd>
     </div>

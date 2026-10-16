@@ -39,9 +39,7 @@ function getLineup(id: number) {
 }
 
 function saveLineup(id: number, formation: Formation, playerIds: number[]) {
-  return api
-    .put<Lineup>(`/clubs/${id}/lineup`, { formation, player_ids: playerIds })
-    .then((response) => response.data)
+  return api.put<Lineup>(`/clubs/${id}/lineup`, { formation, player_ids: playerIds }).then((response) => response.data)
 }
 
 export { createClub, exportClubTransactions, getClub, getLineup, listClubTransactions, listClubs, saveLineup }

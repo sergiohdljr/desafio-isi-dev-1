@@ -81,9 +81,7 @@ function StartersTable({
                   ) : null}
                 </td>
                 <td className="px-2 text-body-sm-semibold tabular-nums">{player?.overall ?? ""}</td>
-                <td className="pr-4 pl-2 text-body-sm text-muted-foreground">
-                  {player ? usedAttributes(player) : ""}
-                </td>
+                <td className="pr-4 pl-2 text-body-sm text-muted-foreground">{player ? usedAttributes(player) : ""}</td>
               </tr>
             )
           })}

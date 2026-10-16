@@ -71,9 +71,7 @@ function SidebarClub({
       aria-label={collapsed ? name : undefined}
       className={cn(
         "flex h-8 items-center gap-2 rounded-md px-2 outline-none hover:bg-sidebar-accent focus-visible:shadow-focus",
-        active
-          ? "border border-sidebar-border bg-background text-body-sm-medium shadow-xs"
-          : "text-body-sm",
+        active ? "border border-sidebar-border bg-background text-body-sm-medium shadow-xs" : "text-body-sm",
         collapsed && "justify-center px-0",
         className,
       )}
@@ -82,16 +80,12 @@ function SidebarClub({
         aria-hidden
         className={cn(
           "inline-flex size-5 shrink-0 items-center justify-center rounded-sm text-caption-xs-medium",
-          active
-            ? "bg-primary text-primary-foreground"
-            : "border border-border bg-muted text-foreground",
+          active ? "bg-primary text-primary-foreground" : "border border-border bg-muted text-foreground",
         )}
       >
         {initial}
       </span>
-      {collapsed ? null : (
-        <span className="min-w-0 flex-1 truncate text-sidebar-foreground">{name}</span>
-      )}
+      {collapsed ? null : <span className="min-w-0 flex-1 truncate text-sidebar-foreground">{name}</span>}
     </a>
   )
 }
@@ -119,9 +113,7 @@ function SidebarGroup({
   return (
     <div className="flex w-full flex-col gap-0.5 p-2">
       <div className="flex h-8 items-center justify-between px-2">
-        {collapsed ? null : (
-          <p className="text-caption-xs-medium text-muted-foreground">{label}</p>
-        )}
+        {collapsed ? null : <p className="text-caption-xs-medium text-muted-foreground">{label}</p>}
         {action}
       </div>
       {children}
@@ -153,11 +145,7 @@ function Sidebar({
   return (
     <aside
       data-slot="sidebar"
-      className={cn(
-        "flex h-svh shrink-0 flex-col bg-sidebar",
-        collapsed ? "w-12" : "w-64",
-        className,
-      )}
+      className={cn("flex h-svh shrink-0 flex-col bg-sidebar", collapsed ? "w-12" : "w-64", className)}
     >
       <button
         type="button"

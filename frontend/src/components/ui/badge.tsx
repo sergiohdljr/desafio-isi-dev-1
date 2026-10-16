@@ -10,12 +10,9 @@ const badgeVariants = cva(
         default: "bg-primary text-primary-foreground",
         secondary: "bg-secondary text-secondary-foreground",
         outline: "border border-border bg-background text-foreground",
-        success:
-          "border border-success-soft-border bg-success-soft text-success-soft-foreground",
-        warning:
-          "border border-warning-soft-border bg-warning-soft text-warning-soft-foreground",
-        destructive:
-          "border border-destructive-soft-border bg-destructive-soft text-destructive-soft-foreground",
+        success: "border border-success-soft-border bg-success-soft text-success-soft-foreground",
+        warning: "border border-warning-soft-border bg-warning-soft text-warning-soft-foreground",
+        destructive: "border border-destructive-soft-border bg-destructive-soft text-destructive-soft-foreground",
       },
     },
     defaultVariants: {
@@ -36,13 +33,8 @@ function Badge({
     icon?: ReactNode
   }) {
   return (
-    <span
-      data-slot="badge"
-      className={cn(badgeVariants({ variant, className }))}
-    >
-      {dot ? (
-        <span className="size-1.5 rounded-full bg-current" aria-hidden />
-      ) : null}
+    <span data-slot="badge" className={cn(badgeVariants({ variant, className }))}>
+      {dot ? <span className="size-1.5 rounded-full bg-current" aria-hidden /> : null}
       {icon ? (
         <span className="[&_svg]:size-3" aria-hidden>
           {icon}

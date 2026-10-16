@@ -256,8 +256,7 @@ function CreatePlayerDialog({
         </div>
         <footer className="flex items-center justify-between border-t border-border pt-4">
           <p className="flex items-center gap-2 text-caption-xs text-muted-foreground">
-            <Info className="size-3.5" aria-hidden="true" />
-            O jogador começa livre e Apto.
+            <Info className="size-3.5" aria-hidden="true" />O jogador começa livre e Apto.
           </p>
           <div className="flex gap-2">
             <Button type="button" variant="outline" onClick={onClose}>

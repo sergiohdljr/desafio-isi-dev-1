@@ -43,8 +43,7 @@ function DeletePlayerDialog({
           Excluir {player.name}?
         </h2>
         <p className="text-body-sm text-muted-foreground">
-          O jogador sai da lista e da busca, mas as transações e as partidas antigas dele continuam como foram
-          gravadas.
+          O jogador sai da lista e da busca, mas as transações e as partidas antigas dele continuam como foram gravadas.
         </p>
       </header>
       <DialogClose onClose={onClose} />

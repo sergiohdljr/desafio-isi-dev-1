@@ -27,20 +27,14 @@ function isClubName(value: string) {
   if (!Array.from(value).every(isClubNameCharacter)) return false
 
   const words = value.split(" ")
-  return (
-    words.length >= NAME_MIN_WORDS &&
-    words.length <= NAME_MAX_WORDS &&
-    words.every((word) => /\p{L}/u.test(word))
-  )
+  return words.length >= NAME_MIN_WORDS && words.length <= NAME_MAX_WORDS && words.every((word) => /\p{L}/u.test(word))
 }
 
 function acronymFitsName(name: string, acronym: string) {
   if (!/^[A-Z]{3}$/.test(acronym)) return false
   if (acronym[0] === acronym[1] && acronym[1] === acronym[2]) return false
 
-  const letters = Array.from(foldAccents(name).toUpperCase()).filter((character) =>
-    /^\p{L}$/u.test(character),
-  )
+  const letters = Array.from(foldAccents(name).toUpperCase()).filter((character) => /^\p{L}$/u.test(character))
   if (letters[0] !== acronym[0]) return false
 
   let matched = 0

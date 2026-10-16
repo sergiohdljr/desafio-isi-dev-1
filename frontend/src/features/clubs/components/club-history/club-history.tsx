@@ -13,13 +13,7 @@ import { downloadBlob } from "@/features/clubs/utils/download-blob"
 import { toggleTransactionType } from "@/features/clubs/utils/toggle-transaction-type"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Toast, ToastViewport } from "@/components/ui/toast"
 
 function ClubHistory({ clubId, players }: { clubId: number; players: SquadPlayer[] }) {
@@ -93,7 +87,10 @@ function ClubHistory({ clubId, players }: { clubId: number; players: SquadPlayer
             onChange={(checked) => setTypes((current) => toggleTransactionType(current, "VENDA", checked))}
           />
           <span className="mx-1 h-5 w-px bg-border" aria-hidden />
-          <Select value={playerId || null} onValueChange={(value) => setPlayerId(value && value !== "all" ? value : "")}>
+          <Select
+            value={playerId || null}
+            onValueChange={(value) => setPlayerId(value && value !== "all" ? value : "")}
+          >
             <SelectTrigger className="w-auto" aria-label="Filtrar por jogador">
               <SelectValue placeholder="Todos os jogadores" />
             </SelectTrigger>

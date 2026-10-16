@@ -26,8 +26,8 @@ function ClubsPage() {
           <div className="flex min-w-0 flex-col gap-[4px]">
             <h1 className="text-heading-page">Clubes</h1>
             <p className="text-body-sm text-muted-foreground">
-              Cada clube começa com {money.format(STARTING_CASH)} em caixa e sem jogadores. A liga aceita no
-              máximo {MAX_CLUBS} clubes.
+              Cada clube começa com {money.format(STARTING_CASH)} em caixa e sem jogadores. A liga aceita no máximo{" "}
+              {MAX_CLUBS} clubes.
             </p>
           </div>
         </div>
@@ -39,13 +39,7 @@ function ClubsPage() {
 
       {error ? <Alert variant="destructive" description={error} /> : null}
 
-      <ClubsList
-        clubs={clubs}
-        isPending={isPending}
-        sort={sort}
-        onSortChange={setSort}
-        onCreate={openCreateClub}
-      />
+      <ClubsList clubs={clubs} isPending={isPending} sort={sort} onSortChange={setSort} onCreate={openCreateClub} />
 
       {clubs.length > 0 ? (
         <p className="text-caption-xs text-muted-foreground">
