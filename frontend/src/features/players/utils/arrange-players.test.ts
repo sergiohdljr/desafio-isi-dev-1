@@ -80,6 +80,14 @@ describe("arrangePlayers", () => {
     expect(arrangePlayers(roster, query({ maxValue: 20 })).players.map((item) => item.id)).toEqual([2, 4])
   })
 
+  it("combina busca, posição, condição, idade e valor", () => {
+    const matched = arrangePlayers(
+      roster,
+      query({ search: "ana", position: "ATA", condition: "APTO", minAge: 20, maxAge: 25, minValue: 30, maxValue: 50 }),
+    )
+    expect(matched.players.map((item) => item.id)).toEqual([1])
+  })
+
   it("respeita o escopo e o clube nos resultados e nos contadores", () => {
     const free = arrangePlayers(roster, query({ scope: "free" }))
     expect(free.players.map((item) => item.id)).toEqual([2])
@@ -102,5 +110,16 @@ describe("arrangePlayers", () => {
     const empty = arrangePlayers([], query())
     expect(empty.totalPages).toBe(0)
     expect(empty.players).toEqual([])
+  })
+
+  it("mostra 10 por página e deixa o restante na seguinte", () => {
+    const many = Array.from({ length: 11 }, (_, index) =>
+      player({ id: index + 1, name: `Jogador ${String.fromCharCode(65 + index)}` }),
+    )
+    const first = arrangePlayers(many, query({ limit: 10, page: 1 }))
+    const second = arrangePlayers(many, query({ limit: 10, page: 2 }))
+    expect(first.totalItems).toBe(11)
+    expect(first.players).toHaveLength(10)
+    expect(second.players.map((item) => item.name)).toEqual(["Jogador K"])
   })
 })
