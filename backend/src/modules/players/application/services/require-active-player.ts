@@ -1,5 +1,5 @@
 import { DomainError } from '../../../../shared/domain/domain-error.js';
-import { Player } from '../../domain/entities/player.js';
+import type { Player } from '../../domain/entities/player.js';
 import type { PlayersRepository } from '../repositories/players-repository.js';
 
 export async function requireActivePlayer(

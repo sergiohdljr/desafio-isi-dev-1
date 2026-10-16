@@ -1,7 +1,7 @@
 import { Money } from '../../../../shared/domain/money.js';
 import { Player } from '../../domain/entities/player.js';
 import { arrangePlayers } from './player-list.js';
-import { PlayerListQuery } from './player-list-query.js';
+import type { PlayerListQuery } from './player-list-query.js';
 
 const baseValue = Money.roundHalfAwayFromZero('1.00');
 

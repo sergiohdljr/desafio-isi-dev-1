@@ -1,5 +1,5 @@
 import fastifyApiReference from '@scalar/fastify-api-reference';
-import { NestFastifyApplication } from '@nestjs/platform-fastify';
+import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { openApiDocument } from './openapi-document.js';
 
 export function mountDocs(app: NestFastifyApplication): void {

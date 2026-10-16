@@ -1,4 +1,4 @@
-import { NestFastifyApplication } from '@nestjs/platform-fastify';
+import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { mountDocs } from './docs/mount-docs.js';
 
 export function configureApp(app: NestFastifyApplication): void {

@@ -1,5 +1,5 @@
 import { formatBrasilia } from '../../../../clubs/infra/http/presenters/brasilia-time.js';
-import { TransactionListView } from '../../../application/use-cases/list-transactions.use-case.js';
+import type { TransactionListView } from '../../../application/use-cases/list-transactions.use-case.js';
 
 export function presentTransactions(view: TransactionListView) {
   return {

@@ -1,5 +1,5 @@
 import { formatBrasilia } from '../../../../clubs/infra/http/presenters/brasilia-time.js';
-import { SaleView } from '../../../application/use-cases/sell-player.use-case.js';
+import type { SaleView } from '../../../application/use-cases/sell-player.use-case.js';
 
 export function presentSale(view: SaleView) {
   return {

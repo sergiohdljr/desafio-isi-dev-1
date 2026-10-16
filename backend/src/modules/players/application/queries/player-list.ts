@@ -3,8 +3,8 @@ import {
   foldName,
 } from '../../../../shared/domain/name-order.js';
 import { positionOrder } from '../../../clubs/domain/entities/squad.js';
-import { Player } from '../../domain/entities/player.js';
-import { PlayerListQuery, PlayerSort } from './player-list-query.js';
+import type { Player } from '../../domain/entities/player.js';
+import type { PlayerListQuery, PlayerSort } from './player-list-query.js';
 
 export type PlayerListPage = {
   data: Player[];

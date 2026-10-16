@@ -1,5 +1,5 @@
 import { Money } from '../../../../shared/domain/money.js';
-import { Club } from '../../domain/entities/club.js';
+import type { Club } from '../../domain/entities/club.js';
 
 export type ClubView = {
   id: number;

@@ -1,4 +1,4 @@
-import { NestFastifyApplication } from '@nestjs/platform-fastify';
+import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { closeLeague, openLeague, resetLeague } from '../league-app.js';
 import { appOf, buyPlayer, createClub, createPlayer } from './api.js';
 

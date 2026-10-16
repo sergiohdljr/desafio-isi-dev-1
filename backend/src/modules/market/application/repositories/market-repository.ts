@@ -1,4 +1,4 @@
-import { Money } from '../../../../shared/domain/money.js';
+import type { Money } from '../../../../shared/domain/money.js';
 import {
   type PurchaseFacts,
   type PurchaseWrite,

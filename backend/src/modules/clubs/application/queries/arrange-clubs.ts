@@ -1,7 +1,7 @@
 import { compareNames } from '../../../../shared/domain/name-order.js';
-import { Money } from '../../../../shared/domain/money.js';
-import { Club } from '../../domain/entities/club.js';
-import { ClubSort } from './club-list-query.js';
+import type { Money } from '../../../../shared/domain/money.js';
+import type { Club } from '../../domain/entities/club.js';
+import type { ClubSort } from './club-list-query.js';
 
 export type ClubWithSquad = {
   club: Club;

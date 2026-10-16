@@ -1,5 +1,5 @@
-import { Player } from '../../domain/entities/player.js';
-import { Condition, Position } from '../../domain/types/player-types.js';
+import type { Player } from '../../domain/entities/player.js';
+import type { Condition, Position } from '../../domain/types/player-types.js';
 
 export type PlayerView = {
   id: number;

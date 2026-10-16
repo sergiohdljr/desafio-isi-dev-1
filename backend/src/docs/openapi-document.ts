@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import type { z } from 'zod';
 import { resourceIdSchema } from '../common/validation/resource-id.js';
 import { clubListQuerySchema } from '../modules/clubs/infra/http/input/club-list-query.schema.js';
 import { createClubSchema } from '../modules/clubs/infra/http/dto/create-club.schema.js';

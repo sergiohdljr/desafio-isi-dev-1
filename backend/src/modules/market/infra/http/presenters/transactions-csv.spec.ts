@@ -1,5 +1,5 @@
 import { toTransactionsCsv } from './transactions-csv.js';
-import { TransactionView } from '../../../application/use-cases/list-transactions.use-case.js';
+import type { TransactionView } from '../../../application/use-cases/list-transactions.use-case.js';
 
 function row(overrides: Partial<TransactionView>): TransactionView {
   return {

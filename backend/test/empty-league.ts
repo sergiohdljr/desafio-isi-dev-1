@@ -1,4 +1,4 @@
-import { PrismaService } from '../src/prisma/prisma.service.js';
+import type { PrismaService } from '../src/prisma/prisma.service.js';
 
 export async function emptyLeague(prisma: PrismaService): Promise<void> {
   await prisma.duelos_partida.deleteMany();

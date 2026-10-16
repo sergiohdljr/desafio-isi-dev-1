@@ -1,6 +1,7 @@
+import type {
+  NestFastifyApplication} from '@nestjs/platform-fastify';
 import {
-  FastifyAdapter,
-  NestFastifyApplication,
+  FastifyAdapter
 } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../src/app.module.js';

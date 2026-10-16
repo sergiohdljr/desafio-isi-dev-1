@@ -1,4 +1,4 @@
-import { Player } from '../../domain/entities/player.js';
+import type { Player } from '../../domain/entities/player.js';
 
 export const PLAYERS_REPOSITORY = Symbol('PLAYERS_REPOSITORY');
 

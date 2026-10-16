@@ -1,5 +1,5 @@
 import { formatBrasilia } from '../../../../clubs/infra/http/presenters/brasilia-time.js';
-import { TransactionView } from '../../../application/use-cases/list-transactions.use-case.js';
+import type { TransactionView } from '../../../application/use-cases/list-transactions.use-case.js';
 
 const HEADER =
   'data_hora;tipo;jogador;valor;taxa_ou_comissao;multa;lucro;variacao_caixa';

@@ -1,5 +1,5 @@
 import { formatBrasilia } from '../../../../clubs/infra/http/presenters/brasilia-time.js';
-import { PurchaseView } from '../../../application/use-cases/buy-player.use-case.js';
+import type { PurchaseView } from '../../../application/use-cases/buy-player.use-case.js';
 
 export function presentPurchase(view: PurchaseView) {
   return {

@@ -1,6 +1,6 @@
 import { presentPlayer } from '../../../../players/infra/http/presenters/player-response.js';
-import { ClubView } from '../../../application/read-models/club-view.js';
-import { ClubDetailView } from '../../../application/use-cases/find-club.use-case.js';
+import type { ClubView } from '../../../application/read-models/club-view.js';
+import type { ClubDetailView } from '../../../application/use-cases/find-club.use-case.js';
 import { formatBrasilia } from './brasilia-time.js';
 
 export type ClubResponse = {

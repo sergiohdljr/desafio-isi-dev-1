@@ -1,5 +1,5 @@
-import { Condition, Position } from '../../../domain/types/player-types.js';
-import {
+import type { Condition, Position } from '../../../domain/types/player-types.js';
+import type {
   PlayerListView,
   PlayerView,
 } from '../../../application/read-models/player-view.js';

@@ -1,5 +1,5 @@
 import { DomainError } from '../../../../shared/domain/domain-error.js';
-import { Money } from '../../../../shared/domain/money.js';
+import type { Money } from '../../../../shared/domain/money.js';
 import {
   settleSale,
   type ContractStatus,
