@@ -2,13 +2,7 @@
 
 ## Banco
 
-O e2e usa o Postgres do `docker-compose.yml`, no banco `liga_teste`, separado do banco da aplicação. O script `docker/init/01-liga-teste.sql` cria esse banco quando o volume ainda está vazio. Se o volume já existia, crie uma vez:
-
-```sql
-CREATE DATABASE liga_teste;
-```
-
-Copie `.env.test.example` para `.env.test` e ajuste usuário e senha. `npm run test:e2e` carrega esse arquivo, aplica `prisma migrate deploy` e roda a suíte em série. Cada arquivo em `test/flows/` abre a aplicação uma vez e esvazia a liga antes de cada caso, com `resetLeague`.
+O e2e usa o serviço `postgres-test` do `docker-compose.yml`, na porta 5433, com o banco `liga_teste` criado pela imagem. O Postgres da aplicação não entra nessa suíte. Copie `.env.test.example` para `.env.test` e use o mesmo usuário e senha do `.env`, na porta 5433. `npm run test:e2e:up` sobe esse serviço, espera o healthcheck e roda a suíte. `npm run test:e2e` só roda a suíte, com o serviço já no ar: carrega `.env.test`, aplica `prisma migrate deploy` e executa os arquivos em série. Cada arquivo em `test/flows/` abre a aplicação uma vez e esvazia a liga antes de cada caso, com `resetLeague`.
 
 Cada fluxo tem um caso feliz e o erro que a borda HTTP traduz. O teste confere o status, o corpo e se a operação recusada gravou alguma coisa. Percentual, faixa, arredondamento e teto ficam no teste unitário da função que calcula.
 

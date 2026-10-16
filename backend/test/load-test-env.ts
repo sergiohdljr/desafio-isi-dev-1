@@ -14,9 +14,9 @@ export function loadTestEnv(): void {
   process.env.NODE_ENV = 'test';
 
   const url = process.env.DATABASE_URL ?? '';
-  if (!url.endsWith('/liga_teste')) {
+  if (!url.endsWith(':5433/liga_teste')) {
     throw new Error(
-      'DATABASE_URL do e2e precisa terminar em /liga_teste, para não gravar no banco da aplicação.',
+      'DATABASE_URL do e2e precisa apontar para a porta 5433 e o banco liga_teste.',
     );
   }
 }
