@@ -37,9 +37,9 @@ describe('club contracts', () => {
     expect(() =>
       bodyPipe.transform({ name: 'Águias\tFC', acronym: 'AFC' }),
     ).toThrow(BadRequestException);
-    expect(() =>
-      bodyPipe.transform({ name: null, acronym: 'AFC' }),
-    ).toThrow(BadRequestException);
+    expect(() => bodyPipe.transform({ name: null, acronym: 'AFC' })).toThrow(
+      BadRequestException,
+    );
     expect(() => bodyPipe.transform({ acronym: 'AFC' })).toThrow(
       BadRequestException,
     );
@@ -53,9 +53,11 @@ describe('club contracts', () => {
 
   it('defaults the list sort to name and ignores an unknown parameter', () => {
     expect(queryPipe.transform({})).toEqual({ sort: 'name' });
-    expect(queryPipe.transform({ extra: '1', sort: 'net_worth_desc' })).toEqual({
-      sort: 'net_worth_desc',
-    });
+    expect(queryPipe.transform({ extra: '1', sort: 'net_worth_desc' })).toEqual(
+      {
+        sort: 'net_worth_desc',
+      },
+    );
     expect(queryPipe.transform({ sort: 'net_worth_asc' })).toEqual({
       sort: 'net_worth_asc',
     });

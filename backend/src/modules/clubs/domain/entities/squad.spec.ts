@@ -1,25 +1,15 @@
 import { Money } from '../../../../shared/domain/money.js';
 import { Player } from '../../../players/domain/entities/player.js';
-import {
-  arrangeSquad,
-  remainingDays,
-  squadValueOf,
-} from './squad.js';
+import { arrangeSquad, remainingDays, squadValueOf } from './squad.js';
 
 const now = new Date('2027-03-02T15:00:00.000Z');
 
 describe('squad', () => {
   it('rounds remaining loyalty days up from the query instant', () => {
-    expect(
-      remainingDays(new Date('2027-03-04T15:00:00.000Z'), now),
-    ).toBe(2);
-    expect(
-      remainingDays(new Date('2027-03-04T15:00:00.001Z'), now),
-    ).toBe(3);
+    expect(remainingDays(new Date('2027-03-04T15:00:00.000Z'), now)).toBe(2);
+    expect(remainingDays(new Date('2027-03-04T15:00:00.001Z'), now)).toBe(3);
     expect(remainingDays(now, now)).toBe(0);
-    expect(
-      remainingDays(new Date('2027-03-01T15:00:00.000Z'), now),
-    ).toBe(-1);
+    expect(remainingDays(new Date('2027-03-01T15:00:00.000Z'), now)).toBe(-1);
   });
 
   it('sums already rounded market values once, half away from zero', () => {
@@ -38,7 +28,9 @@ describe('squad', () => {
       member('MEI', 'Meia Épsilon', 5),
     ]);
 
-    expect(ordered.map((player) => [player.position, player.name, player.id])).toEqual([
+    expect(
+      ordered.map((player) => [player.position, player.name, player.id]),
+    ).toEqual([
       ['GOL', 'Goleiro Alfa', 1],
       ['MEI', 'Meia Delta', 2],
       ['MEI', 'Meia Épsilon', 3],
@@ -48,7 +40,11 @@ describe('squad', () => {
   });
 });
 
-function member(position: 'GOL' | 'MEI' | 'ATA', name: string, id: number): Player {
+function member(
+  position: 'GOL' | 'MEI' | 'ATA',
+  name: string,
+  id: number,
+): Player {
   const draft = Player.register({
     name,
     position,

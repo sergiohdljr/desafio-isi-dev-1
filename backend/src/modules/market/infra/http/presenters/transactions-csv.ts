@@ -5,18 +5,17 @@ const HEADER =
   'data_hora;tipo;jogador;valor;taxa_ou_comissao;multa;lucro;variacao_caixa';
 
 export function toTransactionsCsv(rows: TransactionView[]): string {
-  const lines = rows.map(
-    (row) =>
-      [
-        formatBrasilia(row.createdAt),
-        row.type,
-        csvText(row.playerName),
-        csvAmount(row.value),
-        csvAmount(row.fee),
-        csvAmount(row.penalty),
-        row.profit === null ? '' : csvAmount(row.profit),
-        csvAmount(row.cashChange),
-      ].join(';'),
+  const lines = rows.map((row) =>
+    [
+      formatBrasilia(row.createdAt),
+      row.type,
+      csvText(row.playerName),
+      csvAmount(row.value),
+      csvAmount(row.fee),
+      csvAmount(row.penalty),
+      row.profit === null ? '' : csvAmount(row.profit),
+      csvAmount(row.cashChange),
+    ].join(';'),
   );
   return `${[HEADER, ...lines].join('\n')}\n`;
 }

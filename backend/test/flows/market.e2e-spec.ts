@@ -38,7 +38,9 @@ describe('Compra', () => {
       -(player.market_value + bought.body.fee),
     );
 
-    const hired = await appOf(app).get(`/api/v1/players/${player.id}`).expect(200);
+    const hired = await appOf(app)
+      .get(`/api/v1/players/${player.id}`)
+      .expect(200);
     expect(hired.body.club_id).toBe(club.id);
 
     const contract = await prismaOf(app).contratos.findFirst({
@@ -102,7 +104,10 @@ describe('Compra', () => {
       .post(`/api/v1/players/${player.id}/buy`)
       .send({ club_id: 999999, loyalty_until: loyaltyUntil })
       .expect(404);
-    await appOf(app).post(`/api/v1/players/${player.id}/buy`).send({}).expect(400);
+    await appOf(app)
+      .post(`/api/v1/players/${player.id}/buy`)
+      .send({})
+      .expect(400);
     expect(await prismaOf(app).transacoes.count()).toBe(0);
   });
 });
@@ -127,7 +132,9 @@ describe('Venda', () => {
     const player = await createPlayer(app);
     const bought = await buyPlayer(app, player.id, club.id).expect(200);
 
-    const sold = await appOf(app).post(`/api/v1/players/${player.id}/sell`).expect(200);
+    const sold = await appOf(app)
+      .post(`/api/v1/players/${player.id}/sell`)
+      .expect(200);
     expect(sold.body.type).toBe('VENDA');
     expect(sold.body.club_cash).toBeCloseTo(
       bought.body.club_cash + sold.body.cash_change,
@@ -136,7 +143,9 @@ describe('Venda', () => {
     expect(sold.body.profit).toBe(sold.body.value - sold.body.purchase_value);
     expect(['ENCERRADO', 'RESCINDIDO']).toContain(sold.body.contract_status);
 
-    const freed = await appOf(app).get(`/api/v1/players/${player.id}`).expect(200);
+    const freed = await appOf(app)
+      .get(`/api/v1/players/${player.id}`)
+      .expect(200);
     expect(freed.body.club_id).toBeNull();
 
     const contract = await prismaOf(app).contratos.findFirst({

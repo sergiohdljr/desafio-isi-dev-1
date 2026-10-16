@@ -6,13 +6,12 @@ import {
   type ClubsRepository,
 } from '../../repositories/clubs-repository.js';
 import { Money } from '../../../../../shared/domain/money.js';
-import { Player, type RegisterPlayer } from '../../../../players/domain/entities/player.js';
 import {
-  CLOCK,
-} from '../../clock.js';
-import {
-  type SquadMember,
-} from '../../repositories/clubs-repository.js';
+  Player,
+  type RegisterPlayer,
+} from '../../../../players/domain/entities/player.js';
+import { CLOCK } from '../../clock.js';
+import { type SquadMember } from '../../repositories/clubs-repository.js';
 import { CreateClub } from '../create-club.use-case.js';
 import { FindClub } from '../find-club.use-case.js';
 import { ListClubs } from '../list-clubs.use-case.js';
@@ -174,7 +173,11 @@ describe('club use cases', () => {
     const existing = Array.from({ length: 19 }, (_, index) => {
       const second = String.fromCharCode(65 + (index % 25));
       const third = String.fromCharCode(66 + (index % 24));
-      return stored(`Clube ${index + 1} Norte`, `C${second}${third}`, index + 1);
+      return stored(
+        `Clube ${index + 1} Norte`,
+        `C${second}${third}`,
+        index + 1,
+      );
     });
     const { repo, saved } = repository(existing);
     const create = await useCase(CreateClub, repo);
@@ -226,7 +229,9 @@ describe('club use cases', () => {
       stored('Aguias FC', 'AGU', 7),
       stored('Águias FC', 'AGI', 2),
     ];
-    const { repo } = repository(clubs, [contracted(member(9, 1), new Date('2027-06-01T15:00:00.000Z'))]);
+    const { repo } = repository(clubs, [
+      contracted(member(9, 1), new Date('2027-06-01T15:00:00.000Z')),
+    ]);
     const list = await useCase(ListClubs, repo);
 
     const ascending = await list.execute({ sort: 'net_worth_asc' });

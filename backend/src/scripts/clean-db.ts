@@ -25,7 +25,8 @@ async function cleanDatabase() {
 }
 
 cleanDatabase().catch((error: unknown) => {
-  const message = error instanceof Error ? error.message : 'Falha ao limpar o banco';
+  const message =
+    error instanceof Error ? error.message : 'Falha ao limpar o banco';
   console.error(message);
   process.exitCode = 1;
 });

@@ -16,11 +16,11 @@ import {
 import { SQUAD_LIMIT } from '../modules/market/application/policies/decide-purchase.js';
 import type { Position } from '../modules/players/domain/types/player-types.js';
 
-const LOYALTY_DAYS = 365
-const FREE_PLAYERS = 12
-const SKILL = 1
-const AGE = 24
-const AGILITY = 40
+const LOYALTY_DAYS = 365;
+const FREE_PLAYERS = 12;
+const SKILL = 1;
+const AGE = 24;
+const AGILITY = 40;
 
 const SQUAD: Position[] = [
   'GOL',
@@ -35,26 +35,26 @@ const SQUAD: Position[] = [
   'ATA',
   'ATA',
   'ATA',
-]
+];
 
 const CLUBS = [
   { name: 'Norte Futebol Clube', acronym: 'NFC' },
   { name: 'Sul Esporte Clube', acronym: 'SEC' },
-] as const
+] as const;
 
-const FIRST_NAMES = ['Caio', 'Davi', 'Enzo', 'Iago', 'Luan', 'Otto']
-const LAST_NAMES = ['Melo', 'Lima', 'Nunes', 'Pires', 'Rocha', 'Souza']
+const FIRST_NAMES = ['Caio', 'Davi', 'Enzo', 'Iago', 'Luan', 'Otto'];
+const LAST_NAMES = ['Melo', 'Lima', 'Nunes', 'Pires', 'Rocha', 'Souza'];
 
 async function resetDemo() {
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['error', 'warn', 'log'],
-  })
+  });
 
   try {
-    const prisma = app.get(PrismaService)
-    const createClub = app.get<CreateClubPort>(CREATE_CLUB)
-    const createPlayer = app.get<CreatePlayerPort>(CREATE_PLAYER)
-    const buyPlayer = app.get<BuyPlayerPort>(BUY_PLAYER)
+    const prisma = app.get(PrismaService);
+    const createClub = app.get<CreateClubPort>(CREATE_CLUB);
+    const createPlayer = app.get<CreatePlayerPort>(CREATE_PLAYER);
+    const buyPlayer = app.get<BuyPlayerPort>(BUY_PLAYER);
 
     await prisma.$transaction([
       prisma.duelos_partida.deleteMany(),
@@ -64,41 +64,42 @@ async function resetDemo() {
       prisma.contratos.deleteMany(),
       prisma.jogadores.deleteMany(),
       prisma.clubes.deleteMany(),
-    ])
+    ]);
 
-    const loyaltyUntil = new Date()
-    loyaltyUntil.setUTCDate(loyaltyUntil.getUTCDate() + LOYALTY_DAYS)
+    const loyaltyUntil = new Date();
+    loyaltyUntil.setUTCDate(loyaltyUntil.getUTCDate() + LOYALTY_DAYS);
 
-    let nameIndex = 0
+    let nameIndex = 0;
     for (const club of CLUBS) {
-      const created = await createClub.execute(club)
+      const created = await createClub.execute(club);
       for (const position of SQUAD) {
-        const player = await createPlayer.execute(draft(position, nameIndex))
-        nameIndex += 1
+        const player = await createPlayer.execute(draft(position, nameIndex));
+        nameIndex += 1;
         await buyPlayer.execute({
           playerId: player.id,
           clubId: created.id,
           loyaltyUntil,
-        })
+        });
       }
     }
 
     for (let index = 0; index < FREE_PLAYERS; index += 1) {
-      await createPlayer.execute(draft(SQUAD[index % SQUAD.length], nameIndex))
-      nameIndex += 1
+      await createPlayer.execute(draft(SQUAD[index % SQUAD.length], nameIndex));
+      nameIndex += 1;
     }
 
     console.log(
       `Banco limpo. ${CLUBS.length} clubes com ${SQUAD_LIMIT} jogadores cada e ${FREE_PLAYERS} jogadores sem contrato.`,
-    )
+    );
   } finally {
-    await app.close()
+    await app.close();
   }
 }
 
 function draft(position: Position, index: number) {
-  const first = FIRST_NAMES[index % FIRST_NAMES.length]
-  const last = LAST_NAMES[Math.floor(index / FIRST_NAMES.length) % LAST_NAMES.length]
+  const first = FIRST_NAMES[index % FIRST_NAMES.length];
+  const last =
+    LAST_NAMES[Math.floor(index / FIRST_NAMES.length) % LAST_NAMES.length];
   return {
     name: `${first} ${last}`,
     position,
@@ -111,11 +112,12 @@ function draft(position: Position, index: number) {
     defending: SKILL,
     physical: SKILL,
     potential: SKILL,
-  }
+  };
 }
 
 resetDemo().catch((error: unknown) => {
-  const message = error instanceof Error ? error.message : 'Falha ao remontar o banco'
-  console.error(message)
-  process.exitCode = 1
-})
+  const message =
+    error instanceof Error ? error.message : 'Falha ao remontar o banco';
+  console.error(message);
+  process.exitCode = 1;
+});

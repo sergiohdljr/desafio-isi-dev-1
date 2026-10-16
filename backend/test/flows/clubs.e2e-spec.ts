@@ -26,7 +26,9 @@ describe('Clubes', () => {
       net_worth: 300,
     });
 
-    const detail = await appOf(app).get(`/api/v1/clubs/${created.id}`).expect(200);
+    const detail = await appOf(app)
+      .get(`/api/v1/clubs/${created.id}`)
+      .expect(200);
     expect(detail.body.players).toEqual([]);
     expect(detail.body.net_worth).toBe(300);
   });
@@ -68,7 +70,10 @@ describe('Clubes', () => {
     const player = await createPlayer(app, { name: 'Reforco Caro' });
     await buyPlayer(app, player.id, zulu.id).expect(200);
 
-    const byName = await appOf(app).get('/api/v1/clubs').query({ sort: 'name' }).expect(200);
+    const byName = await appOf(app)
+      .get('/api/v1/clubs')
+      .query({ sort: 'name' })
+      .expect(200);
     expect(byName.body.map((club: { id: number }) => club.id)).toEqual([
       aguias.id,
       plain.id,
@@ -91,16 +96,21 @@ describe('Clubes', () => {
 
   it('devolve o elenco na ordem de posição, o contrato e o patrimônio na consulta do clube', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
-    const attack = await createPlayer(app, { name: 'Ataque Beta', position: 'ATA' });
-    const keeper = await createPlayer(app, { name: 'Goleiro Alfa', position: 'GOL' });
+    const attack = await createPlayer(app, {
+      name: 'Ataque Beta',
+      position: 'ATA',
+    });
+    const keeper = await createPlayer(app, {
+      name: 'Goleiro Alfa',
+      position: 'GOL',
+    });
     await buyPlayer(app, attack.id, club.id).expect(200);
     await buyPlayer(app, keeper.id, club.id).expect(200);
 
     const detail = await appOf(app).get(`/api/v1/clubs/${club.id}`).expect(200);
-    expect(detail.body.players.map((player: { name: string }) => player.name)).toEqual([
-      'Goleiro Alfa',
-      'Ataque Beta',
-    ]);
+    expect(
+      detail.body.players.map((player: { name: string }) => player.name),
+    ).toEqual(['Goleiro Alfa', 'Ataque Beta']);
     expect(detail.body.players[0].contract.purchase_value).toBe(
       detail.body.players[0].market_value,
     );
@@ -108,7 +118,8 @@ describe('Clubes', () => {
       '2027-04-01T15:00:00-03:00',
     );
     const squad = detail.body.players.reduce(
-      (sum: number, player: { market_value: number }) => sum + player.market_value,
+      (sum: number, player: { market_value: number }) =>
+        sum + player.market_value,
       0,
     );
     expect(detail.body.squad_value).toBe(squad);

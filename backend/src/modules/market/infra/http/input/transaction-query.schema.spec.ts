@@ -22,7 +22,9 @@ describe('transaction query', () => {
 
   it('rejects an empty, repeated, spaced or lowercase type and a bad player id', () => {
     expect(() => pipe.transform({ type: '' })).toThrow(BadRequestException);
-    expect(() => pipe.transform({ type: 'venda' })).toThrow(BadRequestException);
+    expect(() => pipe.transform({ type: 'venda' })).toThrow(
+      BadRequestException,
+    );
     expect(() => pipe.transform({ type: 'COMPRA,COMPRA' })).toThrow(
       BadRequestException,
     );

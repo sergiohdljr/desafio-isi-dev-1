@@ -1,4 +1,11 @@
-import { Controller, Get, Inject, Param, Query, StreamableFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Query,
+  StreamableFile,
+} from '@nestjs/common';
 import { ZodPipe } from '../../../../common/validation/zod-pipe.js';
 import { clubIdSchema } from '../../../clubs/infra/http/input/club-id.schema.js';
 import { type TransactionFilter } from '../../application/repositories/market-repository.js';
@@ -19,30 +26,25 @@ export class ClubsMarketController {
 
   @Get(':id/transactions/export')
   async exportFile(
-    @Param(
-      'id',
-      new ZodPipe(clubIdSchema, 'not_found', 'Clube não encontrado'),
-    )
+    @Param('id', new ZodPipe(clubIdSchema, 'not_found', 'Clube não encontrado'))
     id: number,
     @Query(new ZodPipe(transactionQuerySchema)) filter: TransactionFilter,
   ): Promise<StreamableFile> {
     const page = await this.listTransactions.execute(id, filter);
-    return new StreamableFile(Buffer.from(toTransactionsCsv(page.data), 'utf8'), {
-      type: 'text/csv; charset=utf-8',
-    });
+    return new StreamableFile(
+      Buffer.from(toTransactionsCsv(page.data), 'utf8'),
+      {
+        type: 'text/csv; charset=utf-8',
+      },
+    );
   }
 
   @Get(':id/transactions')
   async list(
-    @Param(
-      'id',
-      new ZodPipe(clubIdSchema, 'not_found', 'Clube não encontrado'),
-    )
+    @Param('id', new ZodPipe(clubIdSchema, 'not_found', 'Clube não encontrado'))
     id: number,
     @Query(new ZodPipe(transactionQuerySchema)) filter: TransactionFilter,
   ) {
-    return presentTransactions(
-      await this.listTransactions.execute(id, filter),
-    );
+    return presentTransactions(await this.listTransactions.execute(id, filter));
   }
 }

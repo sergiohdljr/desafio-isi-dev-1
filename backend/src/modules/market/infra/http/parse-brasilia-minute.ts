@@ -1,5 +1,4 @@
-const BRASILIA_MINUTE =
-  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})-03:00$/;
+const BRASILIA_MINUTE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})-03:00$/;
 
 export function parseBrasiliaMinute(value: string): Date | null {
   const match = BRASILIA_MINUTE.exec(value);

@@ -66,13 +66,21 @@ describe('loyalty penalty', () => {
       days: 31,
       rate: 10 as const,
     },
-    { until: new Date(start.getTime() + 180 * day), days: 180, rate: 10 as const },
+    {
+      until: new Date(start.getTime() + 180 * day),
+      days: 180,
+      rate: 10 as const,
+    },
     {
       until: new Date(start.getTime() + 180 * day + 60 * 1000),
       days: 181,
       rate: 20 as const,
     },
-    { until: new Date(start.getTime() + 200 * day), days: 200, rate: 20 as const },
+    {
+      until: new Date(start.getTime() + 200 * day),
+      days: 200,
+      rate: 20 as const,
+    },
   ];
 
   it('rounds 116 days, 17 hours and 35 minutes up to 117', () => {
@@ -171,7 +179,16 @@ const settlements = [
 describe('sale credit', () => {
   it.each(settlements)(
     'credits $credit from a purchase of $purchase sold at $market',
-    ({ purchase, market, days, penalty, profit, commission, credit, status }) => {
+    ({
+      purchase,
+      market,
+      days,
+      penalty,
+      profit,
+      commission,
+      credit,
+      status,
+    }) => {
       const soldAt = new Date('2026-11-05T19:40:00.000Z');
       const settled = settleSale({
         purchaseValue: Money.roundHalfAwayFromZero(purchase),
@@ -188,4 +205,3 @@ describe('sale credit', () => {
     },
   );
 });
-

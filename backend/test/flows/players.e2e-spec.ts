@@ -27,7 +27,9 @@ describe('Jogadores', () => {
     expect(created.base_value).toBe(36);
     expect(Number(stored?.valor_base)).toBe(36);
 
-    const loaded = await appOf(app).get(`/api/v1/players/${created.id}`).expect(200);
+    const loaded = await appOf(app)
+      .get(`/api/v1/players/${created.id}`)
+      .expect(200);
     expect(loaded.body).toMatchObject({
       overall: 73,
       base_value: 36,
@@ -46,7 +48,9 @@ describe('Jogadores', () => {
     expect(changed.body.base_value).toBe(36);
     expect(changed.body.market_value).toBe(30.6);
 
-    const loaded = await appOf(app).get(`/api/v1/players/${created.id}`).expect(200);
+    const loaded = await appOf(app)
+      .get(`/api/v1/players/${created.id}`)
+      .expect(200);
     expect(loaded.body).toMatchObject({
       condition: 'MAL_CONDICIONADO',
       base_value: 36,
@@ -81,9 +85,7 @@ describe('Jogadores', () => {
     });
     expect(younger.status).toBe(409);
     expect(
-      (
-        await appOf(app).get(`/api/v1/players/${created.id}`)
-      ).body.age,
+      (await appOf(app).get(`/api/v1/players/${created.id}`)).body.age,
     ).toBe(32);
 
     const club = await createClub(app, 'Águias FC', 'AFC');
@@ -98,9 +100,7 @@ describe('Jogadores', () => {
     });
     expect(moved.status).toBe(409);
     expect(
-      (
-        await appOf(app).get(`/api/v1/players/${hired.id}`)
-      ).body.position,
+      (await appOf(app).get(`/api/v1/players/${hired.id}`)).body.position,
     ).toBe('MEI');
   });
 

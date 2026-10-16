@@ -30,12 +30,15 @@ describe('Histórico e CSV', () => {
     const player = await createPlayer(app);
     await buyPlayer(app, player.id, club.id).expect(200);
     await appOf(app).post(`/api/v1/players/${player.id}/sell`).expect(200);
-    await appOf(app).put(`/api/v1/players/${player.id}`).send({
-      name: 'Nome Novo',
-      position: 'MEI',
-      agility: 50,
-      age: 25,
-    }).expect(200);
+    await appOf(app)
+      .put(`/api/v1/players/${player.id}`)
+      .send({
+        name: 'Nome Novo',
+        position: 'MEI',
+        agility: 50,
+        age: 25,
+      })
+      .expect(200);
 
     const history = await appOf(app)
       .get(`/api/v1/clubs/${club.id}/transactions`)

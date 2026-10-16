@@ -24,7 +24,10 @@ async function hireLine(
 ) {
   const ids: number[] = [];
   for (const [name, position] of squad) {
-    const player = await createPlayer(app, regular(`${prefix} ${name}`, position));
+    const player = await createPlayer(
+      app,
+      regular(`${prefix} ${name}`, position),
+    );
     await buyPlayer(app, player.id, clubId).expect(200);
     ids.push(player.id);
   }
@@ -48,7 +51,9 @@ describe('Escalação e partidas', () => {
 
   it('nasce sem escalação, grava uma formação válida sem mexer no caixa e recusa a inválida', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
-    const empty = await appOf(app).get(`/api/v1/clubs/${club.id}/lineup`).expect(200);
+    const empty = await appOf(app)
+      .get(`/api/v1/clubs/${club.id}/lineup`)
+      .expect(200);
     expect(empty.body).toMatchObject({
       formation: null,
       players: [],
@@ -58,20 +63,18 @@ describe('Escalação e partidas', () => {
     const ids = await hireLine(app, club.id, 'Casa');
     const before = await appOf(app).get(`/api/v1/clubs/${club.id}`).expect(200);
 
-    const saved = await appOf(app).put(`/api/v1/clubs/${club.id}/lineup`).send({
-      formation: '2-1-1',
-      player_ids: [...ids].reverse(),
-    });
+    const saved = await appOf(app)
+      .put(`/api/v1/clubs/${club.id}/lineup`)
+      .send({
+        formation: '2-1-1',
+        player_ids: [...ids].reverse(),
+      });
     expect(saved.status).toBe(200);
     expect(saved.body.complete).toBe(true);
     expect(saved.body.formation).toBe('2-1-1');
-    expect(saved.body.players.map((player: { position: string }) => player.position)).toEqual([
-      'GOL',
-      'ZAG',
-      'LAT',
-      'MEI',
-      'ATA',
-    ]);
+    expect(
+      saved.body.players.map((player: { position: string }) => player.position),
+    ).toEqual(['GOL', 'ZAG', 'LAT', 'MEI', 'ATA']);
 
     const after = await appOf(app).get(`/api/v1/clubs/${club.id}`).expect(200);
     expect(after.body.cash).toBe(before.body.cash);
@@ -80,10 +83,12 @@ describe('Escalação e partidas', () => {
     const outsider = await createPlayer(app, regular('Fora Nome', 'ATA'));
     await buyPlayer(app, outsider.id, other.id).expect(200);
 
-    const mismatch = await appOf(app).put(`/api/v1/clubs/${club.id}/lineup`).send({
-      formation: '2-2',
-      player_ids: ids,
-    });
+    const mismatch = await appOf(app)
+      .put(`/api/v1/clubs/${club.id}/lineup`)
+      .send({
+        formation: '2-2',
+        player_ids: ids,
+      });
     expect(mismatch.status).toBe(409);
     const sick = await createPlayer(app, regular('Doente Nome', 'MEI'));
     await buyPlayer(app, sick.id, club.id).expect(200);
@@ -91,18 +96,24 @@ describe('Escalação e partidas', () => {
       .patch(`/api/v1/players/${sick.id}/condition`)
       .send({ condition: 'DOENTE' })
       .expect(200);
-    const ill = await appOf(app).put(`/api/v1/clubs/${club.id}/lineup`).send({
-      formation: '2-1-1',
-      player_ids: [ids[0], ids[1], ids[2], sick.id, ids[4]],
-    });
+    const ill = await appOf(app)
+      .put(`/api/v1/clubs/${club.id}/lineup`)
+      .send({
+        formation: '2-1-1',
+        player_ids: [ids[0], ids[1], ids[2], sick.id, ids[4]],
+      });
     expect(ill.status).toBe(409);
-    const away = await appOf(app).put(`/api/v1/clubs/${club.id}/lineup`).send({
-      formation: '2-1-1',
-      player_ids: [ids[0], ids[1], ids[2], ids[3], outsider.id],
-    });
+    const away = await appOf(app)
+      .put(`/api/v1/clubs/${club.id}/lineup`)
+      .send({
+        formation: '2-1-1',
+        player_ids: [ids[0], ids[1], ids[2], ids[3], outsider.id],
+      });
     expect(away.status).toBe(409);
 
-    const still = await appOf(app).get(`/api/v1/clubs/${club.id}/lineup`).expect(200);
+    const still = await appOf(app)
+      .get(`/api/v1/clubs/${club.id}/lineup`)
+      .expect(200);
     expect(still.body.formation).toBe('2-1-1');
     expect(still.body.players).toHaveLength(5);
 
@@ -124,29 +135,35 @@ describe('Escalação e partidas', () => {
       .patch(`/api/v1/players/${ids[4]}/condition`)
       .send({ condition: 'DOENTE' })
       .expect(200);
-    const sick = await appOf(app).get(`/api/v1/clubs/${club.id}/lineup`).expect(200);
+    const sick = await appOf(app)
+      .get(`/api/v1/clubs/${club.id}/lineup`)
+      .expect(200);
     expect(sick.body.formation).toBe('2-1-1');
     expect(sick.body.complete).toBe(false);
-    expect(sick.body.players.map((player: { id: number }) => player.id)).not.toContain(
-      ids[4],
-    );
+    expect(
+      sick.body.players.map((player: { id: number }) => player.id),
+    ).not.toContain(ids[4]);
 
     await appOf(app)
       .patch(`/api/v1/players/${ids[4]}/condition`)
       .send({ condition: 'MAL_CONDICIONADO' })
       .expect(200);
-    const recovered = await appOf(app).get(`/api/v1/clubs/${club.id}/lineup`).expect(200);
+    const recovered = await appOf(app)
+      .get(`/api/v1/clubs/${club.id}/lineup`)
+      .expect(200);
     expect(recovered.body.complete).toBe(false);
     expect(
       recovered.body.players.map((player: { id: number }) => player.id),
     ).not.toContain(ids[4]);
 
     await appOf(app).post(`/api/v1/players/${ids[3]}/sell`).expect(200);
-    const sold = await appOf(app).get(`/api/v1/clubs/${club.id}/lineup`).expect(200);
+    const sold = await appOf(app)
+      .get(`/api/v1/clubs/${club.id}/lineup`)
+      .expect(200);
     expect(sold.body.formation).toBe('2-1-1');
-    expect(sold.body.players.map((player: { id: number }) => player.id)).not.toContain(
-      ids[3],
-    );
+    expect(
+      sold.body.players.map((player: { id: number }) => player.id),
+    ).not.toContain(ids[3]);
   });
 
   it('joga a partida com as duas escalações, grava os 6 duelos e recusa sem gravar', async () => {
@@ -163,7 +180,8 @@ describe('Escalação e partidas', () => {
       .send({ formation: '2-1-1', player_ids: awayIds })
       .expect(200);
 
-    const cashBefore = (await appOf(app).get(`/api/v1/clubs/${home.id}`)).body.cash;
+    const cashBefore = (await appOf(app).get(`/api/v1/clubs/${home.id}`)).body
+      .cash;
     const played = await appOf(app).post('/api/v1/matches').send({
       home_club_id: home.id,
       away_club_id: away.id,
@@ -171,7 +189,9 @@ describe('Escalação e partidas', () => {
     expect(played.status).toBe(201);
     expect(played.headers.location).toBe(`/api/v1/matches/${played.body.id}`);
     expect(played.body.duels).toHaveLength(6);
-    expect((await appOf(app).get(`/api/v1/clubs/${home.id}`)).body.cash).toBe(cashBefore);
+    expect((await appOf(app).get(`/api/v1/clubs/${home.id}`)).body.cash).toBe(
+      cashBefore,
+    );
     expect(await prismaOf(app).partidas.count()).toBe(1);
     expect(await prismaOf(app).duelos_partida.count()).toBe(6);
 
@@ -227,21 +247,26 @@ describe('Escalação e partidas', () => {
     ]);
 
     const attacker = first.body.duels[0].attacker.player_name;
-    await appOf(app).put(`/api/v1/players/${homeIds[4]}`).send({
-      name: 'Nome Trocado',
-      position: 'ATA',
-      agility: 50,
-      age: 26,
-    }).expect(200);
+    await appOf(app)
+      .put(`/api/v1/players/${homeIds[4]}`)
+      .send({
+        name: 'Nome Trocado',
+        position: 'ATA',
+        agility: 50,
+        age: 26,
+      })
+      .expect(200);
 
-    const loaded = await appOf(app).get(`/api/v1/matches/${first.body.id}`).expect(200);
+    const loaded = await appOf(app)
+      .get(`/api/v1/matches/${first.body.id}`)
+      .expect(200);
     expect(loaded.body.duels).toHaveLength(6);
     expect(loaded.body.duels[0].attacker.player_name).toBe(attacker);
   });
 
   it('classifica todos os clubes, inclusive quem não jogou, por pontos, saldo, gols e nome', async () => {
     const alpha = await createClub(app, 'Alpha FC', 'AFC');
-    const meio = await createClub(app, 'Meio FC', 'MFC');
+    await createClub(app, 'Meio FC', 'MFC');
     const zulu = await createClub(app, 'Zulu FC', 'ZFC');
     const alphaIds = await hireLine(app, alpha.id, 'Alpha');
     const zuluIds = await hireLine(app, zulu.id, 'Zulu');
@@ -259,12 +284,12 @@ describe('Escalação e partidas', () => {
       .expect(201);
 
     const table = await appOf(app).get('/api/v1/standings').expect(200);
-    expect(table.body.map((row: { position: number }) => row.position)).toEqual([1, 2, 3]);
-    expect(table.body.map((row: { club_name: string }) => row.club_name)).toEqual([
-      'Alpha FC',
-      'Zulu FC',
-      'Meio FC',
-    ]);
+    expect(table.body.map((row: { position: number }) => row.position)).toEqual(
+      [1, 2, 3],
+    );
+    expect(
+      table.body.map((row: { club_name: string }) => row.club_name),
+    ).toEqual(['Alpha FC', 'Zulu FC', 'Meio FC']);
     expect(table.body[2]).toMatchObject({
       played: 0,
       points: 0,

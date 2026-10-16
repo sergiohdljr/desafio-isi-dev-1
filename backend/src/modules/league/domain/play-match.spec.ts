@@ -61,9 +61,9 @@ describe('playing a match', () => {
         ]),
       });
 
-      expect(played.duels.slice(0, 3).map((duel) => duel.attacker.attribute)).toEqual(
-        attack,
-      );
+      expect(
+        played.duels.slice(0, 3).map((duel) => duel.attacker.attribute),
+      ).toEqual(attack);
       expect(played.homeGoals).toBe(3);
     },
   );

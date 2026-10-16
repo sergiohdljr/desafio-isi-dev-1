@@ -1,4 +1,12 @@
-import { Body, Controller, HttpCode, HttpStatus, Inject, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Inject,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { ZodPipe } from '../../../../common/validation/zod-pipe.js';
 import { playerIdSchema } from '../../../players/infra/http/input/player-id.schema.js';
 import {
@@ -9,7 +17,10 @@ import {
   SELL_PLAYER,
   type SellPlayerPort,
 } from '../../application/use-cases/sell-player.use-case.js';
-import { buyPlayerSchema, type BuyPlayerBody } from './dto/buy-player.schema.js';
+import {
+  buyPlayerSchema,
+  type BuyPlayerBody,
+} from './dto/buy-player.schema.js';
 import { presentPurchase } from './presenters/purchase-response.js';
 import { presentSale } from './presenters/sale-response.js';
 

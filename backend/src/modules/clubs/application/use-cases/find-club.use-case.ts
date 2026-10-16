@@ -5,7 +5,11 @@ import {
 } from '../../../players/application/read-models/player-view.js';
 import { DomainError } from '../../../../shared/domain/domain-error.js';
 import { penaltyRateFor } from '../../../market/domain/sale-settlement.js';
-import { arrangeSquad, remainingDays, squadValueOf } from '../../domain/entities/squad.js';
+import {
+  arrangeSquad,
+  remainingDays,
+  squadValueOf,
+} from '../../domain/entities/squad.js';
 import { CLOCK, type Clock } from '../clock.js';
 import { clubViewOf, type ClubView } from '../read-models/club-view.js';
 import {
