@@ -4,12 +4,14 @@ import {
   type PlayerView,
 } from '../../../players/application/read-models/player-view.js';
 import { DomainError } from '../../../../shared/domain/domain-error.js';
+import { penaltyRateFor } from '../../../market/domain/sale-settlement.js';
 import { arrangeSquad, remainingDays, squadValueOf } from '../../domain/entities/squad.js';
 import { CLOCK, type Clock } from '../clock.js';
 import { clubViewOf, type ClubView } from '../read-models/club-view.js';
 import {
   CLUBS_REPOSITORY,
   type ClubsRepository,
+  type SquadMember,
 } from '../repositories/clubs-repository.js';
 
 export const FIND_CLUB = Symbol('FIND_CLUB');
@@ -19,6 +21,7 @@ export type SquadPlayerView = PlayerView & {
     purchaseValue: number;
     loyaltyUntil: Date;
     remainingDays: number;
+    penaltyRate: 0 | 5 | 10 | 20;
   };
 };
 
@@ -50,11 +53,7 @@ export class FindClub implements FindClubPort {
     const players = arrangeSquad(
       members.map((member) => ({
         ...playerViewOf(member.player),
-        contract: {
-          purchaseValue: member.purchaseValue.amount,
-          loyaltyUntil: member.loyaltyUntil,
-          remainingDays: remainingDays(member.loyaltyUntil, now),
-        },
+        contract: contractOf(member, now),
       })),
     );
 
@@ -66,4 +65,14 @@ export class FindClub implements FindClubPort {
       players,
     };
   }
+}
+
+function contractOf(member: SquadMember, now: Date) {
+  const days = remainingDays(member.loyaltyUntil, now);
+  return {
+    purchaseValue: member.purchaseValue.amount,
+    loyaltyUntil: member.loyaltyUntil,
+    remainingDays: days,
+    penaltyRate: penaltyRateFor(days),
+  };
 }

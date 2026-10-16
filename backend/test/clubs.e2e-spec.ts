@@ -461,6 +461,7 @@ describe('Clubs', () => {
       expect(detail.body.players[0].contract).toMatchObject({
         purchase_value: 25.5,
         remaining_days: 3,
+        penalty_rate: 5,
       });
       expect(detail.body.players[0].contract.loyalty_until).toMatch(
         /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}-03:00$/,

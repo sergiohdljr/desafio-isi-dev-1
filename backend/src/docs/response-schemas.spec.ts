@@ -95,6 +95,7 @@ describe('response schemas', () => {
                 purchaseValue: 25.5,
                 loyaltyUntil: at,
                 remainingDays: 3,
+                penaltyRate: 5,
               },
             },
           ],

@@ -62,6 +62,12 @@ export const clubDetailResponseSchema = clubResponseSchema.extend({
         purchase_value: money,
         loyalty_until: brasiliaTime,
         remaining_days: z.int(),
+        penalty_rate: z.union([
+          z.literal(0),
+          z.literal(5),
+          z.literal(10),
+          z.literal(20),
+        ]),
       }),
     }),
   ),

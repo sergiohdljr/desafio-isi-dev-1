@@ -30,6 +30,7 @@ export function presentClubDetail(view: ClubDetailView): ClubResponse & {
         purchase_value: number;
         loyalty_until: string;
         remaining_days: number;
+        penalty_rate: number;
       };
     }
   >;
@@ -42,6 +43,7 @@ export function presentClubDetail(view: ClubDetailView): ClubResponse & {
         purchase_value: player.contract.purchaseValue,
         loyalty_until: formatBrasilia(player.contract.loyaltyUntil),
         remaining_days: player.contract.remainingDays,
+        penalty_rate: player.contract.penaltyRate,
       },
     })),
   };

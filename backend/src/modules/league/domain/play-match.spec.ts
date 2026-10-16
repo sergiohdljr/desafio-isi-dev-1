@@ -15,7 +15,59 @@ describe('duel value', () => {
   });
 });
 
+const shapes = [
+  {
+    formation: '3-1' as const,
+    line: ['ZAG', 'LAT', 'LAT', 'ATA'] as const,
+    attack: ['shooting', 'dribbling', 'dribbling'],
+  },
+  {
+    formation: '2-2' as const,
+    line: ['ZAG', 'LAT', 'ATA', 'ATA'] as const,
+    attack: ['shooting', 'shooting', 'dribbling'],
+  },
+  {
+    formation: '2-1-1' as const,
+    line: ['ZAG', 'LAT', 'MEI', 'ATA'] as const,
+    attack: ['shooting', 'passing', 'dribbling'],
+  },
+  {
+    formation: '1-2-1' as const,
+    line: ['ZAG', 'MEI', 'MEI', 'ATA'] as const,
+    attack: ['shooting', 'passing', 'passing'],
+  },
+];
+
 describe('playing a match', () => {
+  it.each(shapes)(
+    'sends the 4th, 3rd and 2nd of $formation to attack',
+    ({ formation, line, attack }) => {
+      const played = decideMatch({
+        home: side(1, 'Casa FC', formation, [
+          player(1, 'Rui Prado', 'GOL', 'APTO', { defending: 1 }),
+          ...line.map((position, index) =>
+            player(index + 2, `Linha ${index + 1}`, position, 'APTO', {
+              shooting: 90,
+              passing: 90,
+              dribbling: 90,
+            }),
+          ),
+        ]),
+        away: side(2, 'Fora FC', formation, [
+          player(11, 'Ivo Teles', 'GOL', 'APTO', { defending: 1 }),
+          ...line.map((position, index) =>
+            player(index + 12, `Visita ${index + 1}`, position, 'APTO', {}),
+          ),
+        ]),
+      });
+
+      expect(played.duels.slice(0, 3).map((duel) => duel.attacker.attribute)).toEqual(
+        attack,
+      );
+      expect(played.homeGoals).toBe(3);
+    },
+  );
+
   it('plays Águias at home against Delta as 1-2, with the tied duel not scoring', () => {
     const played = decideMatch({
       home: side(1, 'Águias FC', '2-1-1', [

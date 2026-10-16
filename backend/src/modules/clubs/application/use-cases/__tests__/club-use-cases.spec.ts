@@ -284,12 +284,13 @@ describe('club use cases', () => {
       position: 'MEI',
       marketValue: 40,
       clubId: 1,
-      contract: { purchaseValue: 25.5, remainingDays: 2 },
+      contract: { purchaseValue: 25.5, remainingDays: 2, penaltyRate: 5 },
     });
     expect(detail.players[0].contract.loyaltyUntil).toEqual(
       new Date('2027-03-04T15:00:00.000Z'),
     );
     expect(detail.players[1].contract.remainingDays).toBe(3);
+    expect(detail.players[1].contract.penaltyRate).toBe(5);
   });
 
   it('answers that a missing club does not exist', async () => {
