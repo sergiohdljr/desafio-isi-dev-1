@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ClockModule } from '../../common/clock/clock.module.js';
 import { PrismaModule } from '../../prisma/prisma.module.js';
+import { ClubsModule } from '../clubs/clubs.module.js';
+import { PlayersModule } from '../players/players.module.js';
 import { MARKET_REPOSITORY } from './application/repositories/market-repository.js';
 import {
   BUY_PLAYER,
@@ -19,7 +21,7 @@ import { PlayersMarketController } from './infra/http/players-market.controller.
 import { PrismaMarketRepository } from './infra/repositories/prisma-market-repository.js';
 
 @Module({
-  imports: [PrismaModule, ClockModule],
+  imports: [PrismaModule, ClockModule, ClubsModule, PlayersModule],
   controllers: [PlayersMarketController, ClubsMarketController],
   providers: [
     { provide: BUY_PLAYER, useClass: BuyPlayer },

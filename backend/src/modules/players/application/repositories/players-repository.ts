@@ -6,6 +6,5 @@ export interface PlayersRepository {
   add(player: Player): Promise<Player>;
   findActiveById(id: number): Promise<Player | null>;
   findActive(): Promise<Player[]>;
-  clubExists(id: number): Promise<boolean>;
   save(player: Player): Promise<void>;
 }

@@ -1,4 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
+import {
+  CLUBS_REPOSITORY,
+  type ClubsRepository,
+} from '../../../clubs/application/repositories/clubs-repository.js';
+import {
+  PLAYERS_REPOSITORY,
+  type PlayersRepository,
+} from '../../../players/application/repositories/players-repository.js';
 import { DomainError } from '../../../../shared/domain/domain-error.js';
 import { summarize } from '../../domain/transaction-summary.js';
 import {
@@ -46,23 +54,29 @@ export interface ListTransactionsPort {
 export class ListTransactions implements ListTransactionsPort {
   constructor(
     @Inject(MARKET_REPOSITORY) private readonly market: MarketRepository,
+    @Inject(CLUBS_REPOSITORY) private readonly clubs: ClubsRepository,
+    @Inject(PLAYERS_REPOSITORY) private readonly players: PlayersRepository,
   ) {}
 
   async execute(
     clubId: number,
     filter: TransactionFilter,
   ): Promise<TransactionListView> {
-    const page = await this.market.list(clubId, filter);
-    if (!page.clubFound) {
+    const club = await this.clubs.findById(clubId);
+    if (!club) {
       throw new DomainError('missing', 'Clube não encontrado');
     }
-    if (filter.playerId !== undefined && !page.playerFound) {
-      throw new DomainError('missing', 'Jogador não encontrado');
+    if (filter.playerId !== undefined) {
+      const player = await this.players.findActiveById(filter.playerId);
+      if (!player) {
+        throw new DomainError('missing', 'Jogador não encontrado');
+      }
     }
 
-    const summary = summarize(page.transactions);
+    const transactions = await this.market.list(clubId, filter);
+    const summary = summarize(transactions);
     return {
-      data: page.transactions.map(toView),
+      data: transactions.map(toView),
       summary: {
         totalSpent: summary.totalSpent.amount,
         totalReceived: summary.totalReceived.amount,

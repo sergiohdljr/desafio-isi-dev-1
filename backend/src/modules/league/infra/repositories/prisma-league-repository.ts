@@ -132,20 +132,7 @@ export class PrismaLeagueRepository implements LeagueRepository {
     });
   }
 
-  async listMatches(clubId?: number): Promise<{
-    missingClub: boolean;
-    matches: MatchSummary[];
-  }> {
-    if (clubId !== undefined) {
-      const club = await this.prisma.clubes.findUnique({
-        where: { id: clubId },
-        select: { id: true },
-      });
-      if (!club) {
-        return { missingClub: true, matches: [] };
-      }
-    }
-
+  async listMatches(clubId?: number): Promise<MatchSummary[]> {
     const rows = await this.prisma.partidas.findMany({
       where:
         clubId === undefined
@@ -158,16 +145,13 @@ export class PrismaLeagueRepository implements LeagueRepository {
       },
     });
 
-    return {
-      missingClub: false,
-      matches: rows.map((row) => {
-        const { duels: _duels, ...summary } = toSavedMatch({
-          ...row,
-          duelos: [],
-        });
-        return summary;
-      }),
-    };
+    return rows.map((row) => {
+      const { duels: _duels, ...summary } = toSavedMatch({
+        ...row,
+        duelos: [],
+      });
+      return summary;
+    });
   }
 
   async findMatch(id: number): Promise<SavedMatch | null> {
@@ -178,18 +162,7 @@ export class PrismaLeagueRepository implements LeagueRepository {
     return row ? toSavedMatch(row) : null;
   }
 
-  async standingsSource(): Promise<{
-    clubs: { id: number; name: string }[];
-    matches: {
-      homeClubId: number;
-      awayClubId: number;
-      homeGoals: number;
-      awayGoals: number;
-    }[];
-  }> {
-    const clubs = await this.prisma.clubes.findMany({
-      select: { id: true, nome: true },
-    });
+  async standingsSource() {
     const matches = await this.prisma.partidas.findMany({
       select: {
         mandante_id: true,
@@ -198,15 +171,12 @@ export class PrismaLeagueRepository implements LeagueRepository {
         gols_visitante: true,
       },
     });
-    return {
-      clubs: clubs.map((club) => ({ id: club.id, name: club.nome })),
-      matches: matches.map((match) => ({
-        homeClubId: match.mandante_id,
-        awayClubId: match.visitante_id,
-        homeGoals: match.gols_mandante,
-        awayGoals: match.gols_visitante,
-      })),
-    };
+    return matches.map((match) => ({
+      homeClubId: match.mandante_id,
+      awayClubId: match.visitante_id,
+      homeGoals: match.gols_mandante,
+      awayGoals: match.gols_visitante,
+    }));
   }
 
   private async sideFacts(tx: Tx, clubId: number): Promise<SideFacts> {

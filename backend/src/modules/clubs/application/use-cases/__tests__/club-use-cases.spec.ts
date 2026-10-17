@@ -1,21 +1,15 @@
 import { Test } from '@nestjs/testing';
 import { Club } from '../../../domain/entities/club.js';
-import { sameClubName } from '../../../domain/entities/club-name.js';
-import {
-  CLUBS_REPOSITORY,
-  type ClubsRepository,
-} from '../../repositories/clubs-repository.js';
+import { CLUBS_REPOSITORY } from '../../repositories/clubs-repository.js';
 import { Money } from '../../../../../shared/domain/money.js';
 import {
   Player,
   type RegisterPlayer,
 } from '../../../../players/domain/entities/player.js';
 import { CLOCK } from '../../../../../common/clock/clock.js';
-import {
-  SQUAD_READER,
-  type SquadMember,
-  type SquadReader,
-} from '../../repositories/squad-reader.js';
+import { SQUAD_READER, type SquadMember } from '../../repositories/squad-reader.js';
+import { InMemoryClubsRepository } from '../../../infra/memory/in-memory-clubs-repository.js';
+import { InMemorySquadReader } from '../../../infra/memory/in-memory-squad-reader.js';
 import { CreateClub } from '../create-club.use-case.js';
 import { FindClub } from '../find-club.use-case.js';
 import { ListClubs } from '../list-clubs.use-case.js';
@@ -31,38 +25,9 @@ function stored(name: string, acronym: string, id: number): Club {
 }
 
 function repository(clubs: Club[] = [], squad: SquadMember[] = []) {
-  const saved: Club[] = [];
-  let nextId = clubs.reduce((max, club) => Math.max(max, club.id), 0) + 1;
-  const repo: ClubsRepository = {
-    async add(club) {
-      const created = stored(club.name, club.acronym, nextId);
-      nextId += 1;
-      clubs.push(created);
-      saved.push(created);
-      return created;
-    },
-    async findById(id) {
-      return clubs.find((club) => club.id === id) ?? null;
-    },
-    async count() {
-      return clubs.length;
-    },
-    async nameTaken(name) {
-      return clubs.some((club) => sameClubName(club.name, name));
-    },
-    async acronymTaken(acronym) {
-      return clubs.some((club) => club.acronym === acronym);
-    },
-    async list() {
-      return clubs;
-    },
-  };
-  const squadReader: SquadReader = {
-    async list() {
-      return squad;
-    },
-  };
-  return { repo, saved, squadReader };
+  const repo = new InMemoryClubsRepository(clubs);
+  const squadReader = new InMemorySquadReader(squad);
+  return { repo, squadReader, saved: repo.saved };
 }
 
 const pricedMeia: RegisterPlayer = {
@@ -119,8 +84,8 @@ function contracted(
 
 async function useCase<T>(
   token: new (...args: never[]) => T,
-  repo: ClubsRepository,
-  squad: SquadReader,
+  repo: InMemoryClubsRepository,
+  squad: InMemorySquadReader,
 ) {
   const module = await Test.createTestingModule({
     providers: [

@@ -3,10 +3,10 @@ import {
   Player,
   type RegisterPlayer,
 } from '../../../domain/entities/player.js';
-import {
-  PLAYERS_REPOSITORY,
-  type PlayersRepository,
-} from '../../repositories/players-repository.js';
+import { CLUBS_REPOSITORY } from '../../../../clubs/application/repositories/clubs-repository.js';
+import { InMemoryClubsRepository } from '../../../../clubs/infra/memory/in-memory-clubs-repository.js';
+import { PLAYERS_REPOSITORY } from '../../repositories/players-repository.js';
+import { InMemoryPlayersRepository } from '../../../infra/memory/in-memory-players-repository.js';
 import { type PlayerListQuery } from '../../queries/player-list-query.js';
 import { ChangePlayerCondition } from '../change-player-condition.use-case.js';
 import { CreatePlayer } from '../create-player.use-case.js';
@@ -61,57 +61,22 @@ function store(
   });
 }
 
-function repository(options?: { players?: Player[]; clubs?: number[] }) {
-  const players = [...(options?.players ?? [])];
-  const clubs = new Set(options?.clubs ?? []);
-  const saved: Player[] = [];
-  let nextId = players.reduce((max, player) => Math.max(max, player.id), 0) + 1;
-  const repo: PlayersRepository = {
-    async add(player) {
-      const stored = store(
-        {
-          name: player.name,
-          position: player.position,
-          agility: player.agility,
-          age: player.age,
-          pace: player.pace,
-          shooting: player.shooting,
-          passing: player.passing,
-          dribbling: player.dribbling,
-          defending: player.defending,
-          physical: player.physical,
-          potential: player.potential,
-        },
-        nextId,
-      );
-      nextId += 1;
-      players.push(stored);
-      return stored;
-    },
-    async findActiveById(id) {
-      return (
-        players.find((player) => player.id === id && !player.excluded) ?? null
-      );
-    },
-    async findActive() {
-      return players.filter((player) => !player.excluded);
-    },
-    async clubExists(id) {
-      return clubs.has(id);
-    },
-    async save(player) {
-      saved.push(player);
-    },
-  };
-  return { repo, saved };
+function repository(players: Player[] = []) {
+  const repo = new InMemoryPlayersRepository(players);
+  return { repo, saved: repo.saved };
 }
 
 async function useCase<T>(
   token: new (...args: never[]) => T,
-  repo: PlayersRepository,
+  repo: InMemoryPlayersRepository,
+  clubs = new InMemoryClubsRepository(),
 ) {
   const module = await Test.createTestingModule({
-    providers: [token, { provide: PLAYERS_REPOSITORY, useValue: repo }],
+    providers: [
+      token,
+      { provide: PLAYERS_REPOSITORY, useValue: repo },
+      { provide: CLUBS_REPOSITORY, useValue: clubs },
+    ],
   }).compile();
   return module.get(token);
 }
@@ -164,7 +129,7 @@ describe('player use cases', () => {
 
   it('saves a condition change and skips a repeated condition', async () => {
     const player = store(meia, 3);
-    const { repo, saved } = repository({ players: [player] });
+    const { repo, saved } = repository([player]);
     const change = await useCase(ChangePlayerCondition, repo);
 
     const updated = await change.execute(3, 'MAL_CONDICIONADO');
@@ -177,7 +142,7 @@ describe('player use cases', () => {
 
   it('saves an edit and a deletion of an existing player', async () => {
     const player = store({ ...meia, name: 'Meia Livre' }, 5);
-    const { repo, saved } = repository({ players: [player] });
+    const { repo, saved } = repository([player]);
     const update = await useCase(UpdatePlayer, repo);
     const remove = await useCase(DeletePlayer, repo);
 

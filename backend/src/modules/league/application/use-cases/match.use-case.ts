@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DomainError } from '../../../../shared/domain/domain-error.js';
 import { CLOCK, type Clock } from '../../../../common/clock/clock.js';
+import {
+  CLUBS_REPOSITORY,
+  type ClubsRepository,
+} from '../../../clubs/application/repositories/clubs-repository.js';
 import { decideMatch } from '../../domain/play-match.js';
 import { rankStandings, type StandingRow } from '../../domain/standings.js';
 import {
@@ -58,14 +62,17 @@ export class PlayMatch implements PlayMatchPort {
 export class ListMatches implements ListMatchesPort {
   constructor(
     @Inject(LEAGUE_REPOSITORY) private readonly league: LeagueRepository,
+    @Inject(CLUBS_REPOSITORY) private readonly clubs: ClubsRepository,
   ) {}
 
   async execute(clubId?: number): Promise<MatchSummary[]> {
-    const listing = await this.league.listMatches(clubId);
-    if (listing.missingClub) {
-      throw new DomainError('missing', 'Clube não encontrado');
+    if (clubId !== undefined) {
+      const club = await this.clubs.findById(clubId);
+      if (!club) {
+        throw new DomainError('missing', 'Clube não encontrado');
+      }
     }
-    return listing.matches;
+    return this.league.listMatches(clubId);
   }
 }
 
@@ -88,10 +95,15 @@ export class FindMatch implements FindMatchPort {
 export class ListStandings implements ListStandingsPort {
   constructor(
     @Inject(LEAGUE_REPOSITORY) private readonly league: LeagueRepository,
+    @Inject(CLUBS_REPOSITORY) private readonly clubs: ClubsRepository,
   ) {}
 
   async execute(): Promise<StandingRow[]> {
-    const source = await this.league.standingsSource();
-    return rankStandings(source.clubs, source.matches);
+    const clubs = await this.clubs.list();
+    const matches = await this.league.standingsSource();
+    return rankStandings(
+      clubs.map((club) => ({ id: club.id, name: club.name })),
+      matches,
+    );
   }
 }

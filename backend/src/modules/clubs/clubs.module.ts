@@ -29,6 +29,6 @@ import { PrismaSquadReader } from './infra/repositories/prisma-squad-reader.js';
     { provide: CLUBS_REPOSITORY, useClass: PrismaClubsRepository },
     { provide: SQUAD_READER, useClass: PrismaSquadReader },
   ],
-  exports: [CREATE_CLUB],
+  exports: [CREATE_CLUB, CLUBS_REPOSITORY],
 })
 export class ClubsModule {}

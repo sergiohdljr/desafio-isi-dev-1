@@ -5,10 +5,7 @@ import {
 } from '../../../players/domain/types/player-types.js';
 import { type Formation } from '../../domain/formation.js';
 import { type MatchPlan, type SideFacts } from '../../domain/play-match.js';
-import {
-  type StandingClub,
-  type StandingMatch,
-} from '../../domain/standings.js';
+import { type StandingMatch } from '../../domain/standings.js';
 
 export const LEAGUE_REPOSITORY = Symbol('LEAGUE_REPOSITORY');
 
@@ -44,13 +41,7 @@ export interface LeagueRepository {
     playedAt: Date,
     settle: (facts: { home: SideFacts; away: SideFacts }) => MatchPlan,
   ): Promise<SavedMatch>;
-  listMatches(clubId?: number): Promise<{
-    missingClub: boolean;
-    matches: MatchSummary[];
-  }>;
+  listMatches(clubId?: number): Promise<MatchSummary[]>;
   findMatch(id: number): Promise<SavedMatch | null>;
-  standingsSource(): Promise<{
-    clubs: StandingClub[];
-    matches: StandingMatch[];
-  }>;
+  standingsSource(): Promise<StandingMatch[]>;
 }

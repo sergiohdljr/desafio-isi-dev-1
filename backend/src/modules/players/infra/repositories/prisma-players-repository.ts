@@ -45,14 +45,6 @@ export class PrismaPlayersRepository implements PlayersRepository {
     return players.map(playerFromRow);
   }
 
-  async clubExists(id: number): Promise<boolean> {
-    const club = await this.prisma.clubes.findUnique({
-      where: { id },
-      select: { id: true },
-    });
-    return club !== null;
-  }
-
   async save(player: Player): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
       if (player.clubId !== null && player.condition === 'DOENTE') {

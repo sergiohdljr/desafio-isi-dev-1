@@ -20,7 +20,6 @@ import {
   type SaleReceipt,
   type StoredTransaction,
   type TransactionFilter,
-  type TransactionPage,
 } from '../../application/repositories/market-repository.js';
 import { PrismaService } from '../../../../prisma/prisma.service.js';
 
@@ -73,24 +72,7 @@ export class PrismaMarketRepository implements MarketRepository {
   async list(
     clubId: number,
     filter: TransactionFilter,
-  ): Promise<TransactionPage> {
-    const club = await this.prisma.clubes.findUnique({
-      where: { id: clubId },
-      select: { id: true },
-    });
-    if (!club) {
-      return { clubFound: false, playerFound: true, transactions: [] };
-    }
-    if (filter.playerId !== undefined) {
-      const player = await this.prisma.jogadores.findFirst({
-        where: { id: filter.playerId, excluido_em: null },
-        select: { id: true },
-      });
-      if (!player) {
-        return { clubFound: true, playerFound: false, transactions: [] };
-      }
-    }
-
+  ): Promise<StoredTransaction[]> {
     const rows = await this.prisma.transacoes.findMany({
       where: {
         clube_id: clubId,
@@ -101,11 +83,7 @@ export class PrismaMarketRepository implements MarketRepository {
       },
       orderBy: [{ criado_em: 'desc' }, { id: 'desc' }],
     });
-    return {
-      clubFound: true,
-      playerFound: true,
-      transactions: rows.map(toStoredTransaction),
-    };
+    return rows.map(toStoredTransaction);
   }
 }
 
