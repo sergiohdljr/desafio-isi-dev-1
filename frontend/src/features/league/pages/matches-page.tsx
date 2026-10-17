@@ -53,6 +53,7 @@ function MatchesPage() {
       {error ? (
         <ResourceError
           title="Não foi possível carregar as partidas"
+          description={error}
           onRetry={() => void queryClient.invalidateQueries({ queryKey: ["matches"] })}
         />
       ) : null}
@@ -72,12 +73,11 @@ function MatchesPage() {
         empty={
           <ResourceEmpty
             framed={false}
-            icon={<Swords className="size-6" aria-hidden />}
             title="Nenhuma partida jogada"
             description="Escale os titulares de dois clubes e jogue a primeira partida."
             action={
-              <Button type="button" onClick={() => setCreating(true)}>
-                <Plus /> Nova partida
+              <Button type="button" variant="outline" size="sm" onClick={() => setCreating(true)}>
+                Nova partida
               </Button>
             }
           />

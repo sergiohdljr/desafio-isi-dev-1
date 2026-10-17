@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowUpDown, Coins, HeartPulse, Plus, Search, SearchX, Shield, Shirt, UserRound, Users } from "lucide-react"
+import { ArrowUpDown, Coins, HeartPulse, Plus, Search, Shield, Shirt, UserRound, Users } from "lucide-react"
 import { useAppChrome } from "@/app/app-layout"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -318,12 +318,15 @@ function PlayersPage() {
         </div>
 
         {error ? (
-          <ResourceError title="Não foi possível carregar os jogadores" onRetry={() => void refreshPlayers()} />
+          <ResourceError
+            title="Não foi possível carregar os jogadores"
+            description={error}
+            onRetry={() => void refreshPlayers()}
+          />
         ) : isPending ? (
-          <ResourceLoading label="Carregando jogadores…" />
+          <ResourceLoading />
         ) : players.length === 0 ? (
           <ResourceEmpty
-            icon={<SearchX className="size-6" aria-hidden />}
             title={search ? `Nenhum jogador encontrado para “${search}”` : "Nenhum jogador cadastrado"}
             description={
               search || position || condition || clubId || minAge || maxAge || minValue || maxValue
@@ -332,12 +335,12 @@ function PlayersPage() {
             }
             action={
               search || position || condition || clubId || minAge || maxAge || minValue || maxValue ? (
-                <Button type="button" variant="outline" onClick={clearFilters}>
+                <Button type="button" variant="outline" size="sm" onClick={clearFilters}>
                   Limpar filtros
                 </Button>
               ) : (
-                <Button type="button" onClick={() => setDialog({ type: "create" })}>
-                  <Plus /> Novo jogador
+                <Button type="button" variant="outline" size="sm" onClick={() => setDialog({ type: "create" })}>
+                  Novo jogador
                 </Button>
               )
             }

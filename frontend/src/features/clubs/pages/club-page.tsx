@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ClipboardList, Coins, History, Landmark, SearchX, Shirt, ShoppingCart, Users, Wallet } from "lucide-react"
+import { ClipboardList, Coins, History, Landmark, Shirt, ShoppingCart, Users, Wallet } from "lucide-react"
 import { useLocation, useNavigate, useParams } from "react-router"
 import { useAppChrome } from "@/app/app-layout"
 import { paths } from "@/app/routes"
@@ -40,22 +40,13 @@ function ClubPage() {
   return (
     <>
       <main className="flex flex-1 flex-col gap-[24px] px-[32px] pt-[28px] pb-[40px]">
-        {isPending ? <ResourceLoading label="Carregando clube…" /> : null}
+        {isPending ? <ResourceLoading /> : null}
         {error && !club ? (
-          error.toLowerCase().includes("não encontrado") ? (
-            <ResourceEmpty
-              icon={<SearchX className="size-6" aria-hidden />}
-              title="Clube não encontrado"
-              description={`A API não encontrou o clube ${id}. O endereço pode estar errado.`}
-              action={
-                <Button type="button" variant="outline" onClick={() => navigate(paths.clubs)}>
-                  Voltar para clubes
-                </Button>
-              }
-            />
-          ) : (
-            <ResourceError title="Não foi possível carregar o clube" onRetry={() => void refreshClubs()} />
-          )
+          <ResourceError
+            title="Não foi possível carregar o elenco"
+            description={error}
+            onRetry={() => void refreshClubs()}
+          />
         ) : null}
         {club ? (
           <>
@@ -154,11 +145,10 @@ function ClubPage() {
             </div>
             {section === "elenco" && squadSize === 0 && !isPending ? (
               <ResourceEmpty
-                icon={<Shirt className="size-6" aria-hidden />}
                 title="O clube ainda não tem jogadores"
                 description="Compre jogadores livres para formar o elenco."
                 action={
-                  <Button type="button" variant="outline" onClick={() => navigate(paths.players)}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => navigate(paths.players)}>
                     <Users /> Comprar jogadores
                   </Button>
                 }
@@ -175,11 +165,10 @@ function ClubPage() {
             ) : null}
             {section === "escalacao" && club && squadSize === 0 ? (
               <ResourceEmpty
-                icon={<Shirt className="size-6" aria-hidden />}
                 title="O clube ainda não tem jogadores"
                 description="Compre jogadores livres para formar o elenco."
                 action={
-                  <Button type="button" variant="outline" onClick={() => navigate(paths.players)}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => navigate(paths.players)}>
                     <Users /> Comprar jogadores
                   </Button>
                 }

@@ -11,7 +11,7 @@ import { NewMatchDialog } from "@/features/league/components/new-match-dialog"
 import { clubAcronym } from "@/features/league/utils/club-acronym"
 import { formatPlayedAt } from "@/features/league/utils/played-at"
 import { Button } from "@/components/ui/button"
-import { LoadingRows, ResourceEmpty, ResourceError } from "@/components/ui/resource-state"
+import { ResourceEmpty, ResourceError, ResourceLoading } from "@/components/ui/resource-state"
 
 const CRITERIA = ["Mais pontos", "Maior saldo de gols", "Mais gols marcados", "Nome do clube, de A a Z"]
 
@@ -60,6 +60,14 @@ function StandingsPage() {
         />
       ) : (
       <div className="grid grid-cols-[minmax(0,1fr)_300px] items-start gap-4">
+        {table.isPending ? (
+          <ResourceLoading />
+        ) : (table.data ?? []).length === 0 ? (
+          <ResourceEmpty
+            title="Nenhum clube cadastrado"
+            description="A classificação mostra todos os clubes, mesmo os que ainda não jogaram."
+          />
+        ) : (
         <section className="overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
           <table className="w-full border-collapse text-left">
             <thead className="border-b border-border text-body-sm-medium text-muted-foreground">
@@ -75,25 +83,6 @@ function StandingsPage() {
               </tr>
             </thead>
             <tbody>
-              {table.isPending ? (
-                <tr>
-                  <td colSpan={10}>
-                    <LoadingRows label="Carregando classificação…" />
-                  </td>
-                </tr>
-              ) : null}
-              {!table.isPending && (table.data ?? []).length === 0 ? (
-                <tr>
-                  <td colSpan={10}>
-                    <ResourceEmpty
-                      framed={false}
-                      icon={<ListOrdered className="size-6" aria-hidden />}
-                      title="Nenhum clube cadastrado"
-                      description="A classificação mostra todos os clubes, mesmo os que ainda não jogaram."
-                    />
-                  </td>
-                </tr>
-              ) : null}
               {(table.data ?? []).map((row) => (
                 <tr key={row.club_id} className="h-[52px] border-b border-border last:border-b-0">
                   <td className="pl-4 text-right">
@@ -133,6 +122,7 @@ function StandingsPage() {
             J: jogos · V: vitórias · E: empates · D: derrotas · GP: gols pró · GC: gols contra · SG: saldo · Pts: pontos
           </footer>
         </section>
+        )}
         <aside className="flex flex-col gap-4">
           <section className="overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
             <header className="border-b border-border px-5 py-4">

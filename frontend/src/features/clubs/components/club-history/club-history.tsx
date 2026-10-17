@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Download, History } from "lucide-react"
+import { Download } from "lucide-react"
 import { exportClubTransactions, listClubTransactions } from "@/features/clubs/api/clubs.api"
 import { HistorySummary } from "@/features/clubs/components/club-history/history-summary"
 import { HistoryTable } from "@/features/clubs/components/club-history/history-table"
@@ -117,19 +117,18 @@ function ClubHistory({ clubId, players }: { clubId: number; players: SquadPlayer
             </Button>
           ) : null}
         </div>
-        {history.isPending ? <LoadingRows label="Carregando histórico…" /> : null}
+        {history.isPending ? <LoadingRows /> : null}
         {error ? (
           <ResourceError
             framed={false}
             title="Não foi possível carregar o histórico"
-            description="A API não respondeu. Os totais e a exportação ficam indisponíveis até a próxima tentativa."
+            description={error}
             onRetry={() => void history.refetch()}
           />
         ) : null}
         {!error && rows.length === 0 && !history.isPending ? (
           <ResourceEmpty
             framed={false}
-            icon={<History className="size-6" aria-hidden />}
             title="Nenhuma compra ou venda"
             description="As compras e vendas do clube aparecem aqui, com os totais."
           />

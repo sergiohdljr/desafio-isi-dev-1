@@ -38,7 +38,11 @@ function ClubsPage() {
       </div>
 
       {error ? (
-        <ResourceError title="Não foi possível carregar os clubes" onRetry={() => void refreshClubs()} />
+        <ResourceError
+          title="Não foi possível carregar os clubes"
+          description={error}
+          onRetry={() => void refreshClubs()}
+        />
       ) : (
         <ClubsList clubs={clubs} isPending={isPending} sort={sort} onSortChange={setSort} onCreate={openCreateClub} />
       )}

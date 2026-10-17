@@ -53,7 +53,7 @@ function MatchesHistory({
           </SelectContent>
         </Select>
       </header>
-      {pending ? <LoadingRows label="Carregando partidas…" /> : null}
+      {pending ? <LoadingRows /> : null}
       {!pending && rows.length === 0 ? (
         empty ?? <p className="px-4 py-10 text-center text-body-sm text-muted-foreground">Nenhuma partida ainda.</p>
       ) : !pending ? (
