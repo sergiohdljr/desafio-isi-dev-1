@@ -46,4 +46,10 @@ describe('decide sale', () => {
       ),
     ).toThrow(DomainError);
   });
+
+  it('refuses a club player without an active contract', () => {
+    expect(() =>
+      decideSale({ ...owned(2500), contract: null }, soldAt),
+    ).toThrow(DomainError);
+  });
 });
