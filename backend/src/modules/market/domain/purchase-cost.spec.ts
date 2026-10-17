@@ -41,7 +41,7 @@ const purchases = [
 
 describe('purchase cost', () => {
   it.each(purchases)(
-    'prices $market from cash $cash as fee $fee and cost $cost',
+    '[B10] prices $market from cash $cash as fee $fee and cost $cost',
     ({ cash, market, fee, cost, accepted }) => {
       const marketValue = Money.roundHalfAwayFromZero(market);
       const cashValue = Money.roundHalfAwayFromZero(cash);
@@ -54,7 +54,7 @@ describe('purchase cost', () => {
     },
   );
 
-  it('refuses 130.58 against half of 261.15 and accepts 130.57', () => {
+  it('[B10] refuses 130.58 against half of 261.15 and accepts 130.57', () => {
     const cash = Money.fromCents(26115);
 
     expect(exceedsHalfCash(Money.fromCents(13058), cash)).toBe(true);

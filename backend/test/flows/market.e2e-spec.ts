@@ -19,7 +19,7 @@ describe('Compra', () => {
     await closeLeague(app);
   });
 
-  it('compra o jogador livre pelo valor de mercado, abre o contrato e grava a COMPRA', async () => {
+  it('[B10] compra o jogador livre pelo valor de mercado, abre o contrato e grava a COMPRA', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
     const player = await createPlayer(app);
 
@@ -56,7 +56,7 @@ describe('Compra', () => {
     expect(history.body.data[0].type).toBe('COMPRA');
   });
 
-  it('recusa custo acima da metade do caixa, jogador com clube e recompra pelo vendedor, sem gravar', async () => {
+  it('[B11][B16] recusa custo acima da metade do caixa, jogador com clube e recompra pelo vendedor, sem gravar', async () => {
     const seller = await createClub(app, 'Águias FC', 'AFC');
     const buyer = await createClub(app, 'Zulu FC', 'ZFC');
     const expensive = await createPlayer(app, {
@@ -92,7 +92,7 @@ describe('Compra', () => {
     expect(elsewhere.status).toBe(200);
   });
 
-  it('responde 404 para jogador ou clube inexistente e 400 para corpo inválido', async () => {
+  it('[B11] responde 404 para jogador ou clube inexistente e 400 para corpo inválido', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
     const player = await createPlayer(app);
 
@@ -127,7 +127,7 @@ describe('Venda', () => {
     await closeLeague(app);
   });
 
-  it('vende o jogador do elenco, credita o caixa, encerra o contrato e grava a VENDA', async () => {
+  it('[B14][B15] vende o jogador do elenco, credita o caixa, encerra o contrato e grava a VENDA', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
     const player = await createPlayer(app);
     const bought = await buyPlayer(app, player.id, club.id).expect(200);
@@ -165,7 +165,7 @@ describe('Venda', () => {
     });
   });
 
-  it('recusa vender jogador livre e não grava a venda', async () => {
+  it('[B16] recusa vender jogador livre e não grava a venda', async () => {
     const player = await createPlayer(app);
 
     await appOf(app).post(`/api/v1/players/${player.id}/sell`).expect(409);

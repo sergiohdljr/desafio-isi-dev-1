@@ -17,7 +17,7 @@ describe('Clubes', () => {
     await closeLeague(app);
   });
 
-  it('cria o clube com 300 no caixa, elenco vazio e patrimônio igual ao caixa', async () => {
+  it('[B09] cria o clube com 300 no caixa, elenco vazio e patrimônio igual ao caixa', async () => {
     const created = await createClub(app, 'Águias FC', 'AFC');
 
     expect(created).toMatchObject({
@@ -33,7 +33,7 @@ describe('Clubes', () => {
     expect(detail.body.net_worth).toBe(300);
   });
 
-  it('recusa nome e sigla repetidos e o 21º clube, e aceita nome que só muda o acento', async () => {
+  it('[B09] recusa nome e sigla repetidos e o 21º clube, e aceita nome que só muda o acento', async () => {
     await createClub(app, 'Águias FC', 'AFC');
 
     const sameName = await appOf(app)
@@ -63,7 +63,7 @@ describe('Clubes', () => {
     expect(await prismaOf(app).clubes.count()).toBe(20);
   });
 
-  it('ordena a lista por nome ou pelo patrimônio calculado, desempatando por nome e id', async () => {
+  it('[B09][B17] ordena a lista por nome ou pelo patrimônio calculado, desempatando por nome e id', async () => {
     const aguias = await createClub(app, 'Águias FC', 'AFC');
     const plain = await createClub(app, 'Aguias FC', 'AGF');
     const zulu = await createClub(app, 'Zulu FC', 'ZFC');
@@ -94,7 +94,7 @@ describe('Clubes', () => {
     expect(byWorth.body[2].net_worth).toBe(300);
   });
 
-  it('devolve o elenco na ordem de posição, o contrato e o patrimônio na consulta do clube', async () => {
+  it('[B13] devolve o elenco na ordem de posição, o contrato e o patrimônio na consulta do clube', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
     const attack = await createPlayer(app, {
       name: 'Ataque Beta',

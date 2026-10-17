@@ -49,7 +49,7 @@ describe('Escalação e partidas', () => {
     await closeLeague(app);
   });
 
-  it('nasce sem escalação, grava uma formação válida sem mexer no caixa e recusa a inválida', async () => {
+  it('[B20] nasce sem escalação, grava uma formação válida sem mexer no caixa e recusa a inválida', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
     const empty = await appOf(app)
       .get(`/api/v1/clubs/${club.id}/lineup`)
@@ -123,7 +123,7 @@ describe('Escalação e partidas', () => {
       .expect(400);
   });
 
-  it('tira o titular vendido ou doente e não o recoloca quando deixa de estar doente', async () => {
+  it('[B20] tira o titular vendido ou doente e não o recoloca quando deixa de estar doente', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
     const ids = await hireLine(app, club.id, 'Casa');
     await appOf(app)
@@ -166,7 +166,7 @@ describe('Escalação e partidas', () => {
     ).not.toContain(ids[3]);
   });
 
-  it('joga a partida com as duas escalações, grava os 6 duelos e recusa sem gravar', async () => {
+  it('[B21] joga a partida com as duas escalações, grava os 6 duelos e recusa sem gravar', async () => {
     const home = await createClub(app, 'Águias FC', 'AFC');
     const away = await createClub(app, 'Delta FC', 'DFC');
     const homeIds = await hireLine(app, home.id, 'Casa');
@@ -213,7 +213,7 @@ describe('Escalação e partidas', () => {
     expect(await prismaOf(app).partidas.count()).toBe(1);
   });
 
-  it('lista as partidas da mais recente e devolve os duelos gravados mesmo depois de editar o jogador', async () => {
+  it('[B22] lista as partidas da mais recente e devolve os duelos gravados mesmo depois de editar o jogador', async () => {
     const home = await createClub(app, 'Águias FC', 'AFC');
     const away = await createClub(app, 'Delta FC', 'DFC');
     const third = await createClub(app, 'Gama SC', 'GSC');
@@ -264,7 +264,7 @@ describe('Escalação e partidas', () => {
     expect(loaded.body.duels[0].attacker.player_name).toBe(attacker);
   });
 
-  it('classifica todos os clubes, inclusive quem não jogou, por pontos, saldo, gols e nome', async () => {
+  it('[B22] classifica todos os clubes, inclusive quem não jogou, por pontos, saldo, gols e nome', async () => {
     const alpha = await createClub(app, 'Alpha FC', 'AFC');
     await createClub(app, 'Meio FC', 'MFC');
     const zulu = await createClub(app, 'Zulu FC', 'ZFC');

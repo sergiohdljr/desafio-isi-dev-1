@@ -10,12 +10,12 @@ import {
 const soldAt = new Date('2026-11-05T19:40:00.000Z');
 
 describe('sale settlement', () => {
-  it('counts zero days when loyalty is the sale instant or already past', () => {
+  it('[B14] counts zero days when loyalty is the sale instant or already past', () => {
     expect(saleRemainingDays(soldAt, soldAt)).toBe(0);
     expect(saleRemainingDays(new Date(soldAt.getTime() - 1), soldAt)).toBe(0);
   });
 
-  it('closes the contract without a penalty when loyalty is over', () => {
+  it('[B14][B15] closes the contract without a penalty when loyalty is over', () => {
     const settled = settleSale({
       purchaseValue: Money.fromCents(2500),
       marketValue: Money.fromCents(2500),
@@ -34,7 +34,7 @@ describe('sale settlement', () => {
     });
   });
 
-  it('rounds a positive commission into the credit when there is no penalty', () => {
+  it('[B15] rounds a positive commission into the credit when there is no penalty', () => {
     const settled = settleSale({
       purchaseValue: Money.fromCents(1000),
       marketValue: Money.fromCents(1385),
@@ -83,7 +83,7 @@ describe('loyalty penalty', () => {
     },
   ];
 
-  it('rounds 116 days, 17 hours and 35 minutes up to 117', () => {
+  it('[B14] rounds 116 days, 17 hours and 35 minutes up to 117', () => {
     const longFraction = new Date(
       start.getTime() + ((116 * 24 + 17) * 60 + 35) * 60 * 1000,
     );
@@ -91,14 +91,14 @@ describe('loyalty penalty', () => {
   });
 
   it.each(loyaltyBands)(
-    'counts $days remaining days at $rate percent',
+    '[B14] counts $days remaining days at $rate percent',
     ({ until, days, rate }) => {
       expect(saleRemainingDays(until, start)).toBe(days);
       expect(penaltyRateFor(days)).toBe(rate);
     },
   );
 
-  it('caps a 20 percent penalty of 15.00 at 10.00', () => {
+  it('[B14] caps a 20 percent penalty of 15.00 at 10.00', () => {
     expect(loyaltyPenalty(Money.fromCents(7500), 200).cents).toBe(1000);
   });
 });
@@ -114,7 +114,7 @@ const commissions = [
 
 describe('sale commission', () => {
   it.each(commissions)(
-    'charges $commission on a profit of $profit',
+    '[B15] charges $commission on a profit of $profit',
     ({ profit, commission }) => {
       expect(
         saleCommission(Money.roundHalfAwayFromZero(profit)).toDecimalString(),
@@ -178,7 +178,7 @@ const settlements = [
 
 describe('sale credit', () => {
   it.each(settlements)(
-    'credits $credit from a purchase of $purchase sold at $market',
+    '[B14][B15] credits $credit from a purchase of $purchase sold at $market',
     ({
       purchase,
       market,

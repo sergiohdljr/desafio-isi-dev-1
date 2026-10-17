@@ -25,7 +25,7 @@ describe('Histórico e CSV', () => {
     await closeLeague(app);
   });
 
-  it('lista da mais recente para a mais antiga, fecha o caixa e mantém o nome gravado', async () => {
+  it('[B18] lista da mais recente para a mais antiga, fecha o caixa e mantém o nome gravado', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
     const player = await createPlayer(app);
     await buyPlayer(app, player.id, club.id).expect(200);
@@ -57,7 +57,7 @@ describe('Histórico e CSV', () => {
     expect(detail.body.cash).toBeCloseTo(300 + cashChange, 2);
   });
 
-  it('filtra por tipo e jogador, zera o resumo sem transações e responde 400 ou 404', async () => {
+  it('[B18] filtra por tipo e jogador, zera o resumo sem transações e responde 400 ou 404', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
     const empty = await appOf(app)
       .get(`/api/v1/clubs/${club.id}/transactions`)
@@ -96,7 +96,7 @@ describe('Histórico e CSV', () => {
       .expect(404);
   });
 
-  it('exporta o CSV na mesma ordem, só o cabeçalho sem transações, e o erro em JSON', async () => {
+  it('[B19] exporta o CSV na mesma ordem, só o cabeçalho sem transações, e o erro em JSON', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
     const header =
       'data_hora;tipo;jogador;valor;taxa_ou_comissao;multa;lucro;variacao_caixa';

@@ -17,7 +17,7 @@ describe('Jogadores', () => {
     await closeLeague(app);
   });
 
-  it('cadastra um jogador e devolve o overall calculado e o valor base gravado', async () => {
+  it('[B06] cadastra um jogador e devolve o overall calculado e o valor base gravado', async () => {
     const created = await createPlayer(app);
     const stored = await prismaOf(app).jogadores.findUnique({
       where: { id: created.id },
@@ -37,7 +37,7 @@ describe('Jogadores', () => {
     });
   });
 
-  it('muda o valor de mercado ao alterar a condição e mantém o valor base', async () => {
+  it('[B04][B05] muda o valor de mercado ao alterar a condição e mantém o valor base', async () => {
     const created = await createPlayer(app);
 
     const changed = await appOf(app)
@@ -58,7 +58,7 @@ describe('Jogadores', () => {
     });
   });
 
-  it('edita nome, posição, agilidade e idade, e recusa idade menor ou troca de posição no elenco', async () => {
+  it('[B04][B17] edita nome, posição, agilidade e idade, e recusa idade menor ou troca de posição no elenco', async () => {
     const created = await createPlayer(app);
 
     const edited = await appOf(app).put(`/api/v1/players/${created.id}`).send({
@@ -104,7 +104,7 @@ describe('Jogadores', () => {
     ).toBe('MEI');
   });
 
-  it('pagina depois do filtro, devolve a página vazia além da última e recusa filtro inválido', async () => {
+  it('[B07] pagina depois do filtro, devolve a página vazia além da última e recusa filtro inválido', async () => {
     await createPlayer(app, { name: 'Ana Lima' });
     await createPlayer(app, { name: 'Bruno Dias' });
 
@@ -132,7 +132,7 @@ describe('Jogadores', () => {
     await appOf(app).get('/api/v1/players').query({ sort: 'nome' }).expect(400);
   });
 
-  it('exclui o jogador livre com 204, preserva a linha e responde 404 nos demais endpoints', async () => {
+  it('[B08] exclui o jogador livre com 204, preserva a linha e responde 404 nos demais endpoints', async () => {
     const created = await createPlayer(app);
 
     const deleted = await appOf(app)
@@ -161,7 +161,7 @@ describe('Jogadores', () => {
     expect(listed.body.meta.total_items).toBe(0);
   });
 
-  it('recusa excluir jogador do elenco e não preenche excluido_em', async () => {
+  it('[B17] recusa excluir jogador do elenco e não preenche excluido_em', async () => {
     const club = await createClub(app, 'Águias FC', 'AFC');
     const player = await createPlayer(app);
     await buyPlayer(app, player.id, club.id).expect(200);

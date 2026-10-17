@@ -5,7 +5,7 @@ import { buyPlayerSchema } from './buy-player.schema.js';
 const pipe = new ZodPipe(buyPlayerSchema);
 
 describe('buy player contract', () => {
-  it('reads the club and the loyalty minute and ignores an unknown field', () => {
+  it('[B12] reads the club and the loyalty minute and ignores an unknown field', () => {
     const parsed = pipe.transform({
       club_id: 4,
       loyalty_until: '2027-03-02T10:15-03:00',
@@ -16,7 +16,7 @@ describe('buy player contract', () => {
     expect(parsed.loyaltyUntil.toISOString()).toBe('2027-03-02T13:15:00.000Z');
   });
 
-  it('rejects a missing field, a bad club id and a loyalty that is not the Brasília minute', () => {
+  it('[B11][B12] rejects a missing field, a bad club id and a loyalty that is not the Brasília minute', () => {
     expect(() => pipe.transform({})).toThrow(BadRequestException);
     expect(() =>
       pipe.transform({

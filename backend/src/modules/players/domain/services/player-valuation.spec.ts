@@ -136,7 +136,7 @@ const baseCases: BaseCase[] = [
 
 describe('overallOf', () => {
   it.each(overallCases)(
-    'rates a $position as $overall',
+    '[B06] rates a $position as $overall',
     ({ position, overall, ...skills }) => {
       expect(overallOf(position, skills)).toBe(overall);
     },
@@ -145,7 +145,7 @@ describe('overallOf', () => {
 
 describe('baseValueOf', () => {
   it.each(baseCases)(
-    'prices overall $overall potential $potential age $age as $base',
+    '[B06] prices overall $overall potential $potential age $age as $base',
     ({ overall, potential, age, base }) => {
       expect(baseValueOf(overall, potential, age).toDecimalString()).toBe(base);
     },
@@ -154,7 +154,7 @@ describe('baseValueOf', () => {
 
 describe('marketValueOf', () => {
   it.each(cases)(
-    'prices $base $condition agility $agility age $age as $market',
+    '[B05] prices $base $condition agility $agility age $age as $market',
     ({ base, condition, agility, age, market }) => {
       const value = marketValueOf(
         Money.roundHalfAwayFromZero(base),

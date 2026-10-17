@@ -23,7 +23,7 @@ const player = {
 };
 
 describe('player contracts', () => {
-  it('normalizes the name and ignores an unknown field', () => {
+  it('[B01][B03] normalizes the name and ignores an unknown field', () => {
     const parsed = bodyPipe.transform({
       ...player,
       name: '  Meia   Zeta  ',
@@ -36,7 +36,7 @@ describe('player contracts', () => {
     expect(parsed).not.toHaveProperty('club_id');
   });
 
-  it('rejects a name that is too short or contains a digit', () => {
+  it('[B01] rejects a name that is too short or contains a digit', () => {
     expect(() => bodyPipe.transform({ ...player, name: 'Ana' })).toThrow(
       BadRequestException,
     );
@@ -45,7 +45,7 @@ describe('player contracts', () => {
     );
   });
 
-  it('rejects a body that is not a JSON object and a string used as a number', () => {
+  it('[B01][B02] rejects a body that is not a JSON object and a string used as a number', () => {
     expect(() => bodyPipe.transform([])).toThrow(BadRequestException);
     expect(() => bodyPipe.transform('x')).toThrow(BadRequestException);
     expect(() => bodyPipe.transform(10)).toThrow(BadRequestException);
@@ -58,7 +58,7 @@ describe('player contracts', () => {
     );
   });
 
-  it('reads a player id and answers 404 when the format is invalid', () => {
+  it('[B02] reads a player id and answers 404 when the format is invalid', () => {
     expect(idPipe.transform('12')).toBe(12);
     expect(() => idPipe.transform('01')).toThrow(NotFoundException);
     expect(() => idPipe.transform('0')).toThrow(NotFoundException);
@@ -66,7 +66,7 @@ describe('player contracts', () => {
     expect(() => idPipe.transform('1.5')).toThrow(NotFoundException);
   });
 
-  it('applies query defaults and ignores an unknown parameter', () => {
+  it('[B07] applies query defaults and ignores an unknown parameter', () => {
     expect(queryPipe.transform({ extra: '1' })).toEqual({
       search: undefined,
       position: undefined,
@@ -83,7 +83,7 @@ describe('player contracts', () => {
     });
   });
 
-  it('rejects an empty filter, a reversed range, a repeated sort field and free with a club', () => {
+  it('[B07] rejects an empty filter, a reversed range, a repeated sort field and free with a club', () => {
     expect(() => queryPipe.transform({ position: '' })).toThrow(
       BadRequestException,
     );
