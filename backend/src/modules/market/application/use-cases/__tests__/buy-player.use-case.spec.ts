@@ -1,10 +1,10 @@
 import { Test } from '@nestjs/testing';
-import { CLOCK } from '../../../../common/clock/clock.js';
-import { DomainError } from '../../../../shared/domain/domain-error.js';
-import { Money } from '../../../../shared/domain/money.js';
-import { InMemoryMarketRepository } from '../../infra/memory/in-memory-market-repository.js';
-import { MARKET_REPOSITORY } from '../repositories/market-repository.js';
-import { BuyPlayer } from './buy-player.use-case.js';
+import { CLOCK } from '../../../../../common/clock/clock.js';
+import { DomainError } from '../../../../../shared/domain/domain-error.js';
+import { Money } from '../../../../../shared/domain/money.js';
+import { InMemoryMarketRepository } from '../../../infra/memory/in-memory-market-repository.js';
+import { MARKET_REPOSITORY } from '../../repositories/market-repository.js';
+import { BuyPlayer } from '../buy-player.use-case.js';
 
 const boughtAt = new Date('2026-10-14T15:00:00.000Z');
 const loyaltyUntil = new Date('2027-03-02T13:15:00.000Z');
