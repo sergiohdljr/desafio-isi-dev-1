@@ -38,8 +38,11 @@ async function openPlayers(page: Page) {
 }
 
 async function searchPlayers(page: Page, term: string) {
-  await page.getByLabel("Buscar jogador pelo nome").fill(term)
-  await expect(page.getByText(`Busca: ${term}`)).toBeVisible()
+  const search = page.getByLabel("Buscar jogador pelo nome")
+  await search.click()
+  await search.fill(term)
+  await expect(search).toHaveValue(term)
+  await expect(page.getByText(`Busca: ${term}`, { exact: true })).toBeVisible()
 }
 
 function playerRow(page: Page, name: string) {
@@ -47,7 +50,7 @@ function playerRow(page: Page, name: string) {
 }
 
 async function fillAndSave(page: Page, draft: PlayerDraft) {
-  await page.getByRole("button", { name: "Novo jogador" }).click()
+  await page.getByRole("button", { name: "Novo jogador" }).first().click()
   const dialog = page.getByRole("dialog", { name: "Novo jogador" })
   await dialog.getByLabel("Nome").fill(draft.name)
   await dialog.getByRole("radio", { name: new RegExp(draft.position ?? "ATA") }).click()
@@ -60,6 +63,7 @@ async function fillAndSave(page: Page, draft: PlayerDraft) {
   await dialog.getByLabel("Potencial").fill(String(draft.potential ?? 80))
   await dialog.getByRole("button", { name: "Salvar jogador" }).click()
   await expect(page.getByText("Jogador cadastrado")).toBeVisible()
+  await expect(page.getByRole("dialog", { name: "Novo jogador" })).toHaveCount(0)
 }
 
 export { fillAndSave, openPlayers, playerRow, removeByName, searchPlayers, uniqueToken }
