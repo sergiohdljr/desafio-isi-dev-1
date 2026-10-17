@@ -1,6 +1,10 @@
 import { useEffect, useRef } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { useNavigate } from "react-router"
 import { paths } from "@/app/routes"
+import { useClubs } from "@/features/clubs/hooks/use-clubs"
+import { listMatches, listStandings } from "@/features/league/api/league.api"
+import { listPlayers } from "@/features/players/api/players.api"
 import {
   ArrowRight,
   ChevronRight,
@@ -24,15 +28,7 @@ import { Logo } from "@/components/ui/logo"
 const CAMPO_WIDTH = 1233.5
 const CAMPO_HEIGHT = 701.5
 
-const league = {
-  name: "Liga Fictícia 2026",
-  leader: "Delta FC",
-  points: 6,
-  players: 23,
-  freePlayers: 7,
-  clubs: 6,
-  matches: 2,
-}
+const LEAGUE_NAME = "Liga Fictícia 2026"
 
 const steps: { step: string; title: string; description: string; icon: LucideIcon }[] = [
   {
@@ -73,20 +69,39 @@ const steps: { step: string; title: string; description: string; icon: LucideIco
   },
 ]
 
-const stats: { icon: LucideIcon; value: string; label: string }[] = [
-  { icon: Users, value: String(league.players), label: "jogadores" },
-  { icon: UserRound, value: String(league.freePlayers), label: "livres" },
-  { icon: Shield, value: String(league.clubs), label: "clubes" },
-  { icon: Swords, value: String(league.matches), label: "partidas" },
-]
-
-function leagueStatus() {
-  if (league.matches === 0) return "nenhuma partida ainda"
-  return `líder: ${league.leader}, ${league.points} pontos`
-}
-
 function HomePage() {
   const navigate = useNavigate()
+  const { clubs, isPending: clubsPending } = useClubs("name")
+  const players = useQuery({
+    queryKey: ["players", "count"],
+    queryFn: () => listPlayers({ page: 1, limit: 1 }),
+  })
+  const freePlayers = useQuery({
+    queryKey: ["players", "free-count"],
+    queryFn: () => listPlayers({ free: true, page: 1, limit: 1 }),
+  })
+  const matches = useQuery({
+    queryKey: ["matches", ""],
+    queryFn: () => listMatches(),
+  })
+  const standings = useQuery({
+    queryKey: ["standings"],
+    queryFn: listStandings,
+  })
+  const matchCount = matches.data?.length ?? 0
+  const leader = standings.data?.[0]
+  const stats: { icon: LucideIcon; value: string; label: string }[] = [
+    { icon: Users, value: countOf(players.data?.meta.total_items, players.isPending), label: "jogadores" },
+    { icon: UserRound, value: countOf(freePlayers.data?.meta.total_items, freePlayers.isPending), label: "livres" },
+    { icon: Shield, value: countOf(clubs.length, clubsPending), label: "clubes" },
+    { icon: Swords, value: countOf(matchCount, matches.isPending), label: "partidas" },
+  ]
+  const status =
+    matches.isPending || standings.isPending
+      ? "carregando a liga"
+      : matchCount === 0 || !leader
+        ? "nenhuma partida ainda"
+        : `líder: ${leader.club_name}, ${leader.points} pontos`
   const startRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -119,11 +134,11 @@ function HomePage() {
         <Logo size="lg" />
         <p className="inline-flex items-center gap-2 rounded-full border border-border bg-background py-1 pr-3 pl-2.5">
           <span aria-hidden className="size-2 rounded-full bg-success" />
-          <span className="text-caption-xs-medium">{league.name}</span>
+          <span className="text-caption-xs-medium">{LEAGUE_NAME}</span>
           <span className="text-caption-xs text-muted-foreground" aria-hidden>
             ·
           </span>
-          <span className="text-caption-xs text-muted-foreground">{leagueStatus()}</span>
+          <span className="text-caption-xs text-muted-foreground">{status}</span>
         </p>
         <div className="flex flex-col gap-3">
           <h1 className="text-4xl leading-12 font-semibold tracking-tight whitespace-nowrap">
@@ -186,10 +201,15 @@ function HomePage() {
 
       <footer className="relative flex items-center gap-1.5 text-caption-xs text-muted-foreground">
         <Clock aria-hidden className="size-4" />
-        <p>{league.name} · Horário de Brasília (UTC−3)</p>
+        <p>{LEAGUE_NAME} · Horário de Brasília (UTC−3)</p>
       </footer>
     </main>
   )
+}
+
+function countOf(value: number | undefined, pending: boolean) {
+  if (pending || value === undefined) return "…"
+  return String(value)
 }
 
 export { HomePage }

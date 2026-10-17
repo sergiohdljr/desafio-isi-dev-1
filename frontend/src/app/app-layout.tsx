@@ -3,7 +3,9 @@ import { ChevronRight, PanelLeft, RefreshCw } from "lucide-react"
 import { Outlet, useLocation, useNavigate } from "react-router"
 import { pathForSidebar, paths } from "@/app/routes"
 import { CreateClubDialog } from "@/features/clubs/components/create-club-dialog"
+import { useQuery } from "@tanstack/react-query"
 import { useClubs, useCreateClub } from "@/features/clubs/hooks/use-clubs"
+import { listMatches } from "@/features/league/api/league.api"
 import { usePlayersDirectory } from "@/features/players/hooks/use-players"
 import { Button } from "@/components/ui/button"
 import { Sidebar } from "@/components/ui/sidebar"
@@ -55,6 +57,10 @@ function AppLayout() {
     onRefresh: () => undefined,
   })
   const { clubs } = useClubs("name")
+  const matches = useQuery({
+    queryKey: ["matches", ""],
+    queryFn: () => listMatches(),
+  })
   const { counts } = usePlayersDirectory({
     sort: "name",
     scope: "all",
@@ -84,7 +90,12 @@ function AppLayout() {
             if (path) void navigate(path)
           }}
           onCreateClub={() => setCreating(true)}
-          counts={{ players: counts.all, clubs: clubs.length }}
+          counts={{
+            players: counts.all,
+            clubs: clubs.length,
+            matches: matches.data?.length ?? 0,
+          }}
+          latestMatch={latestMatchLabel(matches.data)}
           clubs={clubs.map((club) => ({
             initial: club.name.charAt(0),
             name: club.name,
@@ -149,6 +160,12 @@ function AppLayout() {
       ) : null}
     </AppChromeContext.Provider>
   )
+}
+
+function latestMatchLabel(matches: { home: { club_name: string; goals: number }; away: { club_name: string; goals: number } }[] | undefined) {
+  const latest = matches?.[0]
+  if (!latest) return "Nenhuma partida ainda"
+  return `${latest.home.club_name} ${latest.home.goals} × ${latest.away.goals} ${latest.away.club_name}`
 }
 
 export { AppLayout, useAppChrome }

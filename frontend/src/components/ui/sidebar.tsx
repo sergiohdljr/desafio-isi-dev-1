@@ -129,6 +129,7 @@ function Sidebar({
   onHome,
   onCreateClub,
   counts,
+  latestMatch,
   clubs: clubItems = [...clubs],
   activeClub,
 }: {
@@ -139,6 +140,7 @@ function Sidebar({
   onHome?: () => void
   onCreateClub?: () => void
   counts?: { players?: number; clubs?: number; matches?: number }
+  latestMatch?: string
   clubs?: { initial: string; name: string; href?: string }[]
   activeClub?: string
 }) {
@@ -165,7 +167,7 @@ function Sidebar({
         <SidebarItem
           icon={<Users className="size-4" />}
           label="Jogadores"
-          count={String(counts?.players ?? 23)}
+          count={String(counts?.players ?? 0)}
           active={active === "Jogadores"}
           collapsed={collapsed}
           onSelect={() => onNavigate?.("Jogadores")}
@@ -173,7 +175,7 @@ function Sidebar({
         <SidebarItem
           icon={<Shield className="size-4" />}
           label="Clubes"
-          count={String(counts?.clubs ?? 6)}
+          count={String(counts?.clubs ?? 0)}
           active={active === "Clubes"}
           collapsed={collapsed}
           onSelect={() => onNavigate?.("Clubes")}
@@ -184,7 +186,7 @@ function Sidebar({
         <SidebarItem
           icon={<Swords className="size-4" />}
           label="Partidas"
-          count={String(counts?.matches ?? 2)}
+          count={String(counts?.matches ?? 0)}
           active={active === "Partidas"}
           collapsed={collapsed}
           onSelect={() => onNavigate?.("Partidas")}
@@ -238,7 +240,7 @@ function Sidebar({
               <div className="min-w-0">
                 <p className="text-body-sm-medium text-foreground">Liga Fictícia 2026</p>
                 <p className="text-caption-xs text-muted-foreground">
-                  {counts?.clubs ?? 6} clubes · {counts?.players ?? 23} jogadores
+                  {counts?.clubs ?? 0} clubes · {counts?.players ?? 0} jogadores
                 </p>
               </div>
             </div>
@@ -248,7 +250,7 @@ function Sidebar({
               </span>
               <div className="min-w-0">
                 <p className="text-body-sm-medium text-foreground">Última partida</p>
-                <p className="text-caption-xs text-muted-foreground">Delta FC 2 × 1 Águias FC</p>
+                <p className="text-caption-xs text-muted-foreground">{latestMatch ?? "Nenhuma partida ainda"}</p>
               </div>
             </div>
             <div className="h-px bg-sidebar-border" />
