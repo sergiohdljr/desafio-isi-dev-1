@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { CLOCK } from '../../../../../common/clock/clock.js';
 import { DomainError } from '../../../../../shared/domain/domain-error.js';
 import { Money } from '../../../../../shared/domain/money.js';
-import { InMemoryMarketRepository } from '../../../infra/memory/in-memory-market-repository.js';
+import { InMemoryMarketRepository } from '../../../infra/repositories/in-memory-market-repository.js';
 import { MARKET_REPOSITORY } from '../../repositories/market-repository.js';
 import { BuyPlayer } from '../buy-player.use-case.js';
 

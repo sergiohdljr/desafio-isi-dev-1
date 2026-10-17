@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { CLUBS_REPOSITORY } from '../../../../clubs/application/repositories/clubs-repository.js';
 import { Club } from '../../../../clubs/domain/entities/club.js';
-import { InMemoryClubsRepository } from '../../../../clubs/infra/memory/in-memory-clubs-repository.js';
-import { InMemoryLeagueRepository } from '../../../infra/memory/in-memory-league-repository.js';
+import { InMemoryClubsRepository } from '../../../../clubs/infra/repositories/in-memory-clubs-repository.js';
+import { InMemoryLeagueRepository } from '../../../infra/repositories/in-memory-league-repository.js';
 import {
   LEAGUE_REPOSITORY,
   type SavedMatch,

@@ -1,8 +1,8 @@
 import { Test } from '@nestjs/testing';
 import { CLOCK } from '../../../../../common/clock/clock.js';
 import { Club } from '../../../domain/entities/club.js';
-import { InMemoryClubsRepository } from '../../../infra/memory/in-memory-clubs-repository.js';
-import { InMemorySquadReader } from '../../../infra/memory/in-memory-squad-reader.js';
+import { InMemoryClubsRepository } from '../../../infra/repositories/in-memory-clubs-repository.js';
+import { InMemorySquadReader } from '../../../infra/repositories/in-memory-squad-reader.js';
 import { CLUBS_REPOSITORY } from '../../repositories/clubs-repository.js';
 import { SQUAD_READER } from '../../repositories/squad-reader.js';
 import { CreateClub } from '../create-club.use-case.js';

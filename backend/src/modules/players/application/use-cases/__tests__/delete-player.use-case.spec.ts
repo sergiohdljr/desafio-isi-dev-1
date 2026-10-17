@@ -1,11 +1,11 @@
 import { Test } from '@nestjs/testing';
 import { CLUBS_REPOSITORY } from '../../../../clubs/application/repositories/clubs-repository.js';
-import { InMemoryClubsRepository } from '../../../../clubs/infra/memory/in-memory-clubs-repository.js';
+import { InMemoryClubsRepository } from '../../../../clubs/infra/repositories/in-memory-clubs-repository.js';
 import {
   Player,
   type RegisterPlayer,
 } from '../../../domain/entities/player.js';
-import { InMemoryPlayersRepository } from '../../../infra/memory/in-memory-players-repository.js';
+import { InMemoryPlayersRepository } from '../../../infra/repositories/in-memory-players-repository.js';
 import { PLAYERS_REPOSITORY } from '../../repositories/players-repository.js';
 import { DeletePlayer } from '../delete-player.use-case.js';
 
