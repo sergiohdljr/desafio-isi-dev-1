@@ -11,7 +11,11 @@ import {
   type RegisterPlayer,
 } from '../../../../players/domain/entities/player.js';
 import { CLOCK } from '../../../../../common/clock/clock.js';
-import { type SquadMember } from '../../repositories/clubs-repository.js';
+import {
+  SQUAD_READER,
+  type SquadMember,
+  type SquadReader,
+} from '../../repositories/squad-reader.js';
 import { CreateClub } from '../create-club.use-case.js';
 import { FindClub } from '../find-club.use-case.js';
 import { ListClubs } from '../list-clubs.use-case.js';
@@ -52,11 +56,13 @@ function repository(clubs: Club[] = [], squad: SquadMember[] = []) {
     async list() {
       return clubs;
     },
-    async squad() {
+  };
+  const squadReader: SquadReader = {
+    async list() {
       return squad;
     },
   };
-  return { repo, saved };
+  return { repo, saved, squadReader };
 }
 
 const pricedMeia: RegisterPlayer = {
@@ -114,11 +120,13 @@ function contracted(
 async function useCase<T>(
   token: new (...args: never[]) => T,
   repo: ClubsRepository,
+  squad: SquadReader,
 ) {
   const module = await Test.createTestingModule({
     providers: [
       token,
       { provide: CLUBS_REPOSITORY, useValue: repo },
+      { provide: SQUAD_READER, useValue: squad },
       {
         provide: CLOCK,
         useValue: { now: () => new Date('2027-03-02T15:00:00.000Z') },
@@ -130,8 +138,8 @@ async function useCase<T>(
 
 describe('club use cases', () => {
   it('opens a club with 300 cash, an empty squad and the same net worth', async () => {
-    const { repo } = repository();
-    const create = await useCase(CreateClub, repo);
+    const { repo, squadReader } = repository();
+    const create = await useCase(CreateClub, repo, squadReader);
 
     const created = await create.execute({
       name: 'Águias FC',
@@ -150,8 +158,10 @@ describe('club use cases', () => {
   });
 
   it('refuses a repeated name or acronym and does not save', async () => {
-    const { repo, saved } = repository([stored('Águias FC', 'AFC', 1)]);
-    const create = await useCase(CreateClub, repo);
+    const { repo, saved, squadReader } = repository([
+      stored('Águias FC', 'AFC', 1),
+    ]);
+    const create = await useCase(CreateClub, repo, squadReader);
 
     await expect(
       create.execute({ name: 'águias fc', acronym: 'AGU' }),
@@ -179,8 +189,8 @@ describe('club use cases', () => {
         index + 1,
       );
     });
-    const { repo, saved } = repository(existing);
-    const create = await useCase(CreateClub, repo);
+    const { repo, saved, squadReader } = repository(existing);
+    const create = await useCase(CreateClub, repo, squadReader);
 
     const twentieth = await create.execute({
       name: 'Vigesimo Clube',
@@ -205,8 +215,8 @@ describe('club use cases', () => {
       stored('Aguias FC', 'AGU', 8),
       stored('Águias FC', 'AFC', 2),
     ];
-    const { repo } = repository(clubs);
-    const list = await useCase(ListClubs, repo);
+    const { repo, squadReader } = repository(clubs);
+    const list = await useCase(ListClubs, repo, squadReader);
 
     const listed = await list.execute({ sort: 'name' });
 
@@ -229,10 +239,10 @@ describe('club use cases', () => {
       stored('Aguias FC', 'AGU', 7),
       stored('Águias FC', 'AGI', 2),
     ];
-    const { repo } = repository(clubs, [
+    const { repo, squadReader } = repository(clubs, [
       contracted(member(9, 1), new Date('2027-06-01T15:00:00.000Z')),
     ]);
-    const list = await useCase(ListClubs, repo);
+    const list = await useCase(ListClubs, repo, squadReader);
 
     const ascending = await list.execute({ sort: 'net_worth_asc' });
     expect(ascending.map((club) => club.name)).toEqual([
@@ -261,7 +271,7 @@ describe('club use cases', () => {
 
   it('shows the ordered squad, the contract and the calculated totals', async () => {
     const club = stored('Águias FC', 'AFC', 1);
-    const { repo } = repository(
+    const { repo, squadReader } = repository(
       [club],
       [
         contracted(
@@ -274,7 +284,7 @@ describe('club use cases', () => {
         ),
       ],
     );
-    const find = await useCase(FindClub, repo);
+    const find = await useCase(FindClub, repo, squadReader);
 
     const detail = await find.execute(1);
 
@@ -299,8 +309,8 @@ describe('club use cases', () => {
   });
 
   it('answers that a missing club does not exist', async () => {
-    const { repo } = repository();
-    const find = await useCase(FindClub, repo);
+    const { repo, squadReader } = repository();
+    const find = await useCase(FindClub, repo, squadReader);
 
     await expect(find.execute(4)).rejects.toMatchObject({ kind: 'missing' });
   });

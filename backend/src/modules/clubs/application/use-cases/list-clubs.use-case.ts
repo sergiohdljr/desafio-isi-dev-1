@@ -8,6 +8,10 @@ import {
   CLUBS_REPOSITORY,
   type ClubsRepository,
 } from '../repositories/clubs-repository.js';
+import {
+  SQUAD_READER,
+  type SquadReader,
+} from '../repositories/squad-reader.js';
 
 export const LIST_CLUBS = Symbol('LIST_CLUBS');
 
@@ -19,12 +23,13 @@ export interface ListClubsPort {
 export class ListClubs implements ListClubsPort {
   constructor(
     @Inject(CLUBS_REPOSITORY) private readonly clubs: ClubsRepository,
+    @Inject(SQUAD_READER) private readonly squad: SquadReader,
   ) {}
 
   async execute(query: ClubListQuery): Promise<ClubView[]> {
     const clubs = await this.clubs.list();
     const membersByClub = new Map<number, Money[]>();
-    for (const member of await this.clubs.squad()) {
+    for (const member of await this.squad.list()) {
       const values = membersByClub.get(member.clubId) ?? [];
       values.push(member.player.marketValue);
       membersByClub.set(member.clubId, values);

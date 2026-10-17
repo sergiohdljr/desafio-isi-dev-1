@@ -15,8 +15,12 @@ import { clubViewOf, type ClubView } from '../read-models/club-view.js';
 import {
   CLUBS_REPOSITORY,
   type ClubsRepository,
-  type SquadMember,
 } from '../repositories/clubs-repository.js';
+import {
+  SQUAD_READER,
+  type SquadMember,
+  type SquadReader,
+} from '../repositories/squad-reader.js';
 
 export const FIND_CLUB = Symbol('FIND_CLUB');
 
@@ -41,6 +45,7 @@ export interface FindClubPort {
 export class FindClub implements FindClubPort {
   constructor(
     @Inject(CLUBS_REPOSITORY) private readonly clubs: ClubsRepository,
+    @Inject(SQUAD_READER) private readonly squad: SquadReader,
     @Inject(CLOCK) private readonly clock: Clock,
   ) {}
 
@@ -51,7 +56,7 @@ export class FindClub implements FindClubPort {
     }
 
     const now = this.clock.now();
-    const members = (await this.clubs.squad()).filter(
+    const members = (await this.squad.list()).filter(
       (member) => member.clubId === club.id,
     );
     const players = arrangeSquad(
