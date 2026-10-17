@@ -1,5 +1,9 @@
 import { Money, roundHalfAway } from '../../../../shared/domain/money.js';
-import type { Condition, PlayerSkills, Position } from '../types/player-types.js';
+import type {
+  Condition,
+  PlayerSkills,
+  Position,
+} from '../types/player-types.js';
 
 const attributes = [
   'pace',

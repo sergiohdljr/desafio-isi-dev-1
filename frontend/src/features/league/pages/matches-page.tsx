@@ -65,26 +65,26 @@ function MatchesPage() {
         />
       ) : null}
       {error ? null : (
-      <MatchesHistory
-        rows={rows}
-        clubs={clubs}
-        clubId={clubId}
-        pending={matches.isPending}
-        empty={
-          <ResourceEmpty
-            framed={false}
-            title="Nenhuma partida jogada"
-            description="Escale os titulares de dois clubes e jogue a primeira partida."
-            action={
-              <Button type="button" variant="outline" size="sm" onClick={() => setCreating(true)}>
-                Nova partida
-              </Button>
-            }
-          />
-        }
-        acronym={acronym}
-        onClubIdChange={setClubId}
-      />
+        <MatchesHistory
+          rows={rows}
+          clubs={clubs}
+          clubId={clubId}
+          pending={matches.isPending}
+          empty={
+            <ResourceEmpty
+              framed={false}
+              title="Nenhuma partida jogada"
+              description="Escale os titulares de dois clubes e jogue a primeira partida."
+              action={
+                <Button type="button" variant="outline" size="sm" onClick={() => setCreating(true)}>
+                  Nova partida
+                </Button>
+              }
+            />
+          }
+          acronym={acronym}
+          onClubIdChange={setClubId}
+        />
       )}
       <p className="text-caption-xs text-muted-foreground">
         Vitória vale 3 pontos e empate vale 1. A classificação usa pontos, saldo, gols e nome.

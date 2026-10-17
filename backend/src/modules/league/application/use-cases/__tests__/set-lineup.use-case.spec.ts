@@ -23,12 +23,13 @@ function squad(clubId: number): MemoryLeaguePlayer[] {
 
 describe('set lineup', () => {
   it('refuses a missing club and a missing player', async () => {
-    const league = new InMemoryLeagueRepository([], [{ id: 1, name: 'Alpha FC' }], squad(1));
+    const league = new InMemoryLeagueRepository(
+      [],
+      [{ id: 1, name: 'Alpha FC' }],
+      squad(1),
+    );
     const module = await Test.createTestingModule({
-      providers: [
-        SetLineup,
-        { provide: LEAGUE_REPOSITORY, useValue: league },
-      ],
+      providers: [SetLineup, { provide: LEAGUE_REPOSITORY, useValue: league }],
     }).compile();
     const set = module.get(SetLineup);
 
@@ -47,10 +48,7 @@ describe('set lineup', () => {
       squad(1),
     );
     const module = await Test.createTestingModule({
-      providers: [
-        SetLineup,
-        { provide: LEAGUE_REPOSITORY, useValue: league },
-      ],
+      providers: [SetLineup, { provide: LEAGUE_REPOSITORY, useValue: league }],
     }).compile();
 
     const lineup = await module.get(SetLineup).execute(1, {

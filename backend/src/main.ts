@@ -1,10 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import type {
-  NestFastifyApplication} from '@nestjs/platform-fastify';
-import {
-  FastifyAdapter
-} from '@nestjs/platform-fastify';
+import type { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { FastifyAdapter } from '@nestjs/platform-fastify';
 import { AppModule } from './app.module.js';
 import { logRequests } from './common/http/log-requests.js';
 import { configureApp } from './configure-app.js';

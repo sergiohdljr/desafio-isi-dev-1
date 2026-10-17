@@ -1,5 +1,9 @@
 import { Money } from '../../../../shared/domain/money.js';
-import type { Condition, PlayerSkills, Position } from '../types/player-types.js';
+import type {
+  Condition,
+  PlayerSkills,
+  Position,
+} from '../types/player-types.js';
 import { baseValueOf, marketValueOf, overallOf } from './player-valuation.js';
 
 type MarketCase = {

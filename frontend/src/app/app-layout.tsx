@@ -162,7 +162,9 @@ function AppLayout() {
   )
 }
 
-function latestMatchLabel(matches: { home: { club_name: string; goals: number }; away: { club_name: string; goals: number } }[] | undefined) {
+function latestMatchLabel(
+  matches: { home: { club_name: string; goals: number }; away: { club_name: string; goals: number } }[] | undefined,
+) {
   const latest = matches?.[0]
   if (!latest) return "Nenhuma partida ainda"
   return `${latest.home.club_name} ${latest.home.goals} × ${latest.away.goals} ${latest.away.club_name}`

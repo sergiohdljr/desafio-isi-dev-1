@@ -59,107 +59,108 @@ function StandingsPage() {
           onRetry={() => void queryClient.invalidateQueries({ queryKey: ["standings"] })}
         />
       ) : (
-      <div className="grid grid-cols-[minmax(0,1fr)_300px] items-start gap-4">
-        {table.isPending ? (
-          <ResourceLoading />
-        ) : (table.data ?? []).length === 0 ? (
-          <ResourceEmpty
-            title="Nenhum clube cadastrado"
-            description="A classificação mostra todos os clubes, mesmo os que ainda não jogaram."
-          />
-        ) : (
-        <section className="overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
-          <table className="w-full border-collapse text-left">
-            <thead className="border-b border-border text-body-sm-medium text-muted-foreground">
-              <tr className="h-10 bg-muted-subtle">
-                {["#", "Clube", "J", "V", "E", "D", "GP", "GC", "SG", "Pts"].map((label) => (
-                  <th
-                    key={label}
-                    className={label === "Clube" ? "px-2 text-left font-medium" : "px-2 text-right font-medium"}
-                  >
-                    {label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {(table.data ?? []).map((row) => (
-                <tr key={row.club_id} className="h-[52px] border-b border-border last:border-b-0">
-                  <td className="pl-4 text-right">
-                    <span className="inline-flex size-6 items-center justify-center rounded-md bg-muted text-caption-xs-medium">
-                      {row.position}
-                    </span>
-                  </td>
-                  <td className="px-2">
+        <div className="grid grid-cols-[minmax(0,1fr)_300px] items-start gap-4">
+          {table.isPending ? (
+            <ResourceLoading />
+          ) : (table.data ?? []).length === 0 ? (
+            <ResourceEmpty
+              title="Nenhum clube cadastrado"
+              description="A classificação mostra todos os clubes, mesmo os que ainda não jogaram."
+            />
+          ) : (
+            <section className="overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
+              <table className="w-full border-collapse text-left">
+                <thead className="border-b border-border text-body-sm-medium text-muted-foreground">
+                  <tr className="h-10 bg-muted-subtle">
+                    {["#", "Clube", "J", "V", "E", "D", "GP", "GC", "SG", "Pts"].map((label) => (
+                      <th
+                        key={label}
+                        className={label === "Clube" ? "px-2 text-left font-medium" : "px-2 text-right font-medium"}
+                      >
+                        {label}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(table.data ?? []).map((row) => (
+                    <tr key={row.club_id} className="h-[52px] border-b border-border last:border-b-0">
+                      <td className="pl-4 text-right">
+                        <span className="inline-flex size-6 items-center justify-center rounded-md bg-muted text-caption-xs-medium">
+                          {row.position}
+                        </span>
+                      </td>
+                      <td className="px-2">
+                        <button
+                          type="button"
+                          className="text-body-sm-medium hover:underline"
+                          onClick={() => navigate(paths.club(row.club_id))}
+                        >
+                          <ClubAcronym className="mr-2">{acronym(row.club_id, row.club_name)}</ClubAcronym>
+                          {row.club_name}
+                        </button>
+                      </td>
+                      {[
+                        row.played,
+                        row.wins,
+                        row.draws,
+                        row.losses,
+                        row.goals_for,
+                        row.goals_against,
+                        row.goal_difference,
+                        row.points,
+                      ].map((value, index) => (
+                        <td key={index} className="px-2 text-right text-body-sm tabular-nums">
+                          {value}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <footer className="border-t border-border px-4 py-3 text-caption-xs text-muted-foreground">
+                J: jogos · V: vitórias · E: empates · D: derrotas · GP: gols pró · GC: gols contra · SG: saldo · Pts:
+                pontos
+              </footer>
+            </section>
+          )}
+          <aside className="flex flex-col gap-4">
+            <section className="overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
+              <header className="border-b border-border px-5 py-4">
+                <h2 className="text-heading-card">Últimas partidas</h2>
+                <p className="text-caption-xs text-muted-foreground">Da mais recente para a mais antiga.</p>
+              </header>
+              <ul>
+                {(matches.data ?? []).slice(0, 3).map((match) => (
+                  <li key={match.id} className="border-b border-border px-5 py-3 last:border-b-0">
+                    <p className="text-caption-xs text-muted-foreground">{formatPlayedAt(match.played_at)}</p>
                     <button
                       type="button"
                       className="text-body-sm-medium hover:underline"
-                      onClick={() => navigate(paths.club(row.club_id))}
+                      onClick={() => navigate(paths.match(match.id))}
                     >
-                      <ClubAcronym className="mr-2">{acronym(row.club_id, row.club_name)}</ClubAcronym>
-                      {row.club_name}
+                      {match.home.club_name} {match.home.goals} × {match.away.goals} {match.away.club_name}
                     </button>
-                  </td>
-                  {[
-                    row.played,
-                    row.wins,
-                    row.draws,
-                    row.losses,
-                    row.goals_for,
-                    row.goals_against,
-                    row.goal_difference,
-                    row.points,
-                  ].map((value, index) => (
-                    <td key={index} className="px-2 text-right text-body-sm tabular-nums">
-                      {value}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <footer className="border-t border-border px-4 py-3 text-caption-xs text-muted-foreground">
-            J: jogos · V: vitórias · E: empates · D: derrotas · GP: gols pró · GC: gols contra · SG: saldo · Pts: pontos
-          </footer>
-        </section>
-        )}
-        <aside className="flex flex-col gap-4">
-          <section className="overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
-            <header className="border-b border-border px-5 py-4">
-              <h2 className="text-heading-card">Últimas partidas</h2>
-              <p className="text-caption-xs text-muted-foreground">Da mais recente para a mais antiga.</p>
-            </header>
-            <ul>
-              {(matches.data ?? []).slice(0, 3).map((match) => (
-                <li key={match.id} className="border-b border-border px-5 py-3 last:border-b-0">
-                  <p className="text-caption-xs text-muted-foreground">{formatPlayedAt(match.played_at)}</p>
-                  <button
-                    type="button"
-                    className="text-body-sm-medium hover:underline"
-                    onClick={() => navigate(paths.match(match.id))}
-                  >
-                    {match.home.club_name} {match.home.goals} × {match.away.goals} {match.away.club_name}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-          <section className="rounded-[12px] border border-border bg-card px-5 py-4 shadow-xs">
-            <h2 className="text-heading-card">Ordem da tabela</h2>
-            <p className="text-caption-xs text-muted-foreground">Critérios usados pela API, nesta ordem.</p>
-            <ol className="mt-3 flex flex-col gap-2">
-              {CRITERIA.map((item, index) => (
-                <li key={item} className="flex items-center gap-2 text-body-sm">
-                  <span className="inline-flex size-5 items-center justify-center rounded-md bg-muted text-caption-xs-medium">
-                    {index + 1}
-                  </span>
-                  {item}
-                </li>
-              ))}
-            </ol>
-          </section>
-        </aside>
-      </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+            <section className="rounded-[12px] border border-border bg-card px-5 py-4 shadow-xs">
+              <h2 className="text-heading-card">Ordem da tabela</h2>
+              <p className="text-caption-xs text-muted-foreground">Critérios usados pela API, nesta ordem.</p>
+              <ol className="mt-3 flex flex-col gap-2">
+                {CRITERIA.map((item, index) => (
+                  <li key={item} className="flex items-center gap-2 text-body-sm">
+                    <span className="inline-flex size-5 items-center justify-center rounded-md bg-muted text-caption-xs-medium">
+                      {index + 1}
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </aside>
+        </div>
       )}
       {creating ? (
         <NewMatchDialog

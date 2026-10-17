@@ -9,7 +9,10 @@ import { Club } from '../../../domain/entities/club.js';
 import { InMemoryClubsRepository } from '../../../infra/repositories/in-memory-clubs-repository.js';
 import { InMemorySquadReader } from '../../../infra/repositories/in-memory-squad-reader.js';
 import { CLUBS_REPOSITORY } from '../../repositories/clubs-repository.js';
-import { SQUAD_READER, type SquadMember } from '../../repositories/squad-reader.js';
+import {
+  SQUAD_READER,
+  type SquadMember,
+} from '../../repositories/squad-reader.js';
 import { FindClub } from '../find-club.use-case.js';
 
 function stored(name: string, acronym: string, id: number): Club {
@@ -71,7 +74,10 @@ async function findClub(clubs: Club[] = [], squad: SquadMember[] = []) {
   const module = await Test.createTestingModule({
     providers: [
       FindClub,
-      { provide: CLUBS_REPOSITORY, useValue: new InMemoryClubsRepository(clubs) },
+      {
+        provide: CLUBS_REPOSITORY,
+        useValue: new InMemoryClubsRepository(clubs),
+      },
       { provide: SQUAD_READER, useValue: new InMemorySquadReader(squad) },
       {
         provide: CLOCK,
@@ -87,8 +93,14 @@ describe('find club', () => {
     const find = await findClub(
       [stored('Águias FC', 'AFC', 1)],
       [
-        contracted(member(3, 'Meia Épsilon'), new Date('2027-03-04T15:00:00.001Z')),
-        contracted(member(2, 'Meia Delta'), new Date('2027-03-04T15:00:00.000Z')),
+        contracted(
+          member(3, 'Meia Épsilon'),
+          new Date('2027-03-04T15:00:00.001Z'),
+        ),
+        contracted(
+          member(2, 'Meia Delta'),
+          new Date('2027-03-04T15:00:00.000Z'),
+        ),
       ],
     );
 

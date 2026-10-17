@@ -9,7 +9,10 @@ import { Club } from '../../../domain/entities/club.js';
 import { InMemoryClubsRepository } from '../../../infra/repositories/in-memory-clubs-repository.js';
 import { InMemorySquadReader } from '../../../infra/repositories/in-memory-squad-reader.js';
 import { CLUBS_REPOSITORY } from '../../repositories/clubs-repository.js';
-import { SQUAD_READER, type SquadMember } from '../../repositories/squad-reader.js';
+import {
+  SQUAD_READER,
+  type SquadMember,
+} from '../../repositories/squad-reader.js';
 import { ListClubs } from '../list-clubs.use-case.js';
 
 function stored(name: string, acronym: string, id: number): Club {
@@ -62,7 +65,10 @@ async function listClubs(clubs: Club[], squad: SquadMember[] = []) {
   const module = await Test.createTestingModule({
     providers: [
       ListClubs,
-      { provide: CLUBS_REPOSITORY, useValue: new InMemoryClubsRepository(clubs) },
+      {
+        provide: CLUBS_REPOSITORY,
+        useValue: new InMemoryClubsRepository(clubs),
+      },
       { provide: SQUAD_READER, useValue: new InMemorySquadReader(squad) },
       {
         provide: CLOCK,

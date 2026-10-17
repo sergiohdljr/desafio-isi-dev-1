@@ -31,7 +31,10 @@ describe('find lineup', () => {
     const module = await Test.createTestingModule({
       providers: [
         FindLineup,
-        { provide: LEAGUE_REPOSITORY, useValue: new InMemoryLeagueRepository() },
+        {
+          provide: LEAGUE_REPOSITORY,
+          useValue: new InMemoryLeagueRepository(),
+        },
       ],
     }).compile();
 

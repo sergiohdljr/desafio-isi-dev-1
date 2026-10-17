@@ -55,7 +55,7 @@ function MatchesHistory({
       </header>
       {pending ? <LoadingRows /> : null}
       {!pending && rows.length === 0 ? (
-        empty ?? <p className="px-4 py-10 text-center text-body-sm text-muted-foreground">Nenhuma partida ainda.</p>
+        (empty ?? <p className="px-4 py-10 text-center text-body-sm text-muted-foreground">Nenhuma partida ainda.</p>)
       ) : !pending ? (
         <table className="w-full border-collapse text-left">
           <thead className="border-b border-border text-body-sm-medium text-muted-foreground">

@@ -70,7 +70,9 @@ export class InMemoryMarketRepository implements MarketRepository {
         : null,
       previouslySoldByClub: this.transactions.some(
         (row) =>
-          row.clubId === clubId && row.playerId === playerId && row.type === 'VENDA',
+          row.clubId === clubId &&
+          row.playerId === playerId &&
+          row.type === 'VENDA',
       ),
     });
     if (!player || !club) {
@@ -183,14 +185,13 @@ export class InMemoryMarketRepository implements MarketRepository {
 
   private activePlayer(id: number): MemoryMarketPlayer | null {
     return (
-      this.players.find((player) => player.id === id && player.active !== false) ??
-      null
+      this.players.find(
+        (player) => player.id === id && player.active !== false,
+      ) ?? null
     );
   }
 
-  private record(
-    row: Omit<StoredTransaction, 'id'>,
-  ): StoredTransaction {
+  private record(row: Omit<StoredTransaction, 'id'>): StoredTransaction {
     const stored = { id: this.nextId, ...row };
     this.nextId += 1;
     this.transactions.push(stored);

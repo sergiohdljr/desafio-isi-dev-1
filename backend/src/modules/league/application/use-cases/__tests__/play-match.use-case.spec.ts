@@ -32,7 +32,10 @@ describe('play match', () => {
         { id: 1, name: 'Alpha FC' },
         { id: 2, name: 'Beta FC' },
       ],
-      [...side(1, ['A', 'B', 'C', 'D', 'E']), ...side(2, ['F', 'G', 'H', 'I', 'J'])],
+      [
+        ...side(1, ['A', 'B', 'C', 'D', 'E']),
+        ...side(2, ['F', 'G', 'H', 'I', 'J']),
+      ],
     );
     await league.replaceLineup(1, '2-2', [11, 12, 13, 14, 15], () => undefined);
     await league.replaceLineup(2, '2-2', [21, 22, 23, 24, 25], () => undefined);

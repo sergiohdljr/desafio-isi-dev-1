@@ -1,7 +1,4 @@
-import {
-  Player,
-  type RegisterPlayer,
-} from '../../domain/entities/player.js';
+import { Player, type RegisterPlayer } from '../../domain/entities/player.js';
 import { type PlayersRepository } from '../../application/repositories/players-repository.js';
 
 export class InMemoryPlayersRepository implements PlayersRepository {

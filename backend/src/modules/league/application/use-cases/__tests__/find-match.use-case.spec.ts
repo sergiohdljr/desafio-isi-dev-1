@@ -42,7 +42,10 @@ describe('find match', () => {
     const module = await Test.createTestingModule({
       providers: [
         FindMatch,
-        { provide: LEAGUE_REPOSITORY, useValue: new InMemoryLeagueRepository() },
+        {
+          provide: LEAGUE_REPOSITORY,
+          useValue: new InMemoryLeagueRepository(),
+        },
       ],
     }).compile();
 

@@ -13,11 +13,11 @@ describe('play match contract', () => {
   });
 
   it('rejects the same club on both sides and an invalid id', () => {
-    expect(() =>
-      pipe.transform({ home_club_id: 1, away_club_id: 1 }),
-    ).toThrow(BadRequestException);
-    expect(() =>
-      pipe.transform({ home_club_id: 0, away_club_id: 2 }),
-    ).toThrow(BadRequestException);
+    expect(() => pipe.transform({ home_club_id: 1, away_club_id: 1 })).toThrow(
+      BadRequestException,
+    );
+    expect(() => pipe.transform({ home_club_id: 0, away_club_id: 2 })).toThrow(
+      BadRequestException,
+    );
   });
 });
