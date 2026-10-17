@@ -1,14 +1,13 @@
 import { useState } from "react"
-import { ClipboardList, Coins, History, Landmark, Shirt, ShoppingCart, Users, Wallet } from "lucide-react"
+import { ClipboardList, Coins, History, Landmark, SearchX, Shirt, ShoppingCart, Users, Wallet } from "lucide-react"
 import { useLocation, useNavigate, useParams } from "react-router"
 import { useAppChrome } from "@/app/app-layout"
 import { paths } from "@/app/routes"
 import { ClubHistory } from "@/features/clubs/components/club-history"
-import { EmptySquad } from "@/features/clubs/components/empty-squad"
 import { LineupBoard } from "@/features/clubs/components/lineup-board"
 import { SquadTable } from "@/features/clubs/components/squad-table"
 import { useClub, useClubTransactions, useRefreshClubs } from "@/features/clubs/hooks/use-clubs"
-import { Alert } from "@/components/ui/alert"
+import { ResourceEmpty, ResourceError, ResourceLoading } from "@/components/ui/resource-state"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Escudo } from "@/components/ui/escudo"
@@ -41,7 +40,23 @@ function ClubPage() {
   return (
     <>
       <main className="flex flex-1 flex-col gap-[24px] px-[32px] pt-[28px] pb-[40px]">
-        {error ? <Alert variant="destructive" description={error} /> : null}
+        {isPending ? <ResourceLoading label="Carregando clube…" /> : null}
+        {error && !club ? (
+          error.toLowerCase().includes("não encontrado") ? (
+            <ResourceEmpty
+              icon={<SearchX className="size-6" aria-hidden />}
+              title="Clube não encontrado"
+              description={`A API não encontrou o clube ${id}. O endereço pode estar errado.`}
+              action={
+                <Button type="button" variant="outline" onClick={() => navigate(paths.clubs)}>
+                  Voltar para clubes
+                </Button>
+              }
+            />
+          ) : (
+            <ResourceError title="Não foi possível carregar o clube" onRetry={() => void refreshClubs()} />
+          )
+        ) : null}
         {club ? (
           <>
             <div className="flex w-full items-center gap-[16px]">
@@ -138,7 +153,16 @@ function ClubPage() {
               </button>
             </div>
             {section === "elenco" && squadSize === 0 && !isPending ? (
-              <EmptySquad onBrowse={() => navigate(paths.players)} />
+              <ResourceEmpty
+                icon={<Shirt className="size-6" aria-hidden />}
+                title="O clube ainda não tem jogadores"
+                description="Compre jogadores livres para formar o elenco."
+                action={
+                  <Button type="button" variant="outline" onClick={() => navigate(paths.players)}>
+                    <Users /> Comprar jogadores
+                  </Button>
+                }
+              />
             ) : null}
             {section === "elenco" && club && squadSize > 0 ? (
               <SquadTable
@@ -150,7 +174,16 @@ function ClubPage() {
               />
             ) : null}
             {section === "escalacao" && club && squadSize === 0 ? (
-              <EmptySquad onBrowse={() => navigate(paths.players)} />
+              <ResourceEmpty
+                icon={<Shirt className="size-6" aria-hidden />}
+                title="O clube ainda não tem jogadores"
+                description="Compre jogadores livres para formar o elenco."
+                action={
+                  <Button type="button" variant="outline" onClick={() => navigate(paths.players)}>
+                    <Users /> Comprar jogadores
+                  </Button>
+                }
+              />
             ) : null}
             {section === "escalacao" && club && squadSize > 0 ? (
               <LineupBoard clubId={club.id} clubName={club.name} squad={club.players} />

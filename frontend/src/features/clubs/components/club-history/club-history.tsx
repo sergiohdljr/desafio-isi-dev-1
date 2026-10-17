@@ -1,8 +1,7 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Download } from "lucide-react"
+import { Download, History } from "lucide-react"
 import { exportClubTransactions, listClubTransactions } from "@/features/clubs/api/clubs.api"
-import { HistoryEmpty } from "@/features/clubs/components/club-history/history-empty"
 import { HistorySummary } from "@/features/clubs/components/club-history/history-summary"
 import { HistoryTable } from "@/features/clubs/components/club-history/history-table"
 import { TypeFilter } from "@/features/clubs/components/club-history/type-filter"
@@ -13,6 +12,7 @@ import { downloadBlob } from "@/features/clubs/utils/download-blob"
 import { toggleTransactionType } from "@/features/clubs/utils/toggle-transaction-type"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { LoadingRows, ResourceEmpty, ResourceError } from "@/components/ui/resource-state"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Toast, ToastViewport } from "@/components/ui/toast"
 
@@ -117,12 +117,23 @@ function ClubHistory({ clubId, players }: { clubId: number; players: SquadPlayer
             </Button>
           ) : null}
         </div>
+        {history.isPending ? <LoadingRows label="Carregando histórico…" /> : null}
         {error ? (
-          <div className="px-4 py-3">
-            <Alert variant="destructive" title="Filtro recusado" description={error} />
-          </div>
+          <ResourceError
+            framed={false}
+            title="Não foi possível carregar o histórico"
+            description="A API não respondeu. Os totais e a exportação ficam indisponíveis até a próxima tentativa."
+            onRetry={() => void history.refetch()}
+          />
         ) : null}
-        {!error && rows.length === 0 && !history.isPending ? <HistoryEmpty /> : null}
+        {!error && rows.length === 0 && !history.isPending ? (
+          <ResourceEmpty
+            framed={false}
+            icon={<History className="size-6" aria-hidden />}
+            title="Nenhuma compra ou venda"
+            description="As compras e vendas do clube aparecem aqui, com os totais."
+          />
+        ) : null}
         {rows.length > 0 ? <HistoryTable rows={rows} /> : null}
         {summary && !error ? <HistorySummary summary={summary} /> : null}
       </section>

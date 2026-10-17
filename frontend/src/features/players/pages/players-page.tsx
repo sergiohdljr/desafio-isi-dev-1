@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowUpDown, Coins, HeartPulse, Plus, Search, Shield, Shirt, UserRound, Users } from "lucide-react"
+import { ArrowUpDown, Coins, HeartPulse, Plus, Search, SearchX, Shield, Shirt, UserRound, Users } from "lucide-react"
 import { useAppChrome } from "@/app/app-layout"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { ResourceEmpty, ResourceError, ResourceLoading } from "@/components/ui/resource-state"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -316,18 +317,43 @@ function PlayersPage() {
           </Select>
         </div>
 
-        {error ? <Alert variant="destructive" description={error} /> : null}
-
-        <PlayersTable
-          players={players}
-          clubs={clubs}
-          pending={isPending}
-          onDetails={(player) => setDialog({ type: "details", player })}
-          onEdit={(player) => setDialog({ type: "edit", player })}
-          onCondition={(player) => setDialog({ type: "condition", player })}
-          onBuy={(player) => setDialog({ type: "buy", player })}
-          onDelete={(player) => setDialog({ type: "delete", player })}
-        />
+        {error ? (
+          <ResourceError title="Não foi possível carregar os jogadores" onRetry={() => void refreshPlayers()} />
+        ) : isPending ? (
+          <ResourceLoading label="Carregando jogadores…" />
+        ) : players.length === 0 ? (
+          <ResourceEmpty
+            icon={<SearchX className="size-6" aria-hidden />}
+            title={search ? `Nenhum jogador encontrado para “${search}”` : "Nenhum jogador cadastrado"}
+            description={
+              search || position || condition || clubId || minAge || maxAge || minValue || maxValue
+                ? "Confira a grafia ou tire alguns filtros. A busca ignora maiúsculas e acentos."
+                : "Com o banco recém-criado, a lista começa vazia."
+            }
+            action={
+              search || position || condition || clubId || minAge || maxAge || minValue || maxValue ? (
+                <Button type="button" variant="outline" onClick={clearFilters}>
+                  Limpar filtros
+                </Button>
+              ) : (
+                <Button type="button" onClick={() => setDialog({ type: "create" })}>
+                  <Plus /> Novo jogador
+                </Button>
+              )
+            }
+          />
+        ) : (
+          <PlayersTable
+            players={players}
+            clubs={clubs}
+            pending={false}
+            onDetails={(player) => setDialog({ type: "details", player })}
+            onEdit={(player) => setDialog({ type: "edit", player })}
+            onCondition={(player) => setDialog({ type: "condition", player })}
+            onBuy={(player) => setDialog({ type: "buy", player })}
+            onDelete={(player) => setDialog({ type: "delete", player })}
+          />
+        )}
 
         <PlayersPagination
           page={page}

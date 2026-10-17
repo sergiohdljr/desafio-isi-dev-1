@@ -9,8 +9,8 @@ import { listMatches } from "@/features/league/api/league.api"
 import { LatestMatch, MatchesHistory } from "@/features/league/components/matches-history"
 import { NewMatchDialog } from "@/features/league/components/new-match-dialog"
 import { clubAcronym } from "@/features/league/utils/club-acronym"
-import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { ResourceEmpty, ResourceError } from "@/components/ui/resource-state"
 
 function MatchesPage() {
   const navigate = useNavigate()
@@ -50,7 +50,12 @@ function MatchesPage() {
           <Plus /> Nova partida
         </Button>
       </div>
-      {error ? <Alert variant="destructive" title="Filtro recusado" description={error} /> : null}
+      {error ? (
+        <ResourceError
+          title="Não foi possível carregar as partidas"
+          onRetry={() => void queryClient.invalidateQueries({ queryKey: ["matches"] })}
+        />
+      ) : null}
       {latest ? (
         <LatestMatch
           match={latest}
@@ -58,14 +63,29 @@ function MatchesPage() {
           awayAcronym={acronym(latest.away.club_id, latest.away.club_name)}
         />
       ) : null}
+      {error ? null : (
       <MatchesHistory
         rows={rows}
         clubs={clubs}
         clubId={clubId}
         pending={matches.isPending}
+        empty={
+          <ResourceEmpty
+            framed={false}
+            icon={<Swords className="size-6" aria-hidden />}
+            title="Nenhuma partida jogada"
+            description="Escale os titulares de dois clubes e jogue a primeira partida."
+            action={
+              <Button type="button" onClick={() => setCreating(true)}>
+                <Plus /> Nova partida
+              </Button>
+            }
+          />
+        }
         acronym={acronym}
         onClubIdChange={setClubId}
       />
+      )}
       <p className="text-caption-xs text-muted-foreground">
         Vitória vale 3 pontos e empate vale 1. A classificação usa pontos, saldo, gols e nome.
       </p>

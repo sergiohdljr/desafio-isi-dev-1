@@ -1,5 +1,7 @@
+import type { ReactNode } from "react"
 import { useNavigate } from "react-router"
 import { paths } from "@/app/routes"
+import { LoadingRows } from "@/components/ui/resource-state"
 import type { Club } from "@/features/clubs/types/club.types"
 import { ClubAcronym } from "@/features/league/components/club-acronym"
 import type { MatchSummary } from "@/features/league/types/match.types"
@@ -14,6 +16,7 @@ function MatchesHistory({
   clubs,
   clubId,
   pending,
+  empty,
   acronym,
   onClubIdChange,
 }: {
@@ -21,6 +24,7 @@ function MatchesHistory({
   clubs: Club[]
   clubId: string
   pending: boolean
+  empty?: ReactNode
   acronym: (clubId: number, name: string) => string
   onClubIdChange: (clubId: string) => void
 }) {
@@ -49,9 +53,10 @@ function MatchesHistory({
           </SelectContent>
         </Select>
       </header>
-      {rows.length === 0 && !pending ? (
-        <p className="px-4 py-10 text-center text-body-sm text-muted-foreground">Nenhuma partida ainda.</p>
-      ) : (
+      {pending ? <LoadingRows label="Carregando partidas…" /> : null}
+      {!pending && rows.length === 0 ? (
+        empty ?? <p className="px-4 py-10 text-center text-body-sm text-muted-foreground">Nenhuma partida ainda.</p>
+      ) : !pending ? (
         <table className="w-full border-collapse text-left">
           <thead className="border-b border-border text-body-sm-medium text-muted-foreground">
             <tr className="h-10 bg-muted-subtle">
@@ -97,7 +102,7 @@ function MatchesHistory({
             })}
           </tbody>
         </table>
-      )}
+      ) : null}
       <footer className="border-t border-border px-4 py-3 text-body-sm text-muted-foreground">
         {rows.length} partidas
       </footer>

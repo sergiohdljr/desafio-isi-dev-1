@@ -6,8 +6,8 @@ import { STARTING_CASH } from "@/features/clubs/consts/club-draft"
 import { CLUBS_CRUMBS, DEFAULT_CLUB_SORT, MAX_CLUBS } from "@/features/clubs/consts/clubs-directory"
 import { useClubs, useRefreshClubs } from "@/features/clubs/hooks/use-clubs"
 import type { ClubSort } from "@/features/clubs/types/club.types"
-import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { ResourceError } from "@/components/ui/resource-state"
 import { money } from "@/features/players/consts/directory"
 
 function ClubsPage() {
@@ -37,9 +37,11 @@ function ClubsPage() {
         </Button>
       </div>
 
-      {error ? <Alert variant="destructive" description={error} /> : null}
-
-      <ClubsList clubs={clubs} isPending={isPending} sort={sort} onSortChange={setSort} onCreate={openCreateClub} />
+      {error ? (
+        <ResourceError title="Não foi possível carregar os clubes" onRetry={() => void refreshClubs()} />
+      ) : (
+        <ClubsList clubs={clubs} isPending={isPending} sort={sort} onSortChange={setSort} onCreate={openCreateClub} />
+      )}
 
       {clubs.length > 0 ? (
         <p className="text-caption-xs text-muted-foreground">

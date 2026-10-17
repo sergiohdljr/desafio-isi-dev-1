@@ -10,8 +10,8 @@ import { ClubAcronym } from "@/features/league/components/club-acronym"
 import { NewMatchDialog } from "@/features/league/components/new-match-dialog"
 import { clubAcronym } from "@/features/league/utils/club-acronym"
 import { formatPlayedAt } from "@/features/league/utils/played-at"
-import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { LoadingRows, ResourceEmpty, ResourceError } from "@/components/ui/resource-state"
 
 const CRITERIA = ["Mais pontos", "Maior saldo de gols", "Mais gols marcados", "Nome do clube, de A a Z"]
 
@@ -52,7 +52,13 @@ function StandingsPage() {
           <Plus /> Nova partida
         </Button>
       </div>
-      {error ? <Alert variant="destructive" description={error} /> : null}
+      {error ? (
+        <ResourceError
+          title="Não foi possível carregar a classificação"
+          description={error}
+          onRetry={() => void queryClient.invalidateQueries({ queryKey: ["standings"] })}
+        />
+      ) : (
       <div className="grid grid-cols-[minmax(0,1fr)_300px] items-start gap-4">
         <section className="overflow-hidden rounded-[12px] border border-border bg-card shadow-xs">
           <table className="w-full border-collapse text-left">
@@ -69,6 +75,25 @@ function StandingsPage() {
               </tr>
             </thead>
             <tbody>
+              {table.isPending ? (
+                <tr>
+                  <td colSpan={10}>
+                    <LoadingRows label="Carregando classificação…" />
+                  </td>
+                </tr>
+              ) : null}
+              {!table.isPending && (table.data ?? []).length === 0 ? (
+                <tr>
+                  <td colSpan={10}>
+                    <ResourceEmpty
+                      framed={false}
+                      icon={<ListOrdered className="size-6" aria-hidden />}
+                      title="Nenhum clube cadastrado"
+                      description="A classificação mostra todos os clubes, mesmo os que ainda não jogaram."
+                    />
+                  </td>
+                </tr>
+              ) : null}
               {(table.data ?? []).map((row) => (
                 <tr key={row.club_id} className="h-[52px] border-b border-border last:border-b-0">
                   <td className="pl-4 text-right">
@@ -145,6 +170,7 @@ function StandingsPage() {
           </section>
         </aside>
       </div>
+      )}
       {creating ? (
         <NewMatchDialog
           clubs={clubs}

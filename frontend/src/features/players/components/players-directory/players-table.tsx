@@ -130,9 +130,7 @@ function PlayersTable({
           })}
         </tbody>
       </table>
-      {!pending && players.length === 0 ? (
-        <p className="px-3 py-6 text-body-sm text-muted-foreground">Nenhum jogador encontrado.</p>
-      ) : null}
+      {pending ? <p className="sr-only">Carregando jogadores…</p> : null}
     </div>
   )
 }
