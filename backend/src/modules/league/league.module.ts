@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ClockModule } from '../../common/clock/clock.module.js';
 import { PrismaModule } from '../../prisma/prisma.module.js';
-import { ClubsModule } from '../clubs/clubs.module.js';
 import { LEAGUE_REPOSITORY } from './application/repositories/league-repository.js';
 import {
   FIND_LINEUP,
@@ -26,7 +26,7 @@ import {
 import { PrismaLeagueRepository } from './infra/repositories/prisma-league-repository.js';
 
 @Module({
-  imports: [PrismaModule, ClubsModule],
+  imports: [PrismaModule, ClockModule],
   controllers: [LineupController, MatchesController, StandingsController],
   providers: [
     { provide: FIND_LINEUP, useClass: FindLineup },

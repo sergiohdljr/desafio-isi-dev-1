@@ -10,7 +10,7 @@ import {
   Player,
   type RegisterPlayer,
 } from '../../../../players/domain/entities/player.js';
-import { CLOCK } from '../../clock.js';
+import { CLOCK } from '../../../../../common/clock/clock.js';
 import { type SquadMember } from '../../repositories/clubs-repository.js';
 import { CreateClub } from '../create-club.use-case.js';
 import { FindClub } from '../find-club.use-case.js';

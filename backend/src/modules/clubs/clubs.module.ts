@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ClockModule } from '../../common/clock/clock.module.js';
 import { PrismaModule } from '../../prisma/prisma.module.js';
-import { CLOCK, SystemClock } from './application/clock.js';
 import { CLUBS_REPOSITORY } from './application/repositories/clubs-repository.js';
 import {
   CREATE_CLUB,
@@ -18,15 +18,14 @@ import { ClubsController } from './infra/http/clubs.controller.js';
 import { PrismaClubsRepository } from './infra/repositories/prisma-clubs-repository.js';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, ClockModule],
   controllers: [ClubsController],
   providers: [
     { provide: CREATE_CLUB, useClass: CreateClub },
     { provide: FIND_CLUB, useClass: FindClub },
     { provide: LIST_CLUBS, useClass: ListClubs },
     { provide: CLUBS_REPOSITORY, useClass: PrismaClubsRepository },
-    { provide: CLOCK, useClass: SystemClock },
   ],
-  exports: [CLOCK, CREATE_CLUB],
+  exports: [CREATE_CLUB],
 })
 export class ClubsModule {}

@@ -10,7 +10,7 @@ import {
   remainingDays,
   squadValueOf,
 } from '../../domain/entities/squad.js';
-import { CLOCK, type Clock } from '../clock.js';
+import { CLOCK, type Clock } from '../../../../common/clock/clock.js';
 import { clubViewOf, type ClubView } from '../read-models/club-view.js';
 import {
   CLUBS_REPOSITORY,

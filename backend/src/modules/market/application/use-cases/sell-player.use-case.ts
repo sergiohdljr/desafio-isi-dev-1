@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CLOCK, type Clock } from '../../../clubs/application/clock.js';
+import { CLOCK, type Clock } from '../../../../common/clock/clock.js';
 import { decideSale } from '../policies/decide-sale.js';
 import {
   MARKET_REPOSITORY,

@@ -1,5 +1,5 @@
 import { Test } from '@nestjs/testing';
-import { CLOCK } from '../../../clubs/application/clock.js';
+import { CLOCK } from '../../../../common/clock/clock.js';
 import { DomainError } from '../../../../shared/domain/domain-error.js';
 import { Money } from '../../../../shared/domain/money.js';
 import {

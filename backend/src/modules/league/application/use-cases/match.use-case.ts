@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DomainError } from '../../../../shared/domain/domain-error.js';
-import { CLOCK, type Clock } from '../../../clubs/application/clock.js';
+import { CLOCK, type Clock } from '../../../../common/clock/clock.js';
 import { decideMatch } from '../../domain/play-match.js';
 import { rankStandings, type StandingRow } from '../../domain/standings.js';
 import {
