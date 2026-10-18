@@ -16,7 +16,8 @@ if (existsSync(backendEnvPath)) {
   config({ path: backendEnvPath, override: true });
 }
 
-if (!process.env.POSTGRES_HOST) {
+// loadTestEnv (e2e) já define DATABASE_URL para o Postgres de teste; não sobrescrever.
+if (!process.env.POSTGRES_HOST && !process.env.DATABASE_URL) {
   const user = process.env.POSTGRES_USER;
   const password = process.env.POSTGRES_PASSWORD;
   const database = process.env.POSTGRES_DB;
