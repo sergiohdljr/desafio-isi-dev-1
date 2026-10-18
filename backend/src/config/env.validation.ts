@@ -11,6 +11,7 @@ const envSchema = z.looseObject({
     .transform(Number)
     .optional(),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL obrigatória'),
+  FRONTEND_ORIGIN: z.url('FRONTEND_ORIGIN inválida'),
 });
 
 export function validateEnv(config: Record<string, unknown>) {

@@ -23,6 +23,7 @@ services:
     environment:
       NODE_ENV: test
       PORT: ${E2E_API_PORT}
+      FRONTEND_ORIGIN: http://127.0.0.1:${E2E_UI_PORT}
       POSTGRES_HOST: postgres-test
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

@@ -102,6 +102,7 @@ A fonte de verdade é o `.env` da raiz ([.env.example](.env.example)). Copie tam
 | `POSTGRES_DB` | Banco da aplicação |
 | `POSTGRES_PORT` | Porta do Postgres da app no host |
 | `API_PORT` | Porta da API da app no Compose / fallback da API no host |
+| `FRONTEND_ORIGIN` | Origem do frontend permitida no CORS da API |
 | `POSTGRES_TEST_DB` | Banco de e2e |
 | `POSTGRES_TEST_PORT` | Porta do Postgres de e2e no host |
 | `E2E_API_PORT` | Porta da API de e2e |

@@ -34,6 +34,11 @@ export function loadTestEnv(): void {
     );
   }
 
+  const uiPort = process.env.E2E_UI_PORT;
+  if (!uiPort) {
+    throw new Error('E2E_UI_PORT é obrigatório no .env da raiz.');
+  }
+
   process.env.DATABASE_URL = buildPostgresUrl({
     user,
     password,
@@ -41,5 +46,6 @@ export function loadTestEnv(): void {
     port,
     database,
   });
+  process.env.FRONTEND_ORIGIN = `http://127.0.0.1:${uiPort}`;
   process.env.NODE_ENV = 'test';
 }

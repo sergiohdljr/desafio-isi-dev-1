@@ -7,5 +7,6 @@ export const appConfig = registerAs('app', () => {
   return {
     port,
     environment: process.env.NODE_ENV ?? 'development',
+    frontendOrigin: process.env.FRONTEND_ORIGIN,
   };
 });

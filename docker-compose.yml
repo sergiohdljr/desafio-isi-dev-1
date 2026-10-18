@@ -21,6 +21,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: ${API_PORT:-3000}
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN}
       POSTGRES_HOST: postgres
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
