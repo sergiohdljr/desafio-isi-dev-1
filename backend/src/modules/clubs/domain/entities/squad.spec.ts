@@ -1,17 +1,8 @@
 import { Money } from '../../../../shared/domain/money.js';
 import { Player } from '../../../players/domain/entities/player.js';
-import { arrangeSquad, remainingDays, squadValueOf } from './squad.js';
-
-const now = new Date('2027-03-02T15:00:00.000Z');
+import { arrangeSquad, squadValueOf } from './squad.js';
 
 describe('squad', () => {
-  it('rounds remaining loyalty days up from the query instant', () => {
-    expect(remainingDays(new Date('2027-03-04T15:00:00.000Z'), now)).toBe(2);
-    expect(remainingDays(new Date('2027-03-04T15:00:00.001Z'), now)).toBe(3);
-    expect(remainingDays(now, now)).toBe(0);
-    expect(remainingDays(new Date('2027-03-01T15:00:00.000Z'), now)).toBe(-1);
-  });
-
   it('sums already rounded market values once, half away from zero', () => {
     expect(
       squadValueOf([Money.fromCents(1013), Money.fromCents(1012)]).amount,

@@ -7,6 +7,16 @@ npm install
 npm run dev
 ```
 
+## Lint e formatação
+
+```bash
+# ESLint (só verifica)
+npm run lint
+
+# Prettier (só verifica; não altera arquivos)
+npm run format:check
+```
+
 ## Testes e2e (Playwright)
 
 A suíte usa `docker-compose.e2e.yml` e o `.env` da raiz (`E2E_API_PORT`, `E2E_UI_PORT`, `POSTGRES_TEST_*`).

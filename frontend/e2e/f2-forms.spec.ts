@@ -1,12 +1,5 @@
 import { expect, test, type Page } from "@playwright/test"
-import {
-  createClubRecord,
-  createPlayer,
-  deletePlayer,
-  openClubSection,
-  seedSquad,
-  uniqueToken,
-} from "./clubs.helpers"
+import { createClubRecord, createPlayer, deletePlayer, openClubSection, seedSquad, uniqueToken } from "./clubs.helpers"
 import { openPlayers, playerRow } from "./players.helpers"
 
 async function expectNoRequest(page: Page, method: string, pathSuffix: string, action: () => Promise<void>) {

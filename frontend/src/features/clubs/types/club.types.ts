@@ -1,8 +1,6 @@
 import type { Player } from "@/features/players/types/player.types"
 
-const CLUB_SORTS = ["name", "net_worth_desc", "net_worth_asc"] as const
-
-type ClubSort = (typeof CLUB_SORTS)[number]
+type ClubSort = "name" | "net_worth_desc" | "net_worth_asc"
 
 type Club = {
   id: number
@@ -52,4 +50,3 @@ export type {
   CreateClubInput,
   SquadPlayer,
 }
-export { CLUB_SORTS }

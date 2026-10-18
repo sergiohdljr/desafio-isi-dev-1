@@ -17,10 +17,9 @@ function globalSetup() {
 
   execSync(`${compose} up -d --wait`, { stdio: "pipe" })
 
-  execSync(
-    `${compose} exec -T postgres-test sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "${sql}"'`,
-    { stdio: "pipe" },
-  )
+  execSync(`${compose} exec -T postgres-test sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "${sql}"'`, {
+    stdio: "pipe",
+  })
 }
 
 export default globalSetup

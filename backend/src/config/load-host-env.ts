@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 import { buildPostgresUrl } from './postgres-url.js';
 
 const DEFAULT_APP_PORT = '5432';
-const PLACEHOLDER_URL = 'postgresql://postgres:postgres@localhost:5432/postgres';
+const PLACEHOLDER_URL =
+  'postgresql://postgres:postgres@localhost:5432/postgres';
 
 export type LoadHostEnvOptions = {
   /** Usado no `prisma generate` (build Docker) quando não há `.env`. */

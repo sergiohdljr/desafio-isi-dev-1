@@ -2,8 +2,6 @@ import { compareNames } from '../../../../shared/domain/name-order.js';
 import { Money } from '../../../../shared/domain/money.js';
 import { type Position } from '../../../players/domain/types/player-types.js';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 export const positionOrder: Record<Position, number> = {
   GOL: 0,
   ZAG: 1,
@@ -17,10 +15,6 @@ type SquadPlayer = {
   name: string;
   id: number;
 };
-
-export function remainingDays(loyaltyUntil: Date, now: Date): number {
-  return Math.ceil((loyaltyUntil.getTime() - now.getTime()) / DAY_MS);
-}
 
 export function squadValueOf(values: Money[]): Money {
   const cents = values.reduce((sum, value) => sum + value.cents, 0);
