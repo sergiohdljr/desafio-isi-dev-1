@@ -14,6 +14,11 @@ export default function setup(): void {
 
   execSync(`${compose} up -d --wait postgres-test`, { stdio: 'inherit' });
 
+  execSync('./node_modules/.bin/prisma generate --config prisma7.config.ts', {
+    stdio: 'inherit',
+    env: process.env,
+  });
+
   execSync('./node_modules/.bin/prisma migrate deploy', {
     stdio: 'inherit',
     env: process.env,
