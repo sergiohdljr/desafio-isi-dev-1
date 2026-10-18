@@ -15,6 +15,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      ignoreEnvFile: true,
       load: [appConfig, databaseConfig],
       validate: validateEnv,
     }),

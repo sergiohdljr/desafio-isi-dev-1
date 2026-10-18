@@ -43,7 +43,9 @@ test("[F13] joga partida pela tela com placar e 6 duelos; recusa escalação inc
     expect(match.duels).toHaveLength(6)
 
     await expect(page).toHaveURL(new RegExp(`/partidas/${match.id}$`))
-    await expect(page.getByText(`${match.home.goals} × ${match.away.goals}`, { exact: true })).toBeVisible()
+    await expect(
+      page.getByRole("paragraph").filter({ hasText: new RegExp(`^${match.home.goals} × ${match.away.goals}$`) }),
+    ).toBeVisible()
     await expect(page.getByText(match.home.club_name).first()).toBeVisible()
     await expect(page.getByText(match.away.club_name).first()).toBeVisible()
     await expect(page.getByRole("heading", { name: "Duelos" })).toBeVisible()

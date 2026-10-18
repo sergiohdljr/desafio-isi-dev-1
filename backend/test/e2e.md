@@ -2,7 +2,7 @@
 
 ## Banco
 
-O e2e usa o serviço `postgres-test` do `docker-compose.yml`, na porta 5433, com o banco `liga_teste` criado pela imagem. O Postgres da aplicação não entra nessa suíte. Copie `.env.test.example` para `.env.test` e use o mesmo usuário e senha do `.env`, na porta 5433. `npm run test:e2e:up` sobe esse serviço, espera o healthcheck e roda a suíte. `npm run test:e2e` só roda a suíte, com o serviço já no ar: carrega `.env.test`, aplica `prisma migrate deploy` e executa os arquivos em série. Cada arquivo em `test/flows/` abre a aplicação uma vez e esvazia a liga antes de cada caso, com `resetLeague`.
+O e2e usa o serviço `postgres-test` de `docker-compose.e2e.yml` (raiz), com `POSTGRES_TEST_DB` / `POSTGRES_TEST_PORT` obrigatórios no `.env` da raiz. O Postgres e a API da aplicação não entram nessa suíte. O Playwright do frontend sobe o Compose completo. Aqui, `npm run test:e2e` sobe só o Postgres de teste; a API do Vitest/Supertest roda no host com `DATABASE_URL` montada a partir do mesmo `.env`. O global setup aplica `prisma migrate deploy` e cada arquivo em `test/flows/` esvazia a liga antes de cada caso, com `resetLeague`.
 
 Cada fluxo tem um caso feliz e o erro que a borda HTTP traduz. O teste confere o status, o corpo e se a operação recusada gravou alguma coisa. Percentual, faixa, arredondamento e teto ficam no teste unitário da função que calcula.
 

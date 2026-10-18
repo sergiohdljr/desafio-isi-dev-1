@@ -267,7 +267,9 @@ test("[F2.atualizacao] partida mostra placar e 6 duelos da API", async ({ page, 
     const match = (await response.json()) as MatchDetail
     expect(match.duels).toHaveLength(6)
     await expect(page).toHaveURL(new RegExp(`/partidas/${match.id}$`))
-    await expect(page.getByText(`${match.home.goals} × ${match.away.goals}`, { exact: true })).toBeVisible()
+    await expect(
+      page.getByRole("paragraph").filter({ hasText: new RegExp(`^${match.home.goals} × ${match.away.goals}$`) }),
+    ).toBeVisible()
     await expect(page.getByRole("heading", { name: "Duelos" })).toBeVisible()
     await expect(page.locator("tbody tr").filter({ hasText: /º/ })).toHaveCount(6)
   } finally {

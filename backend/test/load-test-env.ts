@@ -1,22 +1,45 @@
 import { config } from 'dotenv';
 import { existsSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { buildPostgresUrl } from '../src/config/postgres-url.js';
 
-const envFile = '.env.test';
+function rootEnvPath(): string {
+  const testDir = path.dirname(fileURLToPath(import.meta.url));
+  return path.resolve(testDir, '../../.env');
+}
 
 export function loadTestEnv(): void {
-  if (!existsSync(envFile)) {
+  const envPath = rootEnvPath();
+  if (!existsSync(envPath)) {
     throw new Error(
-      'Crie backend/.env.test a partir de .env.test.example. O e2e usa o banco liga_teste.',
+      'Crie .env na raiz a partir de .env.example. O e2e usa o banco de teste do Compose.',
     );
   }
 
-  config({ path: envFile, override: true });
+  config({ path: envPath, override: true });
+
+  const user = process.env.POSTGRES_USER;
+  const password = process.env.POSTGRES_PASSWORD;
+  const port = process.env.POSTGRES_TEST_PORT;
+  const database = process.env.POSTGRES_TEST_DB;
+  if (!user || !password) {
+    throw new Error(
+      'POSTGRES_USER e POSTGRES_PASSWORD são obrigatórios no .env da raiz.',
+    );
+  }
+  if (!port || !database) {
+    throw new Error(
+      'POSTGRES_TEST_PORT e POSTGRES_TEST_DB são obrigatórios no .env da raiz.',
+    );
+  }
+
+  process.env.DATABASE_URL = buildPostgresUrl({
+    user,
+    password,
+    host: 'localhost',
+    port,
+    database,
+  });
   process.env.NODE_ENV = 'test';
-
-  const url = process.env.DATABASE_URL ?? '';
-  if (!url.endsWith(':5433/liga_teste')) {
-    throw new Error(
-      'DATABASE_URL do e2e precisa apontar para a porta 5433 e o banco liga_teste.',
-    );
-  }
 }

@@ -23,9 +23,8 @@ Os comandos de migration rodam na pasta `backend`. O Compose fica na raiz. O ban
 Criar:
 
 ```bash
-cd backend
 cp .env.example .env
-cd ..
+cp backend/.env.example backend/.env
 docker compose up -d postgres
 cd backend
 npm ci
@@ -52,21 +51,23 @@ npm run db:reset
 
 Ubuntu 24.04, com Docker disponível.
 
-Tudo de uma vez, na raiz do repositório. Sobe o banco da aplicação (porta 5432), o banco de teste (porta 5433), a API e o frontend. A API aplica as migrations nos dois bancos ao iniciar.
+Tudo de uma vez, na raiz do repositório. Sobe o banco da aplicação (porta 5432), a API e o frontend. A API aplica as migrations no banco da aplicação ao iniciar.
 
 ```bash
+cp .env.example .env
 cp backend/.env.example backend/.env
 docker compose up --build
 ```
 
 A API fica em `http://localhost:3000`. O frontend fica em `http://localhost:5173`.
 
+O stack de e2e fica em `docker-compose.e2e.yml`. Na raiz: `npm run compose:e2e` / `compose:e2e:build` / `compose:e2e:down`. Não faz parte deste `docker compose up`.
+
 Para desenvolver na máquina, sem a imagem da API e do frontend:
 
 ```bash
-cd backend
 cp .env.example .env
-cd ..
+cp backend/.env.example backend/.env
 docker compose up -d postgres
 cd backend
 npm ci
@@ -88,25 +89,41 @@ O frontend fica em `http://localhost:5173`. As chamadas a `/api` são encaminhad
 
 ## 4. Variáveis de ambiente
 
-O modelo versionado é [backend/.env.example](backend/.env.example). Copie para `backend/.env`.
+A fonte de verdade é o `.env` da raiz ([.env.example](.env.example)). Copie também `backend/.env.example` → `backend/.env` se quiser só ajustar a `PORT` da API no host.
+
+| Arquivo | Modelo | Função |
+| --- | --- | --- |
+| `.env` (raiz) | [.env.example](.env.example) | Postgres, portas do app e do e2e (Compose + loaders) |
+| `backend/.env` | [backend/.env.example](backend/.env.example) | Opcional: `PORT` da API no host |
 
 | Variável | Função |
 | --- | --- |
-| `POSTGRES_USER` | Usuário do Postgres no Compose |
-| `POSTGRES_PASSWORD` | Senha do Postgres no Compose |
-| `POSTGRES_DB` | Nome do banco da aplicação |
-| `POSTGRES_PORT` | Porta publicada no host |
-| `DATABASE_URL` | URL que o Prisma e a API usam. Usuário, senha, porta e banco precisam coincidir com as variáveis acima |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` | Credenciais do Postgres |
+| `POSTGRES_DB` | Banco da aplicação |
+| `POSTGRES_PORT` | Porta do Postgres da app no host |
+| `API_PORT` | Porta da API da app no Compose / fallback da API no host |
+| `POSTGRES_TEST_DB` | Banco de e2e |
+| `POSTGRES_TEST_PORT` | Porta do Postgres de e2e no host |
+| `E2E_API_PORT` | Porta da API de e2e |
+| `E2E_UI_PORT` | Porta do Vite nos testes Playwright |
 
-O frontend não usa variável de ambiente.
+No host, a API e o Prisma montam `DATABASE_URL` a partir de `POSTGRES_*` da raiz (`localhost` + `POSTGRES_PORT` + `POSTGRES_DB`). Não é preciso repetir user/senha em `backend/.env`.
 
-O e2e da API usa outro banco, na porta 5433. O modelo é [backend/.env.test.example](backend/.env.test.example). Não é necessário para subir a aplicação.
+Nos containers, o `docker-entrypoint.sh` monta a URL com encode (user/senha) e `POSTGRES_HOST` (`postgres` ou `postgres-test`). O frontend de desenvolvimento não usa `.env`; o Playwright lê o `.env` da raiz.
+
+Se mudar `POSTGRES_TEST_DB` com volume antigo, recrie o volume: `npm run compose:e2e:down` e `docker compose -f docker-compose.e2e.yml down -v`.
+
+No frontend: `npm run test:e2e:up` (rebuild + Playwright) ou `npm run test:e2e`. No backend: `npm run test:e2e`.
 
 ## 5. Estrutura de pastas
 
 ```text
-backend/     API NestJS, Prisma e Compose do Postgres
-frontend/    Interface React
+.env.example            Credenciais e portas (Compose app/e2e)
+package.json            Scripts compose:e2e*
+docker-compose.yml      App: Postgres, API e frontend
+docker-compose.e2e.yml  E2e: Postgres de teste e API
+backend/                API NestJS e Prisma
+frontend/               Interface React
 ```
 
 Dentro de `backend/src`: `modules/` (jogadores, clubes, mercado e liga), `prisma/` e `config/`. As migrations ficam em `backend/prisma/migrations`.

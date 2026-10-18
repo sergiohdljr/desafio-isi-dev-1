@@ -2,9 +2,12 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { FastifyAdapter } from '@nestjs/platform-fastify';
+import { loadHostEnv } from './config/load-host-env.js';
 import { AppModule } from './app.module.js';
 import { logRequests } from './common/http/log-requests.js';
 import { configureApp } from './configure-app.js';
+
+loadHostEnv();
 
 async function bootstrap() {
   const isProduction = process.env.NODE_ENV === 'production';

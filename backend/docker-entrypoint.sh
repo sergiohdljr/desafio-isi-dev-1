@@ -1,13 +1,22 @@
 #!/bin/sh
 set -eu
 
-app_url="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}"
-test_url="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-test:5432/liga_teste"
+host="${POSTGRES_HOST:-postgres}"
+db="${POSTGRES_DB:?POSTGRES_DB obrigatória}"
+: "${POSTGRES_USER:?POSTGRES_USER obrigatória}"
+: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD obrigatória}"
 
-export DATABASE_URL="${app_url}"
+export POSTGRES_HOST="${host}"
+export POSTGRES_DB="${db}"
+export DATABASE_URL="$(
+  node -e "
+    const user = encodeURIComponent(process.env.POSTGRES_USER);
+    const password = encodeURIComponent(process.env.POSTGRES_PASSWORD);
+    const host = process.env.POSTGRES_HOST;
+    const database = process.env.POSTGRES_DB;
+    process.stdout.write('postgresql://' + user + ':' + password + '@' + host + ':5432/' + database);
+  "
+)"
+
 npx prisma migrate deploy --config prisma7.config.ts
-
-DATABASE_URL="${test_url}" npx prisma migrate deploy --config prisma7.config.ts
-
-export DATABASE_URL="${app_url}"
 exec node dist/main.js
