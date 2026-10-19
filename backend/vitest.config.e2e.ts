@@ -7,6 +7,7 @@ export default defineConfig({
     root: './',
     include: ['test/flows/**/*.e2e-spec.ts'],
     globalSetup: ['./test/global-setup.ts'],
+    globalTeardown: ['./test/global-teardown.ts'],
     setupFiles: ['./test/setup.ts'],
     fileParallelism: false,
   },

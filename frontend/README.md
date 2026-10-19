@@ -37,4 +37,6 @@ npm run test:e2e:up
 npm run test:e2e
 ```
 
+Ao fim da suíte, o Playwright derruba o Compose e2e. Use `E2E_KEEP_UP=1` para manter no ar.
+
 Na raiz do repositório: `npm run compose:e2e`, `compose:e2e:build`, `compose:e2e:down`.
