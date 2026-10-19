@@ -1,5 +1,6 @@
 import { HISTORY_TOTALS } from "@/features/clubs/consts/history"
 import type { TransactionSummary } from "@/features/clubs/types/transactions.types"
+import { profitTotalTone } from "@/features/clubs/utils/profit-total-tone"
 import { money } from "@/features/players/consts/directory"
 import { signedCoins } from "@/features/players/utils/signed-coins"
 
@@ -24,13 +25,6 @@ function HistorySummary({ summary }: { summary: TransactionSummary }) {
       })}
     </div>
   )
-}
-
-function profitTotalTone(key: keyof TransactionSummary, value: number) {
-  if (key !== "total_profit") return ""
-  if (value > 0) return "text-success"
-  if (value < 0) return "text-destructive"
-  return ""
 }
 
 export { HistorySummary }
