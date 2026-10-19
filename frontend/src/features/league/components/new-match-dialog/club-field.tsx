@@ -8,6 +8,7 @@ function ClubField({
   value,
   clubs,
   disabled,
+  invalid = false,
   onChange,
 }: {
   label: string
@@ -15,15 +16,24 @@ function ClubField({
   value: string
   clubs: Club[]
   disabled: boolean
+  invalid?: boolean
   onChange: (value: string) => void
 }) {
+  const selected = clubs.find((club) => String(club.id) === value)
+
   return (
     <div className="flex flex-col gap-2">
       <span className="text-body-sm-medium">{label}</span>
       <Select value={value || null} onValueChange={(next) => onChange(next ?? "")} disabled={disabled}>
-        <SelectTrigger aria-label={label}>
+        <SelectTrigger
+          aria-label={label}
+          aria-invalid={invalid || undefined}
+          className={invalid ? "border-destructive ring-3 ring-destructive/20" : undefined}
+        >
           <Shield className="size-4 text-muted-foreground" aria-hidden />
-          <SelectValue placeholder="Selecione o clube" />
+          <SelectValue placeholder="Selecione o clube">
+            {selected ? `${selected.name} (${selected.acronym})` : null}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {clubs.map((club) => (

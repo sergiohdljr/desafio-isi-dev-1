@@ -9,9 +9,15 @@ vi.mock("@/features/league/api/league.api", () => ({
   playMatch: vi.fn(),
 }))
 
+vi.mock("@/features/clubs/api/clubs.api", () => ({
+  getLineup: vi.fn(),
+}))
+
+import { getLineup } from "@/features/clubs/api/clubs.api"
 import { playMatch } from "@/features/league/api/league.api"
 
 const playMatchMock = vi.mocked(playMatch)
+const getLineupMock = vi.mocked(getLineup)
 
 const home = makeClub({ id: 1, name: "Clube Casa", acronym: "CAS" })
 const away = makeClub({ id: 2, name: "Clube Fora", acronym: "FOR" })
@@ -49,9 +55,15 @@ describe("NewMatchDialog", () => {
     expect(onPlayed).not.toHaveBeenCalled()
   })
 
-  it("mostra Escalação incompleta quando a API menciona escalação", async () => {
+  it("marca só o mandante quando a escalação dele está incompleta", async () => {
     const user = userEvent.setup()
-    playMatchMock.mockRejectedValue(new Error("Escalação incompleta no clube mandante"))
+    playMatchMock.mockRejectedValue(new Error("Escalação incompleta"))
+    getLineupMock.mockImplementation(async (id) => ({
+      club_id: id,
+      formation: id === 1 ? null : "2-1-1",
+      complete: id !== 1,
+      players: [],
+    }))
     render(<NewMatchDialog clubs={[home, away]} onClose={vi.fn()} onPlayed={vi.fn()} />)
     const dialog = screen.getByRole("dialog", { name: "Nova partida" })
 
@@ -61,7 +73,30 @@ describe("NewMatchDialog", () => {
     await user.click(await screen.findByRole("option", { name: /Clube Fora/ }))
     await user.click(within(dialog).getByRole("button", { name: /Jogar partida/i }))
 
-    expect(await within(dialog).findByText("Escalação incompleta")).toBeInTheDocument()
+    expect(await within(dialog).findByText("Não foi possível jogar a partida")).toBeInTheDocument()
+    expect(within(dialog).getByText("Escalação incompleta: o Clube Casa não tem os 5 titulares.")).toBeInTheDocument()
+    expect(within(dialog).getByRole("combobox", { name: "Mandante" })).toHaveAttribute("aria-invalid", "true")
+    expect(within(dialog).getByRole("combobox", { name: "Visitante" })).not.toHaveAttribute("aria-invalid")
+  })
+
+  it("marca os dois clubes quando as duas escalações estão incompletas", async () => {
+    const user = userEvent.setup()
+    playMatchMock.mockRejectedValue(new Error("Escalação incompleta"))
+    getLineupMock.mockResolvedValue({ club_id: 0, formation: null, complete: false, players: [] })
+    render(<NewMatchDialog clubs={[home, away]} onClose={vi.fn()} onPlayed={vi.fn()} />)
+    const dialog = screen.getByRole("dialog", { name: "Nova partida" })
+
+    await user.click(within(dialog).getByRole("combobox", { name: "Mandante" }))
+    await user.click(await screen.findByRole("option", { name: /Clube Casa/ }))
+    await user.click(within(dialog).getByRole("combobox", { name: "Visitante" }))
+    await user.click(await screen.findByRole("option", { name: /Clube Fora/ }))
+    await user.click(within(dialog).getByRole("button", { name: /Jogar partida/i }))
+
+    expect(
+      await within(dialog).findByText("Escalação incompleta: o Clube Casa e o Clube Fora não têm os 5 titulares."),
+    ).toBeInTheDocument()
+    expect(within(dialog).getByRole("combobox", { name: "Mandante" })).toHaveAttribute("aria-invalid", "true")
+    expect(within(dialog).getByRole("combobox", { name: "Visitante" })).toHaveAttribute("aria-invalid", "true")
   })
 
   it("chama onPlayed após sucesso", async () => {
@@ -74,8 +109,10 @@ describe("NewMatchDialog", () => {
 
     await user.click(within(dialog).getByRole("combobox", { name: "Mandante" }))
     await user.click(await screen.findByRole("option", { name: /Clube Casa/ }))
+    expect(within(dialog).getByRole("combobox", { name: "Mandante" })).toHaveTextContent("Clube Casa (CAS)")
     await user.click(within(dialog).getByRole("combobox", { name: "Visitante" }))
     await user.click(await screen.findByRole("option", { name: /Clube Fora/ }))
+    expect(within(dialog).getByRole("combobox", { name: "Visitante" })).toHaveTextContent("Clube Fora (FOR)")
     await user.click(within(dialog).getByRole("button", { name: /Jogar partida/i }))
 
     expect(playMatchMock).toHaveBeenCalledWith(1, 2)

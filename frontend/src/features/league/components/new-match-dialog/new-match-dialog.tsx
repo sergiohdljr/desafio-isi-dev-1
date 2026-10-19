@@ -3,9 +3,11 @@ import { Info, Swords } from "lucide-react"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { ClubField } from "@/features/league/components/new-match-dialog/club-field"
+import { getLineup } from "@/features/clubs/api/clubs.api"
 import { playMatch } from "@/features/league/api/league.api"
 import { DIFFERENT_CLUBS_MESSAGE } from "@/features/league/consts/new-match"
 import type { Match } from "@/features/league/types/match.types"
+import { incompleteLineupMessage } from "@/features/league/utils/incomplete-lineup-message"
 import { hasDifferentClubs, matchFailureKind } from "@/features/league/utils/match-failure"
 import type { Club } from "@/features/clubs/types/club.types"
 import { MarketDialog, PendingNote } from "@/features/players/components/market-dialog/index"
@@ -23,6 +25,7 @@ function NewMatchDialog({
   const [awayId, setAwayId] = useState("")
   const [pending, setPending] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
+  const [invalidIds, setInvalidIds] = useState<string[]>([])
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -36,7 +39,15 @@ function NewMatchDialog({
       const match = await playMatch(Number(homeId), Number(awayId))
       onPlayed(match)
     } catch (error) {
-      setFailure(error instanceof Error ? error.message : "Não foi possível jogar a partida.")
+      const message = error instanceof Error ? error.message : "Não foi possível jogar a partida."
+      if (matchFailureKind(message) === "incomplete") {
+        const incomplete = await incompleteSides(homeId, awayId, clubs)
+        setInvalidIds(incomplete.ids)
+        setFailure(incompleteLineupMessage(incomplete.names))
+      } else {
+        setInvalidIds([])
+        setFailure(message)
+      }
       setPending(false)
     }
   }
@@ -53,7 +64,7 @@ function NewMatchDialog({
         {kind === "incomplete" || kind === "refused" ? (
           <Alert
             variant="destructive"
-            title={kind === "incomplete" ? "Escalação incompleta" : "Partida recusada"}
+            title={kind === "incomplete" ? "Não foi possível jogar a partida" : "Partida recusada"}
             description={failure!}
           />
         ) : null}
@@ -63,7 +74,12 @@ function NewMatchDialog({
           value={homeId}
           clubs={clubs}
           disabled={pending}
-          onChange={setHomeId}
+          invalid={invalidIds.includes(homeId)}
+          onChange={(value) => {
+            setHomeId(value)
+            setInvalidIds([])
+            setFailure(null)
+          }}
         />
         <ClubField
           label="Visitante"
@@ -71,7 +87,12 @@ function NewMatchDialog({
           value={awayId}
           clubs={clubs}
           disabled={pending}
-          onChange={setAwayId}
+          invalid={invalidIds.includes(awayId)}
+          onChange={(value) => {
+            setAwayId(value)
+            setInvalidIds([])
+            setFailure(null)
+          }}
         />
         {kind === "selection" ? <p className="text-caption-xs text-destructive">{failure}</p> : null}
         <div className="flex flex-col gap-2 rounded-[10px] border border-border bg-muted-subtle px-3.5 py-3 text-caption-xs text-muted-foreground">
@@ -100,6 +121,23 @@ function NewMatchDialog({
       </form>
     </MarketDialog>
   )
+}
+
+async function incompleteSides(homeId: string, awayId: string, clubs: Club[]) {
+  const [home, away] = await Promise.all([readLineup(homeId), readLineup(awayId)])
+  const sides = [
+    { id: homeId, complete: home?.complete ?? false },
+    { id: awayId, complete: away?.complete ?? false },
+  ].filter((side) => !side.complete)
+  const names = sides.flatMap((side) => {
+    const club = clubs.find((item) => String(item.id) === side.id)
+    return club ? [club.name] : []
+  })
+  return { ids: sides.map((side) => side.id), names }
+}
+
+function readLineup(id: string) {
+  return getLineup(Number(id)).catch(() => null)
 }
 
 export { NewMatchDialog }
