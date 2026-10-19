@@ -1,3 +1,4 @@
+import { HandCoins, ShoppingCart } from "lucide-react"
 import type { ClubTransaction } from "@/features/clubs/types/transactions.types"
 import { Avatar } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -31,7 +32,10 @@ function HistoryTable({ rows }: { rows: ClubTransaction[] }) {
                   {when.date} <span className="text-muted-foreground">{when.time}</span>
                 </td>
                 <td className="px-2">
-                  <Badge variant={row.type === "COMPRA" ? "default" : "warning"}>
+                  <Badge
+                    variant={row.type === "COMPRA" ? "outline" : "secondary"}
+                    icon={row.type === "COMPRA" ? <ShoppingCart /> : <HandCoins />}
+                  >
                     {row.type === "COMPRA" ? "Compra" : "Venda"}
                   </Badge>
                 </td>
@@ -47,10 +51,14 @@ function HistoryTable({ rows }: { rows: ClubTransaction[] }) {
                 <td className="px-2 text-right text-body-sm tabular-nums">{money.format(row.value)}</td>
                 <td className="px-2 text-right text-body-sm tabular-nums">{money.format(row.fee)}</td>
                 <td className="px-2 text-right text-body-sm tabular-nums">{money.format(row.penalty)}</td>
-                <td className="px-2 text-right text-body-sm tabular-nums">
+                <td className={`px-2 text-right text-body-sm tabular-nums ${profitTone(row)}`}>
                   {row.type === "COMPRA" ? "–" : signedCoins(row.profit)}
                 </td>
-                <td className="pr-4 pl-2 text-right text-body-sm tabular-nums">{signedCoins(row.cash_change)}</td>
+                <td
+                  className={`pr-4 pl-2 text-right text-body-sm-semibold tabular-nums ${signedTone(row.cash_change)}`}
+                >
+                  {signedCoins(row.cash_change)}
+                </td>
               </tr>
             )
           })}
@@ -58,6 +66,17 @@ function HistoryTable({ rows }: { rows: ClubTransaction[] }) {
       </table>
     </div>
   )
+}
+
+function profitTone(row: ClubTransaction) {
+  if (row.type === "COMPRA") return "text-muted-foreground"
+  return signedTone(row.profit)
+}
+
+function signedTone(value: number) {
+  if (value > 0) return "text-success"
+  if (value < 0) return "text-destructive"
+  return "text-muted-foreground"
 }
 
 export { HistoryTable }

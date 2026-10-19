@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { Download } from "lucide-react"
+import { Download, History } from "lucide-react"
 import { exportClubTransactions, listClubTransactions } from "@/features/clubs/api/clubs.api"
 import { HistorySummary } from "@/features/clubs/components/club-history/history-summary"
 import { HistoryTable } from "@/features/clubs/components/club-history/history-table"
@@ -12,7 +12,7 @@ import { downloadBlob } from "@/features/clubs/utils/download-blob"
 import { toggleTransactionType } from "@/features/clubs/utils/toggle-transaction-type"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { LoadingRows, ResourceEmpty, ResourceError } from "@/components/ui/resource-state"
+import { LoadingRows, ResourceError } from "@/components/ui/resource-state"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Toast, ToastViewport } from "@/components/ui/toast"
 
@@ -127,11 +127,15 @@ function ClubHistory({ clubId, players }: { clubId: number; players: SquadPlayer
           />
         ) : null}
         {!error && rows.length === 0 && !history.isPending ? (
-          <ResourceEmpty
-            framed={false}
-            title="Nenhuma compra ou venda"
-            description="As compras e vendas do clube aparecem aqui, com os totais."
-          />
+          <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+            <span className="rounded-xl bg-muted p-3 text-muted-foreground">
+              <History className="size-6" aria-hidden />
+            </span>
+            <p className="text-heading-card">Nenhuma transação ainda</p>
+            <p className="max-w-[420px] text-body-sm text-muted-foreground">
+              As compras e vendas do clube aparecem aqui, com os totais logo abaixo.
+            </p>
+          </div>
         ) : null}
         {rows.length > 0 ? <HistoryTable rows={rows} /> : null}
         {summary && !error ? <HistorySummary summary={summary} /> : null}

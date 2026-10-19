@@ -5,7 +5,7 @@ import { signedCoins } from "@/features/players/utils/signed-coins"
 
 function HistorySummary({ summary }: { summary: TransactionSummary }) {
   return (
-    <div className="grid grid-cols-5 border-t border-border">
+    <div className="grid grid-cols-5 border-t border-border bg-muted-subtle">
       {HISTORY_TOTALS.map((item) => {
         const Icon = item.icon
         const value = summary[item.key]
@@ -15,7 +15,7 @@ function HistorySummary({ summary }: { summary: TransactionSummary }) {
               <Icon className="size-3.5" aria-hidden />
               {item.label}
             </p>
-            <p className="text-heading-card tabular-nums">
+            <p className={`text-heading-card tabular-nums ${profitTotalTone(item.key, value)}`}>
               {item.key === "total_profit" ? signedCoins(value) : money.format(value)}
             </p>
             <p className="text-caption-xs text-muted-foreground">{item.hint}</p>
@@ -24,6 +24,13 @@ function HistorySummary({ summary }: { summary: TransactionSummary }) {
       })}
     </div>
   )
+}
+
+function profitTotalTone(key: keyof TransactionSummary, value: number) {
+  if (key !== "total_profit") return ""
+  if (value > 0) return "text-success"
+  if (value < 0) return "text-destructive"
+  return ""
 }
 
 export { HistorySummary }
