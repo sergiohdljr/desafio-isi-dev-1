@@ -3,6 +3,8 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+COPY prisma ./prisma
+COPY prisma7.config.ts ./prisma7.config.ts
 RUN npm ci
 
 COPY . .
@@ -15,11 +17,13 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm install prisma@7.10.0 dotenv@18.0.7
+COPY prisma ./prisma
+COPY prisma7.config.ts ./prisma7.config.ts
+RUN npm ci --omit=dev --ignore-scripts \
+  && npm install prisma@7.10.0 dotenv@18.0.7 \
+  && npx prisma generate --config prisma7.config.ts
 
 COPY --from=build /app/dist ./dist
-COPY --from=build /app/prisma ./prisma
-COPY --from=build /app/prisma7.config.ts ./prisma7.config.ts
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
 
 RUN chmod +x docker-entrypoint.sh
