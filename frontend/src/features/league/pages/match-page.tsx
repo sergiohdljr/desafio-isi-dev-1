@@ -1,5 +1,6 @@
+import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { useNavigate, useParams } from "react-router"
+import { useLocation, useNavigate, useParams } from "react-router"
 import { ArrowLeft } from "lucide-react"
 import { useAppChrome } from "@/app/app-layout"
 import { paths } from "@/app/routes"
@@ -11,10 +12,15 @@ import { Scoreboard } from "@/features/league/components/scoreboard"
 import { clubAcronym } from "@/features/league/utils/club-acronym"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { Toast, ToastViewport } from "@/components/ui/toast"
 
 function MatchPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const params = useParams()
+  const [playedNotice, setPlayedNotice] = useState(
+    () => Boolean((location.state as { played?: boolean } | null)?.played),
+  )
   const id = Number(params.id)
   const { clubs } = useClubs("name")
   const match = useQuery({
@@ -51,6 +57,16 @@ function MatchPage() {
           <MatchPitch match={data} />
           <MatchDuels match={data} acronym={acronym} />
         </>
+      ) : null}
+      {playedNotice && data ? (
+        <ToastViewport placement="top-end">
+          <Toast
+            variant="success"
+            title="Partida jogada"
+            description={`${data.home.club_name} ${data.home.goals} × ${data.away.goals} ${data.away.club_name}`}
+            onClose={() => setPlayedNotice(false)}
+          />
+        </ToastViewport>
       ) : null}
     </main>
   )

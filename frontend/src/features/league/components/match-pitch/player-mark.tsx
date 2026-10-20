@@ -34,7 +34,7 @@ function PlayerMark({
         ) : null}
         {scored ? (
           <span className="absolute -top-1.5 left-6">
-            <Ball />
+            <Ball marker />
           </span>
         ) : null}
       </span>

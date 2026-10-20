@@ -97,7 +97,7 @@ function MatchesPage() {
             setCreating(false)
             void queryClient.invalidateQueries({ queryKey: ["matches"] })
             void queryClient.invalidateQueries({ queryKey: ["standings"] })
-            void navigate(paths.match(match.id))
+            void navigate(paths.match(match.id), { state: { played: true } })
           }}
         />
       ) : null}

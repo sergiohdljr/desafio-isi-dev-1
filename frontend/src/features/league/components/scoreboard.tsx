@@ -1,7 +1,7 @@
 import { Escudo } from "@/components/ui/escudo"
 import { Badge } from "@/components/ui/badge"
 import type { MatchSummary } from "@/features/league/types/match.types"
-import { resultLabel, resultVariant } from "@/features/league/utils/match-result-display"
+import { resultLabel } from "@/features/league/utils/match-result-display"
 import { formatPlayedAt } from "@/features/league/utils/played-at"
 
 function Scoreboard({
@@ -27,7 +27,7 @@ function Scoreboard({
           {match.home.goals} × {match.away.goals}
         </p>
         <p className="text-caption-xs text-muted-foreground">{formatPlayedAt(match.played_at)}</p>
-        <Badge variant={resultVariant(match.result)}>{resultLabel(match.result)}</Badge>
+        <Badge variant="outline">{resultLabel(match.result)}</Badge>
       </div>
       <div className="flex items-center gap-3">
         <Escudo sigla={awayAcronym} size="lg" />

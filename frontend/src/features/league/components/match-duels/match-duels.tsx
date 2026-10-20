@@ -14,7 +14,7 @@ function MatchDuels({ match, acronym }: { match: Match; acronym: (clubId: number
       <table className="w-full border-collapse text-left">
         <thead className="border-b border-border text-body-sm-medium text-muted-foreground">
           <tr className="h-10 bg-muted-subtle">
-            <th className="pr-2 pl-4 font-medium">Ordem</th>
+            <th className="pr-2 pl-4 font-medium">Duelo</th>
             <th className="px-2 font-medium">Atacante</th>
             <th className="px-2 font-medium">Ataque</th>
             <th className="px-2 font-medium">Defensor</th>
