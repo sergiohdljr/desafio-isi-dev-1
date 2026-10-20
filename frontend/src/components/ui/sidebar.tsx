@@ -147,7 +147,7 @@ function Sidebar({
   return (
     <aside
       data-slot="sidebar"
-      className={cn("flex h-svh shrink-0 flex-col bg-sidebar", collapsed ? "w-12" : "w-64", className)}
+      className={cn("sticky top-0 flex h-svh shrink-0 flex-col bg-sidebar", collapsed ? "w-12" : "w-64", className)}
     >
       <button
         type="button"

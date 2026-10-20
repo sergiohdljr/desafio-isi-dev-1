@@ -102,8 +102,8 @@ function AppLayout() {
             href: paths.club(club.id),
           }))}
         />
-        <div className="flex min-h-svh min-w-0 flex-1 flex-col py-2 pr-2">
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-background shadow-sm">
+        <div className="flex min-w-0 flex-1 flex-col py-2 pr-2">
+          <div className="flex min-h-[calc(100svh-1rem)] flex-1 flex-col rounded-xl bg-background shadow-sm">
             <header className="flex h-[56px] shrink-0 items-center gap-[8px] border-b border-border px-[16px]">
               <Button
                 type="button"
@@ -142,7 +142,7 @@ function AppLayout() {
                 <RefreshCw className="size-4" />
               </Button>
             </header>
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <div className="flex flex-1 flex-col">
               <Outlet />
             </div>
           </div>
