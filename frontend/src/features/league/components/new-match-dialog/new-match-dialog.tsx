@@ -3,10 +3,11 @@ import { Info, Swords } from "lucide-react"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { ClubField } from "@/features/league/components/new-match-dialog/club-field"
-import { getLineup } from "@/features/clubs/api/clubs.api"
 import { playMatch } from "@/features/league/api/league.api"
 import { DIFFERENT_CLUBS_MESSAGE } from "@/features/league/consts/new-match"
 import type { Match } from "@/features/league/types/match.types"
+import { incompleteClubs } from "@/features/league/utils/incomplete-clubs"
+import { matchSides } from "@/features/league/utils/match-sides"
 import { incompleteLineupMessage } from "@/features/league/utils/incomplete-lineup-message"
 import { hasDifferentClubs, matchFailureKind } from "@/features/league/utils/match-failure"
 import type { Club } from "@/features/clubs/types/club.types"
@@ -41,7 +42,7 @@ function NewMatchDialog({
     } catch (error) {
       const message = error instanceof Error ? error.message : "Não foi possível jogar a partida."
       if (matchFailureKind(message) === "incomplete") {
-        const incomplete = await incompleteSides(homeId, awayId, clubs)
+        const incomplete = incompleteClubs(await matchSides(homeId, awayId, clubs))
         setInvalidIds(incomplete.ids)
         setFailure(incompleteLineupMessage(incomplete.names))
       } else {
@@ -121,23 +122,6 @@ function NewMatchDialog({
       </form>
     </MarketDialog>
   )
-}
-
-async function incompleteSides(homeId: string, awayId: string, clubs: Club[]) {
-  const [home, away] = await Promise.all([readLineup(homeId), readLineup(awayId)])
-  const sides = [
-    { id: homeId, complete: home?.complete ?? false },
-    { id: awayId, complete: away?.complete ?? false },
-  ].filter((side) => !side.complete)
-  const names = sides.flatMap((side) => {
-    const club = clubs.find((item) => String(item.id) === side.id)
-    return club ? [club.name] : []
-  })
-  return { ids: sides.map((side) => side.id), names }
-}
-
-function readLineup(id: string) {
-  return getLineup(Number(id)).catch(() => null)
 }
 
 export { NewMatchDialog }
