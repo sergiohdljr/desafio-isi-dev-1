@@ -28,6 +28,7 @@ export type PlayerListView = {
     limit: number;
     totalItems: number;
     totalPages: number;
+    counts: { all: number; free: number; signed: number };
   };
 };
 

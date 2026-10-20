@@ -43,6 +43,7 @@ export const playerListResponseSchema = z.object({
     limit: z.int(),
     total_items: z.int(),
     total_pages: z.int(),
+    counts: z.object({ all: z.int(), free: z.int(), signed: z.int() }),
   }),
 });
 

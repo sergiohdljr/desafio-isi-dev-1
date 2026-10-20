@@ -18,6 +18,7 @@ export type PlayerListPage = {
     limit: number;
     totalItems: number;
     totalPages: number;
+    counts: { all: number; free: number; signed: number };
   };
 };
 
@@ -25,9 +26,16 @@ export function arrangePlayers(
   players: Player[],
   query: PlayerListQuery,
 ): PlayerListPage {
-  const matched = players
-    .filter((player) => matches(player, query))
-    .sort((left, right) => comparePlayers(left, right, query.sorts));
+  const shared = players.filter((player) => matches(player, { ...query, free: undefined }));
+  const free = shared.filter((player) => player.clubId === null).length;
+  const signed = shared.length - free;
+  const matched = (
+    query.free === true
+      ? shared.filter((player) => player.clubId === null)
+      : query.free === false
+        ? shared.filter((player) => player.clubId !== null)
+        : shared
+  ).sort((left, right) => comparePlayers(left, right, query.sorts));
   const totalItems = matched.length;
   const start = (query.page - 1) * query.limit;
 
@@ -38,6 +46,7 @@ export function arrangePlayers(
       limit: query.limit,
       totalItems,
       totalPages: totalItems === 0 ? 0 : Math.ceil(totalItems / query.limit),
+      counts: { all: shared.length, free, signed },
     },
   };
 }

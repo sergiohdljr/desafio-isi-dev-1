@@ -17,24 +17,32 @@ import type {
   PlayerList,
   UpdatePlayerInput,
 } from "@/features/players/types/player.types"
-import { arrangePlayers } from "@/features/players/utils/arrange-players"
-
 const PLAYERS_KEY = ["players"] as const
-const PLAYERS_FETCH_LIMIT = 50
 
 function usePlayersDirectory(query: DirectoryQuery) {
+  const filters = {
+    search: query.search,
+    position: query.position,
+    condition: query.condition,
+    clubId: query.clubId,
+    minAge: query.minAge,
+    maxAge: query.maxAge,
+    minValue: query.minValue,
+    maxValue: query.maxValue,
+    sort: query.sort,
+  }
+  const free = query.scope === "free" ? true : query.scope === "signed" ? false : undefined
   const list = useQuery({
-    queryKey: PLAYERS_KEY,
-    queryFn: () => listPlayers({ limit: PLAYERS_FETCH_LIMIT }),
+    queryKey: [...PLAYERS_KEY, filters, free ?? "all", query.page, query.limit],
+    queryFn: () => listPlayers({ ...filters, free, page: query.page, limit: query.limit }),
   })
-  const directory = arrangePlayers(list.data?.data ?? [], query)
   const error = list.error
 
   return {
-    players: directory.players,
-    totalItems: directory.totalItems,
-    totalPages: list.data ? directory.totalPages : 1,
-    counts: directory.counts,
+    players: list.data?.data ?? [],
+    totalItems: list.data?.meta.total_items ?? 0,
+    totalPages: list.data ? list.data.meta.total_pages : 1,
+    counts: list.data?.meta.counts ?? { all: 0, free: 0, signed: 0 },
     isPending: list.isPending,
     error: error instanceof Error ? error.message : error ? "Não foi possível carregar os jogadores." : null,
   }
@@ -50,7 +58,7 @@ function useRefreshPlayers() {
 }
 
 function applyCondition(queryClient: QueryClient, previous: Player | undefined, player: Player) {
-  queryClient.setQueryData<PlayerList>(PLAYERS_KEY, (current) => {
+  queryClient.setQueriesData<PlayerList>({ queryKey: PLAYERS_KEY }, (current) => {
     if (!current) return current
     return {
       ...current,
@@ -114,7 +122,10 @@ function usePlayerMutations() {
       return player
     },
     changeCondition: async (id: number, condition: Condition) => {
-      const previous = queryClient.getQueryData<PlayerList>(PLAYERS_KEY)?.data.find((item) => item.id === id)
+      const previous = queryClient
+        .getQueriesData<PlayerList>({ queryKey: PLAYERS_KEY })
+        .flatMap(([, data]) => data?.data ?? [])
+        .find((item) => item.id === id)
       const player = await changePlayerCondition(id, condition)
       applyCondition(queryClient, previous, player)
       return player

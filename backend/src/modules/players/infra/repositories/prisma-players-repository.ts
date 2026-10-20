@@ -61,7 +61,7 @@ export class PrismaPlayersRepository implements PlayersRepository {
   }
 
   async findActivePage(query: PlayerListQuery): Promise<PlayerListPage> {
-    const where = whereOf(query);
+    const where = whereOf(query, true);
     const { rows, totals } = await this.prisma.$transaction(async (tx) => ({
       rows: await tx.$queryRaw<PlayerRow[]>`
         SELECT id, nome, posicao, agilidade, idade, valor_base, condicao,
@@ -72,12 +72,18 @@ export class PrismaPlayersRepository implements PlayersRepository {
         ORDER BY ${orderOf(query.sorts)}
         LIMIT ${query.limit} OFFSET ${(query.page - 1) * query.limit}
       `,
-      totals: await tx.$queryRaw<{ total: number }[]>`
-        SELECT count(*)::int AS total FROM jogadores WHERE ${where}
+      totals: await tx.$queryRaw<{ total: number; free: number; signed: number }[]>`
+        SELECT count(*)::int AS total,
+               count(*) FILTER (WHERE clube_id IS NULL)::int AS free,
+               count(*) FILTER (WHERE clube_id IS NOT NULL)::int AS signed
+        FROM jogadores
+        WHERE ${whereOf(query, false)}
       `,
     }));
 
-    const totalItems = totals[0]?.total ?? 0;
+    const total = totals[0] ?? { total: 0, free: 0, signed: 0 };
+    const totalItems =
+      query.free === true ? total.free : query.free === false ? total.signed : total.total;
     return {
       data: rows.map(playerFromRow),
       meta: {
@@ -85,6 +91,7 @@ export class PrismaPlayersRepository implements PlayersRepository {
         limit: query.limit,
         totalItems,
         totalPages: Math.ceil(totalItems / query.limit),
+        counts: { all: total.total, free: total.free, signed: total.signed },
       },
     };
   }
@@ -112,7 +119,7 @@ export class PrismaPlayersRepository implements PlayersRepository {
   }
 }
 
-function whereOf(query: PlayerListQuery): Prisma.Sql {
+function whereOf(query: PlayerListQuery, applyFree: boolean): Prisma.Sql {
   const parts = [Prisma.sql`excluido_em IS NULL`];
 
   if (query.search !== undefined) {
@@ -126,7 +133,7 @@ function whereOf(query: PlayerListQuery): Prisma.Sql {
   if (query.condition !== undefined) {
     parts.push(Prisma.sql`condicao = ${query.condition}::condicao`);
   }
-  if (query.free !== undefined) {
+  if (applyFree && query.free !== undefined) {
     parts.push(
       query.free
         ? Prisma.sql`clube_id IS NULL`

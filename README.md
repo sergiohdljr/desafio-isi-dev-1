@@ -116,6 +116,7 @@ Frontend: React, Vite, React Router, TanStack Query, Axios, Tailwind, shadcn/Bas
 - Backend em clean architecture: cada módulo separa `domain`, `application` e `infra`. A regra de negócio não depende de HTTP nem de Prisma.
 - Frontend organizado por feature (`src/features/<feature>/`): páginas, componentes, API e utils ficam juntos no módulo da tela.
 - Dados do frontend com TanStack Query: a consulta busca, guarda em cache e repete em caso de falha; loading e erro ficam na query. Depois de criar, editar ou excluir, a mutation invalida as queries relacionadas.
+- A listagem de jogadores faz uma única requisição por filtro. A resposta traz a página e os totais das abas (todos, livres e em clubes) no mesmo `meta`.
 - No Compose, o frontend acessa a API pelo proxy do nginx (`/api` → API).
 - A aplicação inteira sobe no Docker Compose: Postgres, API e frontend. O Compose de e2e é separado e não entra no `docker compose up` da app.
 - Backend: unitários (Vitest, com Prisma e HTTP mockados) e e2e (Supertest contra a API e o Postgres de teste).

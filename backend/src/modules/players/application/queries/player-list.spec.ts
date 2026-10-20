@@ -122,7 +122,13 @@ describe('arrangePlayers', () => {
       expect(result.data).toHaveLength(items);
       expect(result.data[0]?.name).toBe(first);
       expect(result.data.at(-1)?.name).toBe(last);
-      expect(result.meta).toEqual({ page, limit, totalItems, totalPages });
+      expect(result.meta).toEqual({
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        counts: { all: totalItems, free: totalItems, signed: 0 },
+      });
     },
   );
 

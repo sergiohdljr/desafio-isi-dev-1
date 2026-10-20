@@ -62,7 +62,13 @@ describe('response schemas', () => {
       playerListResponseSchema.parse(
         presentPlayerList({
           data: [player],
-          meta: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
+          meta: {
+            page: 1,
+            limit: 10,
+            totalItems: 1,
+            totalPages: 1,
+            counts: { all: 1, free: 1, signed: 0 },
+          },
         }),
       ).meta.total_items,
     ).toBe(1);

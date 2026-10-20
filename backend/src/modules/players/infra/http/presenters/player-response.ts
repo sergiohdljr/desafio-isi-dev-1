@@ -56,6 +56,7 @@ export function presentPlayerList(page: PlayerListView): {
     limit: number;
     total_items: number;
     total_pages: number;
+    counts: { all: number; free: number; signed: number };
   };
 } {
   return {
@@ -65,6 +66,7 @@ export function presentPlayerList(page: PlayerListView): {
       limit: page.meta.limit,
       total_items: page.meta.totalItems,
       total_pages: page.meta.totalPages,
+      counts: page.meta.counts,
     },
   };
 }
