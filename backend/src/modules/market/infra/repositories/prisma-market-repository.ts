@@ -41,12 +41,7 @@ export class PrismaMarketRepository implements MarketRepository {
       if (!loaded.club) {
         throw new Error('Compra sem clube');
       }
-      return persistPurchase(tx, {
-        playerId,
-        clubId,
-        cash: loaded.club.caixa,
-        write,
-      });
+      return persistPurchase(tx, { playerId, clubId, write });
     });
   }
 
@@ -61,11 +56,7 @@ export class PrismaMarketRepository implements MarketRepository {
       if (!loaded.club) {
         throw new Error('Venda sem clube');
       }
-      return persistSale(tx, {
-        playerId,
-        cash: loaded.club.caixa,
-        write,
-      });
+      return persistSale(tx, { playerId, write });
     });
   }
 
@@ -178,22 +169,18 @@ async function persistPurchase(
   purchase: {
     playerId: number;
     clubId: number;
-    cash: { toString(): string };
     write: PurchaseWrite;
   },
 ): Promise<PurchaseReceipt> {
-  const clubCash = Money.fromCents(
-    Money.roundHalfAwayFromZero(purchase.cash.toString()).cents +
-      purchase.write.cashChange.cents,
-  );
   await tx.jogadores.update({
     where: { id: purchase.playerId },
     data: { clube_id: purchase.clubId },
   });
-  await tx.clubes.update({
+  const club = await tx.clubes.update({
     where: { id: purchase.clubId },
-    data: { caixa: clubCash.toDecimalString() },
+    data: { caixa: { increment: purchase.write.cashChange.toDecimalString() } },
   });
+  const clubCash = Money.roundHalfAwayFromZero(club.caixa.toString());
   await tx.contratos.create({
     data: {
       jogador_id: purchase.playerId,
@@ -283,23 +270,19 @@ async function persistSale(
   tx: Tx,
   sale: {
     playerId: number;
-    cash: { toString(): string };
     write: SaleWrite;
   },
 ): Promise<SaleReceipt> {
-  const clubCash = Money.fromCents(
-    Money.roundHalfAwayFromZero(sale.cash.toString()).cents +
-      sale.write.cashChange.cents,
-  );
   await tx.jogadores.update({
     where: { id: sale.playerId },
     data: { clube_id: null },
   });
   await releaseLineupSeat(tx, sale.playerId);
-  await tx.clubes.update({
+  const club = await tx.clubes.update({
     where: { id: sale.write.clubId },
-    data: { caixa: clubCash.toDecimalString() },
+    data: { caixa: { increment: sale.write.cashChange.toDecimalString() } },
   });
+  const clubCash = Money.roundHalfAwayFromZero(club.caixa.toString());
   await tx.contratos.updateMany({
     where: {
       jogador_id: sale.playerId,
