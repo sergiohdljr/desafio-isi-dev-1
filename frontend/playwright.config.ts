@@ -5,13 +5,13 @@ import { defineConfig, devices } from "@playwright/test"
 
 const frontendRoot = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.dirname(frontendRoot)
-loadEnv({ path: path.join(repoRoot, ".env") })
+loadEnv({ path: path.join(repoRoot, ".env.test") })
 
 const API_PORT = Number(process.env.E2E_API_PORT)
 const UI_PORT = Number(process.env.E2E_UI_PORT)
 if (!Number.isFinite(API_PORT) || !Number.isFinite(UI_PORT)) {
   throw new Error(
-    "E2E_API_PORT e E2E_UI_PORT são obrigatórios no .env da raiz (veja .env.example).",
+    "E2E_API_PORT e E2E_UI_PORT são obrigatórios no .env.test (veja .env.test.example).",
   )
 }
 

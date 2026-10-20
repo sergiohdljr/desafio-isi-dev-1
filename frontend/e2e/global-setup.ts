@@ -3,6 +3,7 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const COMPOSE_FILE = "docker-compose.e2e.yml"
+const ENV_FILE = ".env.test"
 
 /**
  * Sobe o Compose e2e (postgres-test + api) e esvazia a liga.
@@ -13,7 +14,7 @@ function globalSetup() {
   const repoRoot = path.dirname(frontendRoot)
   const sql =
     "TRUNCATE TABLE duelos_partida, partidas, escalacoes, transacoes, contratos, jogadores, clubes RESTART IDENTITY CASCADE"
-  const compose = `docker compose -f "${repoRoot}/${COMPOSE_FILE}" --project-directory "${repoRoot}"`
+  const compose = `docker compose --env-file "${repoRoot}/${ENV_FILE}" -f "${repoRoot}/${COMPOSE_FILE}" --project-directory "${repoRoot}"`
 
   execSync(`${compose} up -d --wait`, { stdio: "pipe" })
 

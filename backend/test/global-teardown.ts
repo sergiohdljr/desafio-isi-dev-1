@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const COMPOSE_FILE = 'docker-compose.e2e.yml';
+const ENV_FILE = '.env.test';
 
 /**
  * Derruba o Compose e2e após a suíte.
@@ -16,7 +17,7 @@ export default function teardown(): void {
 
   const testDir = path.dirname(fileURLToPath(import.meta.url));
   const repoRoot = path.resolve(testDir, '../..');
-  const compose = `docker compose -f "${repoRoot}/${COMPOSE_FILE}" --project-directory "${repoRoot}"`;
+  const compose = `docker compose --env-file "${repoRoot}/${ENV_FILE}" -f "${repoRoot}/${COMPOSE_FILE}" --project-directory "${repoRoot}"`;
 
   execSync(`${compose} down`, { stdio: 'inherit' });
 }

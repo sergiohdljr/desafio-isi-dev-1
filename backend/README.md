@@ -50,7 +50,7 @@ $ npm run start:prod
 # unit tests
 $ npm run test
 
-# e2e (sobe postgres-test via Compose se precisar; credenciais no .env da raiz)
+# e2e (sobe postgres-test via Compose se precisar; credenciais no .env.test da raiz)
 $ npm run test:e2e
 
 # test coverage

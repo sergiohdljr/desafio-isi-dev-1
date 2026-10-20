@@ -9,6 +9,9 @@ const rootEnvPath = path.resolve(backendRoot, '../.env');
 const backendEnvPath = path.join(backendRoot, '.env');
 const placeholderUrl = 'postgresql://postgres:postgres@localhost:5432/postgres';
 
+// loadTestEnv (e2e) já define DATABASE_URL para o Postgres de teste; não sobrescrever.
+const presetDatabaseUrl = process.env.DATABASE_URL;
+
 if (existsSync(rootEnvPath)) {
   config({ path: rootEnvPath });
 }
@@ -16,8 +19,9 @@ if (existsSync(backendEnvPath)) {
   config({ path: backendEnvPath, override: true });
 }
 
-// loadTestEnv (e2e) já define DATABASE_URL para o Postgres de teste; não sobrescrever.
-if (!process.env.POSTGRES_HOST && !process.env.DATABASE_URL) {
+if (presetDatabaseUrl) {
+  process.env.DATABASE_URL = presetDatabaseUrl;
+} else if (!process.env.POSTGRES_HOST && !process.env.DATABASE_URL) {
   const user = process.env.POSTGRES_USER;
   const password = process.env.POSTGRES_PASSWORD;
   const database = process.env.POSTGRES_DB;

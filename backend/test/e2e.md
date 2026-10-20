@@ -2,7 +2,9 @@
 
 ## Banco
 
-O e2e usa o serviço `postgres-test` de `docker-compose.e2e.yml` (raiz), com `POSTGRES_TEST_DB` / `POSTGRES_TEST_PORT` obrigatórios no `.env` da raiz. O Postgres e a API da aplicação não entram nessa suíte. O Playwright do frontend sobe o Compose completo. Aqui, `npm run test:e2e` sobe só o Postgres de teste; a API do Vitest/Supertest roda no host com `DATABASE_URL` montada a partir do mesmo `.env`. O global setup aplica `prisma migrate deploy` e cada arquivo em `test/flows/` esvazia a liga antes de cada caso, com `resetLeague`. Ao fim da suíte, o global teardown derruba o Compose e2e (use `E2E_KEEP_UP=1` para manter no ar).
+O e2e usa o serviço `postgres-test` de `docker-compose.e2e.yml` (raiz) e as credenciais de [`.env.test`](../../.env.test) (modelo: [`.env.test.example`](../../.env.test.example)). O Postgres e a API da aplicação não entram nessa suíte. O Playwright do frontend sobe o Compose completo. Aqui, `npm run test:e2e` sobe só o Postgres de teste; a API do Vitest/Supertest roda no host com `DATABASE_URL` montada a partir do mesmo `.env.test`. O global setup aplica `prisma migrate deploy` e cada arquivo em `test/flows/` esvazia a liga antes de cada caso, com `resetLeague`. Ao fim da suíte, o global teardown derruba o Compose e2e (use `E2E_KEEP_UP=1` para manter no ar).
+
+Se mudar user, senha ou `POSTGRES_TEST_*` no `.env.test` com volume antigo: `docker compose --env-file .env.test -f docker-compose.e2e.yml down -v`.
 
 Cada fluxo tem um caso feliz e o erro que a borda HTTP traduz. O teste confere o status, o corpo e se a operação recusada gravou alguma coisa. Percentual, faixa, arredondamento e teto ficam no teste unitário da função que calcula.
 

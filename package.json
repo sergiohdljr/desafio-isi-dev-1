@@ -2,8 +2,8 @@
   "name": "liga",
   "private": true,
   "scripts": {
-    "compose:e2e": "docker compose -f docker-compose.e2e.yml up -d --wait",
-    "compose:e2e:build": "docker compose -f docker-compose.e2e.yml up -d --build --wait",
-    "compose:e2e:down": "docker compose -f docker-compose.e2e.yml down"
+    "compose:e2e": "docker compose --env-file .env.test -f docker-compose.e2e.yml up -d --wait",
+    "compose:e2e:build": "docker compose --env-file .env.test -f docker-compose.e2e.yml up -d --build --wait",
+    "compose:e2e:down": "docker compose --env-file .env.test -f docker-compose.e2e.yml down"
   }
 }

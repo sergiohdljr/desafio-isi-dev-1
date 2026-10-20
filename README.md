@@ -39,7 +39,7 @@ docker compose down
 
 ## Variáveis de ambiente
 
-Só o `.env` na raiz é necessário para o Compose. Modelo: [.env.example](.env.example).
+Só o `.env` na raiz é necessário para o Compose da app. Modelo: [.env.example](.env.example).
 
 | Variável | Função |
 | --- | --- |
@@ -49,7 +49,7 @@ Só o `.env` na raiz é necessário para o Compose. Modelo: [.env.example](.env.
 | `API_PORT` | Porta da API no host |
 | `FRONTEND_ORIGIN` | Origem liberada no CORS (use a URL do frontend) |
 
-Variáveis `POSTGRES_TEST_*` e `E2E_*` servem só aos testes e2e; o `docker compose up` da aplicação não as usa.
+O e2e usa [.env.test](.env.test) (modelo: [.env.test.example](.env.test.example)), com `POSTGRES_*` de teste, `POSTGRES_TEST_*` e `E2E_*`. O `docker compose up` da aplicação não lê esse arquivo.
 
 ## Desenvolvimento na máquina (opcional)
 
@@ -86,12 +86,18 @@ cd frontend && npm run test:e2e
 cd backend && npm run test:e2e
 ```
 
-Se mudar `POSTGRES_TEST_DB` com volume antigo: `docker compose -f docker-compose.e2e.yml down -v`.
+Se mudar credenciais ou `POSTGRES_TEST_*` no `.env.test` com volume antigo:
+
+```bash
+docker compose --env-file .env.test -f docker-compose.e2e.yml down -v
+```
 
 ## Estrutura
 
 ```text
-.env.example            Credenciais e portas
+.env.example            Credenciais e portas da app
+.env.test               Credenciais e portas do e2e (versionado)
+.env.test.example       Modelo do .env.test
 docker-compose.yml      App (Postgres + API + frontend)
 docker-compose.e2e.yml  E2e (Postgres de teste + API)
 package.json            Scripts compose:e2e*
@@ -113,7 +119,7 @@ Frontend: React, Vite, React Router, TanStack Query, Axios, Tailwind, shadcn/Bas
 - No Compose, o frontend acessa a API pelo proxy do nginx (`/api` → API).
 - A aplicação inteira sobe no Docker Compose: Postgres, API e frontend. O Compose de e2e é separado e não entra no `docker compose up` da app.
 - Backend: unitários (Vitest, com Prisma e HTTP mockados) e e2e (Supertest contra a API e o Postgres de teste).
-- Frontend: unitários (Vitest), de componente (Testing Library) e e2e (Playwright contra a API no Compose de e2e). O e2e usa ambiente próprio (`docker-compose.e2e.yml`, portas `E2E_*` e `POSTGRES_TEST_*`) e não mexe no stack de desenvolvimento.
+- Frontend: unitários (Vitest), de componente (Testing Library) e e2e (Playwright contra a API no Compose de e2e). O e2e usa ambiente próprio (`.env.test`, `docker-compose.e2e.yml`, portas `E2E_*` e `POSTGRES_TEST_*`) e não mexe no stack de desenvolvimento.
 - Testes de usecases usando repositorios em memória, focando apenas na lógica.
 - Cada requisição da API gera uma linha de log com método, caminho e status, pelo `Logger` do Nest. O filtro global também registra os erros.
 - Documentação OpenAPI em `/docs`, com os endpoints da API.
