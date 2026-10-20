@@ -18,7 +18,7 @@ function PlayerMark({
   scored: boolean
 }) {
   return (
-    <span className="absolute flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2" style={{ top, left }}>
+    <span className="absolute -translate-x-1/2 -translate-y-1/2" style={{ top, left }}>
       <span
         className={
           home
@@ -38,7 +38,7 @@ function PlayerMark({
           </span>
         ) : null}
       </span>
-      <span className="flex flex-col items-center gap-0.5">
+      <span className="absolute top-[calc(100%+8px)] left-1/2 flex -translate-x-1/2 flex-col items-center gap-0.5">
         <span className="rounded-full bg-pitch-label px-2 py-0.5 text-caption-xs-medium whitespace-nowrap text-pitch-foreground">
           {player.name}
         </span>

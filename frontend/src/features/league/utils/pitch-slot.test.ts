@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { Player } from "@/features/players/types/player.types"
-import { attributeLine, fits } from "@/features/league/utils/pitch-slot"
+import { attributeLine, fits, placeOnPitch } from "@/features/league/utils/pitch-slot"
 
 function player(partial: Partial<Player> & Pick<Player, "position">): Player {
   return {
@@ -34,6 +34,37 @@ describe("fits", () => {
   it("encaixa posição exata", () => {
     expect(fits("ATA", "ATA")).toBe(true)
     expect(fits("ATA", "MEI")).toBe(false)
+  })
+})
+
+describe("placeOnPitch", () => {
+  const lineup = [
+    player({ id: 1, name: "Lateral", position: "LAT" }),
+    player({ id: 2, name: "Goleiro", position: "GOL" }),
+    player({ id: 3, name: "Atacante", position: "ATA" }),
+    player({ id: 4, name: "Zagueiro", position: "ZAG" }),
+    player({ id: 5, name: "Meia", position: "MEI" }),
+  ]
+
+  it("coloca cada linha da formação no eixo certo e o zagueiro acima do lateral", () => {
+    const placed = placeOnPitch("2-1-1", lineup, "home")
+    expect(placed.map((mark) => [mark.player.position, mark.top, mark.left])).toEqual([
+      ["GOL", "50%", "6.5%"],
+      ["ZAG", "32.3%", "17.9%"],
+      ["LAT", "67.7%", "17.9%"],
+      ["MEI", "50%", "28.8%"],
+      ["ATA", "50%", "39%"],
+    ])
+  })
+
+  it("espelha o visitante e leva o ataque das formações sem meio até a última linha", () => {
+    const attack = placeOnPitch("3-1", lineup.filter((item) => item.position !== "MEI"), "away")
+    expect(attack.map((mark) => [mark.player.position, mark.left])).toEqual([
+      ["GOL", "93.5%"],
+      ["ZAG", "82.1%"],
+      ["LAT", "82.1%"],
+      ["ATA", "61%"],
+    ])
   })
 })
 
