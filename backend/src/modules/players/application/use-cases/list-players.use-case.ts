@@ -6,7 +6,6 @@ import {
 } from '../../../clubs/application/repositories/clubs-repository.js';
 import { type PlayersRepository } from '../repositories/players-repository.js';
 import { PLAYERS_REPOSITORY } from '../repositories/players-repository.js';
-import { arrangePlayers } from '../queries/player-list.js';
 import { type PlayerListQuery } from '../queries/player-list-query.js';
 import {
   playerViewOf,
@@ -34,7 +33,7 @@ export class ListPlayers implements ListPlayersPort {
       }
     }
 
-    const page = arrangePlayers(await this.players.findActive(), query);
+    const page = await this.players.findActivePage(query);
     return {
       data: page.data.map(playerViewOf),
       meta: page.meta,

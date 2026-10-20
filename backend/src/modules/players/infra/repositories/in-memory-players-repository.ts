@@ -1,5 +1,10 @@
 import { Player, type RegisterPlayer } from '../../domain/entities/player.js';
 import { type PlayersRepository } from '../../application/repositories/players-repository.js';
+import {
+  arrangePlayers,
+  type PlayerListPage,
+} from '../../application/queries/player-list.js';
+import { type PlayerListQuery } from '../../application/queries/player-list-query.js';
 
 export class InMemoryPlayersRepository implements PlayersRepository {
   readonly saved: Player[] = [];
@@ -24,8 +29,9 @@ export class InMemoryPlayersRepository implements PlayersRepository {
     );
   }
 
-  async findActive(): Promise<Player[]> {
-    return this.players.filter((player) => !player.excluded);
+  async findActivePage(query: PlayerListQuery): Promise<PlayerListPage> {
+    const active = this.players.filter((player) => !player.excluded);
+    return arrangePlayers(active, query);
   }
 
   async save(player: Player): Promise<void> {

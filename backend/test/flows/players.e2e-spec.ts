@@ -132,6 +132,72 @@ describe('Jogadores', () => {
     await appOf(app).get('/api/v1/players').query({ sort: 'nome' }).expect(400);
   });
 
+  it('[B07] busca ignorando acento e caixa, e trata curinga como texto literal', async () => {
+    await createPlayer(app, { name: 'Agustín Peña' });
+    await createPlayer(app, { name: 'Bruno Dias' });
+
+    const unaccented = await appOf(app)
+      .get('/api/v1/players')
+      .query({ search: 'AGUSTIN pe' })
+      .expect(200);
+    expect(
+      unaccented.body.data.map((row: { name: string }) => row.name),
+    ).toEqual(['Agustín Peña']);
+
+    const wildcard = await appOf(app)
+      .get('/api/v1/players')
+      .query({ search: '%n' })
+      .expect(200);
+    expect(wildcard.body.data).toEqual([]);
+    expect(wildcard.body.meta.total_items).toBe(0);
+  });
+
+  it('[B07] ordena por valor de mercado e por idade usando o cálculo da RN05', async () => {
+    const sick = await createPlayer(app, { name: 'Zeca Doente', age: 30 });
+    await createPlayer(app, { name: 'Ana Apta', age: 20 });
+    await appOf(app)
+      .patch(`/api/v1/players/${sick.id}/condition`)
+      .send({ condition: 'DOENTE' })
+      .expect(200);
+
+    const byValue = await appOf(app)
+      .get('/api/v1/players')
+      .query({ sort: 'value_desc' })
+      .expect(200);
+    expect(
+      byValue.body.data.map((row: { name: string; market_value: number }) => [
+        row.name,
+        row.market_value,
+      ]),
+    ).toEqual([
+      ['Ana Apta', 44.75],
+      ['Zeca Doente', 25.2],
+    ]);
+
+    const byAge = await appOf(app)
+      .get('/api/v1/players')
+      .query({ sort: 'age_asc' })
+      .expect(200);
+    expect(byAge.body.data.map((row: { name: string }) => row.name)).toEqual([
+      'Ana Apta',
+      'Zeca Doente',
+    ]);
+  });
+
+  it('[B07] filtra por faixa de valor de mercado no banco', async () => {
+    await createPlayer(app, { name: 'Ana Apta', age: 20 });
+    await createPlayer(app, { name: 'Bruno Base', age: 25 });
+
+    const narrow = await appOf(app)
+      .get('/api/v1/players')
+      .query({ min_value: 40, max_value: 50 })
+      .expect(200);
+    expect(narrow.body.data.map((row: { name: string }) => row.name)).toEqual([
+      'Ana Apta',
+    ]);
+    expect(narrow.body.meta.total_items).toBe(1);
+  });
+
   it('[B08] exclui o jogador livre com 204, preserva a linha e responde 404 nos demais endpoints', async () => {
     const created = await createPlayer(app);
 

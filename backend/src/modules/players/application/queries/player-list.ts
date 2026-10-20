@@ -4,7 +4,12 @@ import {
 } from '../../../../shared/domain/name-order.js';
 import { positionOrder } from '../../../clubs/domain/entities/squad.js';
 import type { Player } from '../../domain/entities/player.js';
-import type { PlayerListQuery, PlayerSort } from './player-list-query.js';
+import {
+  AGE_RANGE,
+  VALUE_RANGE,
+  type PlayerListQuery,
+  type PlayerSort,
+} from './player-list-query.js';
 
 export type PlayerListPage = {
   data: Player[];
@@ -60,15 +65,15 @@ function matches(player: Player, query: PlayerListQuery): boolean {
     return false;
   }
   if (query.minAge !== undefined || query.maxAge !== undefined) {
-    const minAge = query.minAge ?? 16;
-    const maxAge = query.maxAge ?? 45;
+    const minAge = query.minAge ?? AGE_RANGE.min;
+    const maxAge = query.maxAge ?? AGE_RANGE.max;
     if (player.age < minAge || player.age > maxAge) {
       return false;
     }
   }
   if (query.minValue !== undefined || query.maxValue !== undefined) {
-    const minValue = cents(query.minValue ?? 0);
-    const maxValue = cents(query.maxValue ?? 550);
+    const minValue = cents(query.minValue ?? VALUE_RANGE.min);
+    const maxValue = cents(query.maxValue ?? VALUE_RANGE.max);
     if (
       player.marketValue.cents < minValue ||
       player.marketValue.cents > maxValue
