@@ -64,30 +64,31 @@ model jogadores {
   id            Int       @id @default(autoincrement())
   nome          String    @db.VarChar(100)
   posicao       posicao
-  agilidade     Int
-  idade         Int
+  agilidade     Int       @db.SmallInt
+  idade         Int       @db.SmallInt
   valor_base    Decimal   @db.Decimal(6, 2)
   condicao      condicao
   clube_id      Int?
-  velocidade    Int
-  finalizacao   Int
-  passe         Int
-  drible        Int
-  defesa        Int
-  fisico        Int
-  potencial     Int
-  excluido_em   DateTime? @db.Timestamp(6)
-  criado_em     DateTime  @default(now()) @db.Timestamp(6)
-  atualizado_em DateTime  @updatedAt @db.Timestamp(6)
+  velocidade    Int       @db.SmallInt
+  finalizacao   Int       @db.SmallInt
+  passe         Int       @db.SmallInt
+  drible        Int       @db.SmallInt
+  defesa        Int       @db.SmallInt
+  fisico        Int       @db.SmallInt
+  potencial     Int       @db.SmallInt
+  excluido_em   DateTime? @db.Timestamptz(6)
+  criado_em     DateTime  @default(now()) @db.Timestamptz(6)
+  atualizado_em DateTime  @updatedAt @db.Timestamptz(6)
 
-  clube                clubes?          @relation(fields: [clube_id], references: [id])
+  clube                clubes?          @relation(fields: [clube_id], references: [id], onDelete: Restrict)
   contratos            contratos[]
   transacoes           transacoes[]
   escalacao            escalacoes?
   duelos_como_atacante duelos_partida[] @relation("duelo_atacante")
   duelos_como_defensor duelos_partida[] @relation("duelo_defensor")
 
-  @@index([clube_id])
+  /// O índice de clube_id é parcial (WHERE excluido_em IS NULL) e vive só na migration,
+  /// junto dos índices de expressão de valor de mercado e nome dobrado.
 }
 
 model clubes {
@@ -95,10 +96,10 @@ model clubes {
   nome      String    @unique @db.VarChar(60)
   /// Minúsculas do nome, gerado no banco. Único: maiúsculas não coexistem; acento continua diferente.
   nomeChave String    @unique @default(dbgenerated("lower(nome)")) @map("nome_chave") @db.VarChar(60)
-  sigla     String    @unique @db.Char(3)
+  sigla     String    @unique @db.VarChar(3)
   caixa     Decimal   @default(300.00) @db.Decimal(10, 2)
   formacao  formacao?
-  criado_em DateTime  @default(now()) @db.Timestamp(6)
+  criado_em DateTime  @default(now()) @db.Timestamptz(6)
 
   elenco                  jogadores[]
   contratos               contratos[]
@@ -114,15 +115,15 @@ model contratos {
   jogador_id     Int
   clube_id       Int
   valor_compra   Decimal           @db.Decimal(6, 2)
-  fidelidade_ate DateTime          @db.Timestamp(6)
+  fidelidade_ate DateTime          @db.Timestamptz(6)
   situacao       situacao_contrato
-  iniciado_em    DateTime          @default(now()) @db.Timestamp(6)
-  encerrado_em   DateTime?         @db.Timestamp(6)
+  iniciado_em    DateTime          @default(now()) @db.Timestamptz(6)
+  encerrado_em   DateTime?         @db.Timestamptz(6)
 
   jogador jogadores @relation(fields: [jogador_id], references: [id])
   clube   clubes    @relation(fields: [clube_id], references: [id])
 
-  @@index([jogador_id])
+  @@index([jogador_id, clube_id, situacao, iniciado_em(sort: Desc)])
   @@index([clube_id])
 }
 
@@ -137,12 +138,12 @@ model transacoes {
   multa          Decimal        @db.Decimal(6, 2)
   lucro          Decimal?       @db.Decimal(7, 2)
   variacao_caixa Decimal        @db.Decimal(8, 2)
-  criado_em      DateTime       @default(now()) @db.Timestamp(6)
+  criado_em      DateTime       @default(now()) @db.Timestamptz(6)
 
   clube   clubes    @relation(fields: [clube_id], references: [id])
   jogador jogadores @relation(fields: [jogador_id], references: [id])
 
-  @@index([clube_id])
+  @@index([clube_id, criado_em(sort: Desc), id(sort: Desc)])
   @@index([jogador_id])
 }
 
@@ -150,7 +151,7 @@ model transacoes {
 model escalacoes {
   clube_id   Int
   jogador_id Int      @unique
-  criado_em  DateTime @default(now()) @db.Timestamp(6)
+  criado_em  DateTime @default(now()) @db.Timestamptz(6)
 
   clube   clubes    @relation(fields: [clube_id], references: [id])
   jogador jogadores @relation(fields: [jogador_id], references: [id])
@@ -166,12 +167,13 @@ model partidas {
   gols_visitante     Int
   formacao_mandante  formacao
   formacao_visitante formacao
-  jogada_em          DateTime @default(now()) @db.Timestamp(6)
+  jogada_em          DateTime @default(now()) @db.Timestamptz(6)
 
   mandante  clubes           @relation("partida_mandante", fields: [mandante_id], references: [id])
   visitante clubes           @relation("partida_visitante", fields: [visitante_id], references: [id])
   duelos    duelos_partida[]
 
+  @@index([jogada_em(sort: Desc), id(sort: Desc)])
   @@index([mandante_id])
   @@index([visitante_id])
 }

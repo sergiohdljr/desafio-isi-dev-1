@@ -55,8 +55,8 @@ export class PrismaClubsRepository implements ClubsRepository {
   }
 
   async nameTaken(name: string): Promise<boolean> {
-    const club = await this.prisma.clubes.findFirst({
-      where: { nome: { equals: name, mode: 'insensitive' } },
+    const club = await this.prisma.clubes.findUnique({
+      where: { nomeChave: name.toLowerCase() },
       select: { id: true },
     });
     return club !== null;
@@ -80,7 +80,7 @@ function toClub(row: ClubRow): Club {
   return Club.reconstitute({
     id: row.id,
     name: row.nome,
-    acronym: row.sigla.trim(),
+    acronym: row.sigla,
     cash: Money.roundHalfAwayFromZero(row.caixa.toString()),
   });
 }
