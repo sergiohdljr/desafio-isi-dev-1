@@ -107,11 +107,14 @@ Frontend: React, Vite, React Router, TanStack Query, Axios, Tailwind, shadcn/Bas
 
 ## Decisões e premissas
 
+- Backend em clean architecture: cada módulo separa `domain`, `application` e `infra`. A regra de negócio não depende de HTTP nem de Prisma.
+- Frontend organizado por feature (`src/features/<feature>/`): páginas, componentes, API e utils ficam juntos no módulo da tela.
+- Dados do frontend com TanStack Query: a consulta busca, guarda em cache e repete em caso de falha; loading e erro ficam na query. Depois de criar, editar ou excluir, a mutation invalida as queries relacionadas.
 - No Compose, o frontend acessa a API pelo proxy do nginx (`/api` → API).
 - A aplicação inteira sobe no Docker Compose: Postgres, API e frontend. O Compose de e2e é separado e não entra no `docker compose up` da app.
-- Testes do backend: unitários (Vitest, com Prisma e HTTP mockados) e e2e (Supertest contra a API e o Postgres de teste).
-- Testes do frontend: unitários (Vitest), de componente (Testing Library) e e2e (Playwright contra a API no Compose de e2e). O e2e usa ambiente próprio (`docker-compose.e2e.yml`, portas `E2E_*` e `POSTGRES_TEST_*`) e não mexe no stack de desenvolvimento.
-- Cada requisição da API gera uma linha de log com método, caminho e status, pelo `Logger` do Nest. O filtro global também registra os erros. Não faz parte do roteiro funcional.
+- Backend: unitários (Vitest, com Prisma e HTTP mockados) e e2e (Supertest contra a API e o Postgres de teste).
+- Frontend: unitários (Vitest), de componente (Testing Library) e e2e (Playwright contra a API no Compose de e2e). O e2e usa ambiente próprio (`docker-compose.e2e.yml`, portas `E2E_*` e `POSTGRES_TEST_*`) e não mexe no stack de desenvolvimento.
+- Cada requisição da API gera uma linha de log com método, caminho e status, pelo `Logger` do Nest. O filtro global também registra os erros.
 - Documentação OpenAPI em `/docs`, com os endpoints da API.
 - ESLint e Prettier no frontend (`npm run lint` e `npm run format:check`).
 
