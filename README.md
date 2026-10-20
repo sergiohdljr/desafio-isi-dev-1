@@ -114,9 +114,15 @@ Frontend: React, Vite, React Router, TanStack Query, Axios, Tailwind, shadcn/Bas
 ## Decisões e premissas
 
 - Backend em clean architecture: cada módulo separa `domain`, `application` e `infra`. A regra de negócio não depende de HTTP nem de Prisma.
+- O valor de mercado não é coluna: é função `IMMUTABLE` no Postgres, calculada a cada consulta como a RN05 exige. Um índice de expressão sobre ela permite filtrar, ordenar e paginar sem persistir o valor nem manter invariante de sincronização.
+- As listagens filtram, ordenam e paginam no banco. Jogadores usa SQL cru, porque os critérios de valor e nome são chamadas de função que o `orderBy` declarativo do Prisma não alcança; os valores são sempre parâmetros e o `ORDER BY` vem do union type de ordenação, nunca de texto do cliente.
+- A busca por nome ignora maiúsculas e acentos, comparando os dois lados com `nome_dobrado`. Um índice GIN de trigrama acelera o trecho no meio do nome; a ordem alfabética segue o code point, sem depender do idioma do servidor.
+- Os índices espelham os predicados reais das consultas: compostos com a ordem do `ORDER BY` e parciais com o soft delete. Os de coluna única que viraram prefixo dos compostos foram removidos, então o custo de escrita não cresceu.
+- Datas são `timestamptz`. Como a resposta converte para horário de Brasília, guardar hora de parede fazia o resultado depender do fuso do processo.
+- Invariantes que só a aplicação garantia ganharam `CHECK` no banco, com os mesmos limites do schema de entrada. A caixa do clube é atualizada com `increment` atômico, e o valor resultante vem do próprio `UPDATE`.
 - Frontend organizado por feature (`src/features/<feature>/`): páginas, componentes, API e utils ficam juntos no módulo da tela.
 - Dados do frontend com TanStack Query: a consulta busca, guarda em cache e repete em caso de falha; loading e erro ficam na query. Depois de criar, editar ou excluir, a mutation invalida as queries relacionadas.
-- A listagem de jogadores faz uma única requisição por filtro. A resposta traz a página e os totais das abas (todos, livres e em clubes) no mesmo `meta`.
+- A listagem de jogadores faz uma única requisição por filtro. A resposta traz a página e os totais das abas (todos, livres e em clubes) no mesmo `meta` para evitar fazer multiplos requests, retornando além do contrato esperado o campo `meta.count`{ all: 1, free: 1, signed: 0 },.
 - No Compose, o frontend acessa a API pelo proxy do nginx (`/api` → API).
 - A aplicação inteira sobe no Docker Compose: Postgres, API e frontend. O Compose de e2e é separado e não entra no `docker compose up` da app.
 - Backend: unitários (Vitest, com Prisma e HTTP mockados) e e2e (Supertest contra a API e o Postgres de teste).
