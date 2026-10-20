@@ -11,5 +11,7 @@ export type SquadMember = {
 };
 
 export interface SquadReader {
-  list(): Promise<SquadMember[]>;
+  listByClub(clubId: number): Promise<SquadMember[]>;
+  /// Valor de elenco de cada clube que tem jogadores, agregado no banco.
+  squadValues(): Promise<Map<number, Money>>;
 }

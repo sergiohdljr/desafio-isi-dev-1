@@ -11,30 +11,26 @@ import {
 export class PrismaSquadReader implements SquadReader {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(): Promise<SquadMember[]> {
+  async listByClub(clubId: number): Promise<SquadMember[]> {
     const rows = await this.prisma.jogadores.findMany({
-      where: {
-        excluido_em: null,
-        clube_id: { not: null },
-      },
+      where: { clube_id: clubId, excluido_em: null },
       include: {
         contratos: {
-          where: { situacao: 'ATIVO' },
+          where: { clube_id: clubId, situacao: 'ATIVO' },
           orderBy: { iniciado_em: 'desc' },
+          take: 1,
         },
       },
     });
 
     return rows.flatMap((row) => {
-      const contract = row.contratos.find(
-        (item) => item.clube_id === row.clube_id,
-      );
-      if (!contract || row.clube_id === null) {
+      const [contract] = row.contratos;
+      if (!contract) {
         return [];
       }
       return [
         {
-          clubId: row.clube_id,
+          clubId,
           player: playerFromRow(row),
           purchaseValue: Money.roundHalfAwayFromZero(
             contract.valor_compra.toString(),
@@ -43,5 +39,21 @@ export class PrismaSquadReader implements SquadReader {
         },
       ];
     });
+  }
+
+  async squadValues(): Promise<Map<number, Money>> {
+    const rows = await this.prisma.$queryRaw<
+      { clube_id: number; total: string }[]
+    >`
+      SELECT clube_id,
+             sum(valor_mercado(valor_base, condicao, agilidade, idade))::text AS total
+      FROM jogadores
+      WHERE excluido_em IS NULL AND clube_id IS NOT NULL
+      GROUP BY clube_id
+    `;
+
+    return new Map(
+      rows.map((row) => [row.clube_id, Money.roundHalfAwayFromZero(row.total)]),
+    );
   }
 }

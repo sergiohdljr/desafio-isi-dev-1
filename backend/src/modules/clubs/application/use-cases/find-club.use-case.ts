@@ -55,9 +55,7 @@ export class FindClub implements FindClubPort {
     }
 
     const now = this.clock.now();
-    const members = (await this.squad.list()).filter(
-      (member) => member.clubId === club.id,
-    );
+    const members = await this.squad.listByClub(club.id);
     const players = arrangeSquad(
       members.map((member) => ({
         ...playerViewOf(member.player),
