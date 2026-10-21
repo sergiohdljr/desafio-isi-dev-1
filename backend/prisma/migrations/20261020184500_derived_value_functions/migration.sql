@@ -1,5 +1,3 @@
--- RN05: o valor de mercado é calculado a cada consulta. A função concentra a regra no banco
--- e o índice de expressão permite filtrar, ordenar e paginar sem persistir o valor.
 CREATE FUNCTION valor_mercado(
   valor_base numeric,
   condicao condicao,
@@ -39,8 +37,6 @@ CREATE INDEX "jogadores_valor_mercado_idx"
   ON "jogadores" (valor_mercado("valor_base", "condicao", "agilidade", "idade"), "id")
   WHERE "excluido_em" IS NULL;
 
--- A forma de dois argumentos de unaccent fixa o dicionário, o que torna a expressão
--- imutável e indexável; a de um argumento é STABLE e não pode entrar em índice.
 CREATE FUNCTION nome_dobrado(valor text) RETURNS text
 LANGUAGE sql
 IMMUTABLE
@@ -50,13 +46,10 @@ AS $$
   SELECT lower(public.unaccent('public.unaccent'::regdictionary, valor));
 $$;
 
--- Busca por substring não ancorada: só trigrama resolve.
 CREATE INDEX "jogadores_nome_trgm_idx"
   ON "jogadores" USING gin (nome_dobrado("nome") gin_trgm_ops)
   WHERE "excluido_em" IS NULL;
 
--- Ordenação alfabética, que o GIN não atende. COLLATE "C" ordena por code point,
--- igual ao compareNames do domínio, e não depende da locale do servidor.
 CREATE INDEX "jogadores_nome_ordem_idx"
   ON "jogadores" (nome_dobrado("nome") COLLATE "C", "id")
   WHERE "excluido_em" IS NULL;
