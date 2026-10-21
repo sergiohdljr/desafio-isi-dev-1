@@ -5,6 +5,7 @@ import { ClubsModule } from './modules/clubs/clubs.module.js';
 import { LeagueModule } from './modules/league/league.module.js';
 import { MarketModule } from './modules/market/market.module.js';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
+import { HealthController } from './common/http/health.controller.js';
 import { appConfig } from './config/app.config.js';
 import { databaseConfig } from './config/database.config.js';
 import { validateEnv } from './config/env.validation.js';
@@ -25,6 +26,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
     MarketModule,
     LeagueModule,
   ],
+  controllers: [HealthController],
   providers: [
     {
       provide: APP_FILTER,
