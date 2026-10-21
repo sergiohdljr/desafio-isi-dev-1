@@ -23,5 +23,3 @@ export const transactionQuerySchema = z
     types: query.type,
     playerId: query.player_id,
   }));
-
-export type TransactionQuery = z.infer<typeof transactionQuerySchema>;

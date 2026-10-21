@@ -265,4 +265,4 @@ function Sidebar({
   )
 }
 
-export { Sidebar, SidebarItem, SidebarClub }
+export { Sidebar }

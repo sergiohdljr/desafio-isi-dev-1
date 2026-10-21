@@ -171,4 +171,3 @@ function latestMatchLabel(
 }
 
 export { AppLayout, useAppChrome }
-export type { Crumb }

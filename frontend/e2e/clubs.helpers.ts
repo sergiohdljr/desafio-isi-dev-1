@@ -171,12 +171,6 @@ async function buyPlayer(
   return (await response.json()) as Purchase
 }
 
-async function sellPlayer(request: APIRequestContext, playerId: number) {
-  const response = await request.post(`/api/v1/players/${playerId}/sell`)
-  expect(response.ok(), await response.text()).toBeTruthy()
-  return (await response.json()) as Sale
-}
-
 async function deletePlayer(request: APIRequestContext, id: number) {
   let response = await request.delete(`/api/v1/players/${id}`)
   if (!response.ok() && response.status() !== 204) {
@@ -293,11 +287,10 @@ async function openClubSection(page: Page, clubId: number, section: "Elenco" | "
   await page.getByRole("tab", { name: section }).click()
 }
 
-export type { ClubDetail, ClubRow, CreatedPlayer, MatchDetail, Purchase, Sale, StandingRow, TransactionList }
+export type { ClubDetail, MatchDetail, Sale, StandingRow, TransactionList }
 export {
   buyPlayer,
   chooseSort,
-  clubIdentity,
   createClub,
   createClubRecord,
   createPlayer,
@@ -305,9 +298,7 @@ export {
   expectTableOrder,
   money,
   openClubSection,
-  saveLineup,
   seedMatchReadyClub,
   seedSquad,
-  sellPlayer,
   uniqueToken,
 }

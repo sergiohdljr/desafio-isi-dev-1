@@ -57,4 +57,4 @@ function Alert({
   )
 }
 
-export { Alert, alertVariants }
+export { Alert }

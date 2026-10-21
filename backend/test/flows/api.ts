@@ -4,7 +4,7 @@ import { PrismaService } from '../../src/prisma/prisma.service.js';
 
 const loyaltyUntil = '2027-04-01T15:00-03:00';
 
-export const pricedMeia = {
+const pricedMeia = {
   name: 'Meia Lua',
   position: 'MEI' as const,
   agility: 50,

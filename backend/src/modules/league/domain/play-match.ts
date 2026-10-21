@@ -8,7 +8,7 @@ import { type Formation, lineupFits } from './formation.js';
 
 export type MatchResult = 'MANDANTE' | 'VISITANTE' | 'EMPATE';
 
-export type DuelAttribute = 'shooting' | 'passing' | 'dribbling' | 'defending';
+type DuelAttribute = 'shooting' | 'passing' | 'dribbling' | 'defending';
 
 export type FieldCondition = 'APTO' | 'MAL_CONDICIONADO';
 
@@ -30,7 +30,7 @@ export type SideFacts = {
   players: SidePlayer[];
 };
 
-export type DuelSide = {
+type DuelSide = {
   playerId: number;
   playerName: string;
   position: Position;
@@ -83,7 +83,7 @@ export function duelValue(raw: number, condition: FieldCondition): number {
   return Math.floor((raw * 85 + 50) / 100);
 }
 
-export function attackAttribute(
+function attackAttribute(
   position: Position,
 ): Exclude<DuelAttribute, 'defending'> {
   if (position === 'ATA') {

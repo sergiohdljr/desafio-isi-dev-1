@@ -5,7 +5,7 @@ import {
   type ContractStatus,
 } from '../../domain/sale-settlement.js';
 
-export type SalePlayer = {
+type SalePlayer = {
   id: number;
   name: string;
   clubId: number | null;

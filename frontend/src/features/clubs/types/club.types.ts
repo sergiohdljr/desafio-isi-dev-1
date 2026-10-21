@@ -41,7 +41,6 @@ type ClubDetail = Club & {
 
 export type {
   Club,
-  ClubContract,
   ClubDetail,
   ClubDraft,
   ClubDraftIssue,

@@ -32,4 +32,4 @@ function Avatar({
   )
 }
 
-export { Avatar, avatarVariants }
+export { Avatar }

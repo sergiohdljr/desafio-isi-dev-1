@@ -12,7 +12,7 @@ const money = z.number();
 const duelCondition = z.enum(['APTO', 'MAL_CONDICIONADO']);
 const duelAttribute = z.enum(['shooting', 'passing', 'dribbling', 'defending']);
 
-export const errorBodySchema = z.object({
+const errorBodySchema = z.object({
   message: z.string().min(1),
 });
 
@@ -74,7 +74,7 @@ export const clubDetailResponseSchema = clubResponseSchema.extend({
   ),
 });
 
-export const clubListResponseSchema = z.array(clubResponseSchema);
+const clubListResponseSchema = z.array(clubResponseSchema);
 
 const purchaseContract = z.object({
   purchase_value: money,
@@ -185,7 +185,7 @@ export const matchResponseSchema = matchSummaryResponseSchema.extend({
   ),
 });
 
-export const matchListResponseSchema = z.array(matchSummaryResponseSchema);
+const matchListResponseSchema = z.array(matchSummaryResponseSchema);
 
 export const standingResponseSchema = z.object({
   position: z.int(),
@@ -201,7 +201,7 @@ export const standingResponseSchema = z.object({
   points: z.int(),
 });
 
-export const standingListResponseSchema = z.array(standingResponseSchema);
+const standingListResponseSchema = z.array(standingResponseSchema);
 
 export const responseSchemas = {
   Error: errorBodySchema,

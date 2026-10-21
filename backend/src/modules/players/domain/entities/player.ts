@@ -6,14 +6,11 @@ import {
   overallOf,
 } from '../services/player-valuation.js';
 import {
-  CONDITIONS,
-  POSITIONS,
   type Condition,
   type PlayerSkills,
   type Position,
 } from '../types/player-types.js';
 
-export { CONDITIONS, POSITIONS };
 export type { Condition, PlayerSkills, Position };
 
 export type RegisterPlayer = PlayerSkills & {

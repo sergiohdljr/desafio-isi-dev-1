@@ -12,7 +12,6 @@ datasource db {
   provider = "postgresql"
 }
 
-/// GOL, ZAG, LAT, MEI ou ATA.
 enum posicao {
   GOL
   ZAG
@@ -21,14 +20,12 @@ enum posicao {
   ATA
 }
 
-/// APTO, MAL_CONDICIONADO ou DOENTE.
 enum condicao {
   APTO
   MAL_CONDICIONADO
   DOENTE
 }
 
-/// Condição registrada no duelo: doente não entra em campo.
 enum condicao_duelo {
   APTO
   MAL_CONDICIONADO
@@ -45,7 +42,6 @@ enum tipo_transacao {
   VENDA
 }
 
-/// Valores persistidos: 3-1, 2-2, 2-1-1 e 1-2-1.
 enum formacao {
   tres_um    @map("3-1")
   dois_dois  @map("2-2")
@@ -86,15 +82,11 @@ model jogadores {
   escalacao            escalacoes?
   duelos_como_atacante duelos_partida[] @relation("duelo_atacante")
   duelos_como_defensor duelos_partida[] @relation("duelo_defensor")
-
-  /// O índice de clube_id é parcial (WHERE excluido_em IS NULL) e vive só na migration,
-  /// junto dos índices de expressão de valor de mercado e nome dobrado.
 }
 
 model clubes {
   id        Int       @id @default(autoincrement())
   nome      String    @unique @db.VarChar(60)
-  /// Minúsculas do nome, gerado no banco. Único: maiúsculas não coexistem; acento continua diferente.
   nomeChave String    @unique @default(dbgenerated("lower(nome)")) @map("nome_chave") @db.VarChar(60)
   sigla     String    @unique @db.VarChar(3)
   caixa     Decimal   @default(300.00) @db.Decimal(10, 2)
@@ -147,7 +139,6 @@ model transacoes {
   @@index([jogador_id])
 }
 
-/// Um jogador está em no máximo uma escalação.
 model escalacoes {
   clube_id   Int
   jogador_id Int      @unique

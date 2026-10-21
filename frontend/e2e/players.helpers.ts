@@ -15,11 +15,6 @@ type PlayerDraft = {
   potential?: number
 }
 
-function uniqueToken() {
-  const stamp = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`
-  return `Aaa${stamp.replace(/\d/g, "a")}`
-}
-
 async function deletePlayer(request: APIRequestContext, id: number) {
   const response = await request.delete(`/api/v1/players/${id}`)
   expect(response.ok() || response.status() === 204, await response.text()).toBeTruthy()
@@ -66,4 +61,4 @@ async function fillAndSave(page: Page, draft: PlayerDraft) {
   await expect(page.getByRole("dialog", { name: "Novo jogador" })).toHaveCount(0)
 }
 
-export { fillAndSave, openPlayers, playerRow, removeByName, searchPlayers, uniqueToken }
+export { fillAndSave, openPlayers, playerRow, removeByName, searchPlayers }

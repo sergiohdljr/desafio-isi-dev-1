@@ -41,4 +41,4 @@ type Match = MatchSummary & {
   duels: MatchDuel[]
 }
 
-export type { DuelAttribute, DuelSide, Match, MatchDuel, MatchResult, MatchSide, MatchSummary }
+export type { DuelSide, Match, MatchDuel, MatchResult, MatchSummary }

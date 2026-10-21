@@ -25,4 +25,4 @@ function Input({
   return <InputPrimitive data-slot="input" className={cn(inputVariants({ fieldSize, className }))} {...props} />
 }
 
-export { Input, inputVariants }
+export { Input }

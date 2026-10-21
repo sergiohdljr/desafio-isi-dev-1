@@ -32,4 +32,4 @@ function Escudo({
   )
 }
 
-export { Escudo, escudoVariants }
+export { Escudo }

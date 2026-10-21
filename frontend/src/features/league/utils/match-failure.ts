@@ -13,5 +13,4 @@ function matchFailureKind(failure: string | null): MatchFailureKind | null {
   return "refused"
 }
 
-export type { MatchFailureKind }
 export { hasDifferentClubs, matchFailureKind }

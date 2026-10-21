@@ -23,7 +23,7 @@ import {
 
 export const FIND_CLUB = Symbol('FIND_CLUB');
 
-export type SquadPlayerView = PlayerView & {
+type SquadPlayerView = PlayerView & {
   contract: {
     purchaseValue: number;
     loyaltyUntil: Date;
