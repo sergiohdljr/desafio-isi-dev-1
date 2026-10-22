@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../app.module.js';
+import { loadHostEnv } from '../config/load-host-env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   CREATE_CLUB,
@@ -46,6 +46,8 @@ const FIRST_NAMES = ['Caio', 'Davi', 'Enzo', 'Iago', 'Luan', 'Otto'];
 const LAST_NAMES = ['Melo', 'Lima', 'Nunes', 'Pires', 'Rocha', 'Souza'];
 
 async function resetDemo() {
+  loadHostEnv();
+  const { AppModule } = await import('../app.module.js');
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['error', 'warn', 'log'],
   });

@@ -43,10 +43,10 @@ docker compose up -d postgres
 docker compose up --build api
 ```
 
-Dados de exemplo são opcionais e ficam fora desses passos. Com Node.js 22 no host e a API parada:
+Limpar os dados (jogadores, clubes, transações e partidas) e manter o schema. Com Node.js 22 no host e a API parada:
 
 ```bash
-cd backend && npm ci && npm run db:reset
+cd backend && npm ci && npm run db:clean
 ```
 
 ## Instalação e execução

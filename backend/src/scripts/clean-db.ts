@@ -1,8 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../app.module.js';
+import { loadHostEnv } from '../config/load-host-env.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 async function cleanDatabase() {
+  loadHostEnv();
+  const { AppModule } = await import('../app.module.js');
   const app = await NestFactory.createApplicationContext(AppModule, {
     logger: ['error', 'warn'],
   });
