@@ -30,9 +30,7 @@ describe("ConditionDialog", () => {
   it("avisa quando titular passa a Doente", async () => {
     const user = userEvent.setup()
     const player = makePlayer({ name: "Davi Melo", condition: "APTO" })
-    render(
-      <ConditionDialog player={player} starterClub="Clube Aurora" onClose={vi.fn()} onSubmit={vi.fn()} />,
-    )
+    render(<ConditionDialog player={player} starterClub="Clube Aurora" onClose={vi.fn()} onSubmit={vi.fn()} />)
     const dialog = screen.getByRole("dialog", { name: "Alterar condição física" })
 
     await user.click(within(dialog).getByRole("radio", { name: /Doente/ }))

@@ -67,9 +67,7 @@ describe("LineupBoard", () => {
     const squad = squadFor211().slice(0, 2)
     renderWithProviders(<LineupBoard clubId={clubId} clubName={clubName} squad={squad} />)
 
-    expect(
-      await screen.findByText(`Escalação incompleta: o ${clubName} não pode jogar partidas`),
-    ).toBeInTheDocument()
+    expect(await screen.findByText(`Escalação incompleta: o ${clubName} não pode jogar partidas`)).toBeInTheDocument()
     expect(screen.getByText("Incompleta")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /Salvar escalação/i })).toBeDisabled()
   })

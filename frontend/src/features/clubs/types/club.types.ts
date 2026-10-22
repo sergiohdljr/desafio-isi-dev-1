@@ -39,13 +39,4 @@ type ClubDetail = Club & {
   players: SquadPlayer[]
 }
 
-export type {
-  Club,
-  ClubDetail,
-  ClubDraft,
-  ClubDraftIssue,
-  ClubField,
-  ClubSort,
-  CreateClubInput,
-  SquadPlayer,
-}
+export type { Club, ClubDetail, ClubDraft, ClubDraftIssue, ClubField, ClubSort, CreateClubInput, SquadPlayer }

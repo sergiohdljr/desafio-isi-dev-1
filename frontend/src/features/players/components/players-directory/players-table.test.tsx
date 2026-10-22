@@ -17,15 +17,7 @@ describe("PlayersTable", () => {
     const user = userEvent.setup()
     const onBuy = vi.fn()
     const player = makePlayer({ club_id: null, name: "Livre Silva" })
-    render(
-      <PlayersTable
-        players={[player]}
-        clubs={[]}
-        pending={false}
-        {...handlers}
-        onBuy={onBuy}
-      />,
-    )
+    render(<PlayersTable players={[player]} clubs={[]} pending={false} {...handlers} onBuy={onBuy} />)
 
     expect(screen.getByText("Livre")).toBeInTheDocument()
     expect(screen.getByRole("columnheader", { name: "Jogador" })).toBeInTheDocument()
@@ -37,9 +29,7 @@ describe("PlayersTable", () => {
   it("mostra sigla e nome do clube quando contratado", () => {
     const club = makeClub({ id: 7, name: "Clube Norte", acronym: "NOR" })
     const player = makePlayer({ club_id: 7, name: "Contratado Souza" })
-    render(
-      <PlayersTable players={[player]} clubs={[club]} pending={false} {...handlers} />,
-    )
+    render(<PlayersTable players={[player]} clubs={[club]} pending={false} {...handlers} />)
 
     expect(screen.getByText("NOR")).toBeInTheDocument()
     expect(screen.getByText("Clube Norte")).toBeInTheDocument()
@@ -47,9 +37,7 @@ describe("PlayersTable", () => {
   })
 
   it("anuncia carregamento quando pending", () => {
-    render(
-      <PlayersTable players={[]} clubs={[]} pending {...handlers} />,
-    )
+    render(<PlayersTable players={[]} clubs={[]} pending {...handlers} />)
     expect(screen.getByText("Carregando jogadores…")).toBeInTheDocument()
   })
 })

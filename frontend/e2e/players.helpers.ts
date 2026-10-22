@@ -44,7 +44,7 @@ function playerRow(page: Page, name: string) {
   return page.getByRole("row").filter({ hasText: name })
 }
 
-async function fillAndSave(page: Page, draft: PlayerDraft) {
+async function fillPlayerForm(page: Page, draft: PlayerDraft) {
   await page.getByRole("button", { name: "Novo jogador" }).first().click()
   const dialog = page.getByRole("dialog", { name: "Novo jogador" })
   await dialog.getByLabel("Nome").fill(draft.name)
@@ -56,9 +56,14 @@ async function fillAndSave(page: Page, draft: PlayerDraft) {
     await dialog.getByLabel(label, { exact: true }).fill(skill)
   }
   await dialog.getByLabel("Potencial").fill(String(draft.potential ?? 80))
+  return dialog
+}
+
+async function fillAndSave(page: Page, draft: PlayerDraft) {
+  const dialog = await fillPlayerForm(page, draft)
   await dialog.getByRole("button", { name: "Salvar jogador" }).click()
   await expect(page.getByText("Jogador cadastrado")).toBeVisible()
   await expect(page.getByRole("dialog", { name: "Novo jogador" })).toHaveCount(0)
 }
 
-export { fillAndSave, openPlayers, playerRow, removeByName, searchPlayers }
+export { fillAndSave, fillPlayerForm, openPlayers, playerRow, removeByName, searchPlayers }

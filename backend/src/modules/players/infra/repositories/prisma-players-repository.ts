@@ -72,7 +72,9 @@ export class PrismaPlayersRepository implements PlayersRepository {
         ORDER BY ${orderOf(query.sorts)}
         LIMIT ${query.limit} OFFSET ${(query.page - 1) * query.limit}
       `,
-      totals: await tx.$queryRaw<{ total: number; free: number; signed: number }[]>`
+      totals: await tx.$queryRaw<
+        { total: number; free: number; signed: number }[]
+      >`
         SELECT count(*)::int AS total,
                count(*) FILTER (WHERE clube_id IS NULL)::int AS free,
                count(*) FILTER (WHERE clube_id IS NOT NULL)::int AS signed
@@ -83,7 +85,11 @@ export class PrismaPlayersRepository implements PlayersRepository {
 
     const total = totals[0] ?? { total: 0, free: 0, signed: 0 };
     const totalItems =
-      query.free === true ? total.free : query.free === false ? total.signed : total.total;
+      query.free === true
+        ? total.free
+        : query.free === false
+          ? total.signed
+          : total.total;
     return {
       data: rows.map(playerFromRow),
       meta: {

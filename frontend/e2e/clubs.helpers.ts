@@ -291,6 +291,7 @@ export type { ClubDetail, MatchDetail, Sale, StandingRow, TransactionList }
 export {
   buyPlayer,
   chooseSort,
+  clubIdentity,
   createClub,
   createClubRecord,
   createPlayer,

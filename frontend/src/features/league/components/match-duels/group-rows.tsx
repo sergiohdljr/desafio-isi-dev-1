@@ -61,7 +61,10 @@ function GroupRows({ group }: { group: MatchDuelGroup }) {
 function PlayerCell({ player, caption }: { player: DuelSide; caption: string }) {
   return (
     <span className="flex items-center gap-2.5">
-      <Avatar initials={initials(player.player_name)} className={AVATAR_TONES[player.player_id % AVATAR_TONES.length]} />
+      <Avatar
+        initials={initials(player.player_name)}
+        className={AVATAR_TONES[player.player_id % AVATAR_TONES.length]}
+      />
       <span className="min-w-0">
         <span className="block text-body-sm-medium">{player.player_name}</span>
         <span className="block text-caption-xs text-muted-foreground">{caption}</span>

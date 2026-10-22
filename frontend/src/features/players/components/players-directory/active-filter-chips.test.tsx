@@ -5,9 +5,7 @@ import { ActiveFilterChips } from "@/features/players/components/players-directo
 
 describe("ActiveFilterChips", () => {
   it("não renderiza quando não há filtros", () => {
-    const { container } = render(
-      <ActiveFilterChips filters={[]} onClearAll={vi.fn()} onClearOne={vi.fn()} />,
-    )
+    const { container } = render(<ActiveFilterChips filters={[]} onClearAll={vi.fn()} onClearOne={vi.fn()} />)
     expect(container).toBeEmptyDOMElement()
   })
 
@@ -16,11 +14,7 @@ describe("ActiveFilterChips", () => {
     const clear = vi.fn()
     const onClearOne = vi.fn((fn: () => void) => fn())
     render(
-      <ActiveFilterChips
-        filters={[{ id: "pos", label: "ATA", clear }]}
-        onClearAll={vi.fn()}
-        onClearOne={onClearOne}
-      />,
+      <ActiveFilterChips filters={[{ id: "pos", label: "ATA", clear }]} onClearAll={vi.fn()} onClearOne={onClearOne} />,
     )
 
     await user.click(screen.getByRole("button", { name: "Remover filtro ATA" }))

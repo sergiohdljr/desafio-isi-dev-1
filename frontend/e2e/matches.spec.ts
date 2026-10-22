@@ -91,7 +91,12 @@ test("[F14] histórico de partidas com filtro e classificação na ordem do GET"
     await expect(history.getByRole("columnheader", { name: "Placar" })).toBeVisible()
     await expect(history.getByRole("columnheader", { name: "Visitante" })).toBeVisible()
 
-    const matchRow = history.getByRole("row").filter({ hasText: home.club.name }).filter({ hasText: away.club.name })
+    // Clubes são reaproveitados entre testes: o mesmo par pode ter partidas antigas.
+    const matchRow = history
+      .getByRole("row")
+      .filter({ hasText: home.club.name })
+      .filter({ hasText: away.club.name })
+      .first()
     await expect(matchRow).toContainText(`${match.home.goals} × ${match.away.goals}`)
 
     const filtered = page.waitForResponse(

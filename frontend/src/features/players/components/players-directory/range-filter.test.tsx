@@ -38,14 +38,7 @@ describe("RangeFilter", () => {
     const user = userEvent.setup()
     render(
       <div>
-        <RangeFilter
-          label="Valor"
-          icon={<span>v</span>}
-          min=""
-          max=""
-          onMinChange={vi.fn()}
-          onMaxChange={vi.fn()}
-        />
+        <RangeFilter label="Valor" icon={<span>v</span>} min="" max="" onMinChange={vi.fn()} onMaxChange={vi.fn()} />
         <button type="button">fora</button>
       </div>,
     )

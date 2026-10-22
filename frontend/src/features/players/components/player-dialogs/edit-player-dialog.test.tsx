@@ -28,9 +28,7 @@ describe("EditPlayerDialog", () => {
     const dialog = screen.getByRole("dialog", { name: "Editar jogador" })
 
     expect(within(dialog).getByRole("radio", { name: /MEI|Meio-campo/ })).toBeDisabled()
-    expect(
-      within(dialog).getByText(/Jogador com clube não muda de posição/i),
-    ).toBeInTheDocument()
+    expect(within(dialog).getByText(/Jogador com clube não muda de posição/i)).toBeInTheDocument()
   })
 
   it("salva alterações válidas", async () => {

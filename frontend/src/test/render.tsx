@@ -19,7 +19,11 @@ function createTestQueryClient() {
 
 function renderWithProviders(
   ui: ReactElement,
-  { route = "/", queryClient = createTestQueryClient(), ...options }: ProvidersOptions & Omit<RenderOptions, "wrapper"> = {},
+  {
+    route = "/",
+    queryClient = createTestQueryClient(),
+    ...options
+  }: ProvidersOptions & Omit<RenderOptions, "wrapper"> = {},
 ) {
   function Wrapper({ children }: { children: ReactNode }) {
     return (

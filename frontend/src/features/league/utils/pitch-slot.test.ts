@@ -58,7 +58,11 @@ describe("placeOnPitch", () => {
   })
 
   it("espelha o visitante e leva o ataque das formações sem meio até a última linha", () => {
-    const attack = placeOnPitch("3-1", lineup.filter((item) => item.position !== "MEI"), "away")
+    const attack = placeOnPitch(
+      "3-1",
+      lineup.filter((item) => item.position !== "MEI"),
+      "away",
+    )
     expect(attack.map((mark) => [mark.player.position, mark.left])).toEqual([
       ["GOL", "93.5%"],
       ["ZAG", "82.1%"],

@@ -12,9 +12,7 @@ describe("FilterSelect", () => {
   it("escolhe uma opção e chama onChange", async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    render(
-      <FilterSelect label="Posição" icon={<span>p</span>} value="" options={OPTIONS} onChange={onChange} />,
-    )
+    render(<FilterSelect label="Posição" icon={<span>p</span>} value="" options={OPTIONS} onChange={onChange} />)
 
     await user.click(screen.getByRole("combobox", { name: "Posição" }))
     await user.click(await screen.findByRole("option", { name: "Atacante" }))
@@ -24,9 +22,7 @@ describe("FilterSelect", () => {
   it("mapeia a opção all para string vazia", async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    render(
-      <FilterSelect label="Condição" icon={<span>c</span>} value="ATA" options={OPTIONS} onChange={onChange} />,
-    )
+    render(<FilterSelect label="Condição" icon={<span>c</span>} value="ATA" options={OPTIONS} onChange={onChange} />)
 
     await user.click(screen.getByRole("combobox", { name: "Condição" }))
     await user.click(await screen.findByRole("option", { name: "Condição" }))
@@ -36,16 +32,7 @@ describe("FilterSelect", () => {
   it("não abre quando disabled", async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()
-    render(
-      <FilterSelect
-        label="Clube"
-        icon={<span>c</span>}
-        value=""
-        options={OPTIONS}
-        disabled
-        onChange={onChange}
-      />,
-    )
+    render(<FilterSelect label="Clube" icon={<span>c</span>} value="" options={OPTIONS} disabled onChange={onChange} />)
 
     const trigger = screen.getByRole("combobox", { name: "Clube" })
     expect(trigger).toBeDisabled()

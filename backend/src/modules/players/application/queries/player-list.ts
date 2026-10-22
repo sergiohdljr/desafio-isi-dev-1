@@ -26,7 +26,9 @@ export function arrangePlayers(
   players: Player[],
   query: PlayerListQuery,
 ): PlayerListPage {
-  const shared = players.filter((player) => matches(player, { ...query, free: undefined }));
+  const shared = players.filter((player) =>
+    matches(player, { ...query, free: undefined }),
+  );
   const free = shared.filter((player) => player.clubId === null).length;
   const signed = shared.length - free;
   const matched = (

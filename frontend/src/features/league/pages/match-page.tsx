@@ -18,8 +18,8 @@ function MatchPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const params = useParams()
-  const [playedNotice, setPlayedNotice] = useState(
-    () => Boolean((location.state as { played?: boolean } | null)?.played),
+  const [playedNotice, setPlayedNotice] = useState(() =>
+    Boolean((location.state as { played?: boolean } | null)?.played),
   )
   const id = Number(params.id)
   const { clubs } = useClubs("name")

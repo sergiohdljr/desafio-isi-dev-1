@@ -60,9 +60,7 @@ describe("PlayersDialogHost", () => {
     await user.click(within(dialog).getByRole("button", { name: "Salvar jogador" }))
 
     expect(createPlayer).toHaveBeenCalled()
-    expect(onFinish).toHaveBeenCalledWith(
-      expect.objectContaining({ variant: "success", title: "Jogador cadastrado" }),
-    )
+    expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ variant: "success", title: "Jogador cadastrado" }))
   })
 
   it("em details, Editar chama onOpen com edit", async () => {

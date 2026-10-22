@@ -74,7 +74,7 @@ describe("NewMatchDialog", () => {
     await user.click(within(dialog).getByRole("button", { name: /Jogar partida/i }))
 
     expect(await within(dialog).findByText("Não foi possível jogar a partida")).toBeInTheDocument()
-    expect(within(dialog).getByText("Escalação incompleta: o Clube Casa não tem os 5 titulares.")).toBeInTheDocument()
+    expect(within(dialog).getByText("Escalação incompleta")).toBeInTheDocument()
     expect(within(dialog).getByRole("combobox", { name: "Mandante" })).toHaveAttribute("aria-invalid", "true")
     expect(within(dialog).getByRole("combobox", { name: "Visitante" })).not.toHaveAttribute("aria-invalid")
   })
@@ -92,9 +92,7 @@ describe("NewMatchDialog", () => {
     await user.click(await screen.findByRole("option", { name: /Clube Fora/ }))
     await user.click(within(dialog).getByRole("button", { name: /Jogar partida/i }))
 
-    expect(
-      await within(dialog).findByText("Escalação incompleta: o Clube Casa e o Clube Fora não têm os 5 titulares."),
-    ).toBeInTheDocument()
+    expect(await within(dialog).findByText("Escalação incompleta")).toBeInTheDocument()
     expect(within(dialog).getByRole("combobox", { name: "Mandante" })).toHaveAttribute("aria-invalid", "true")
     expect(within(dialog).getByRole("combobox", { name: "Visitante" })).toHaveAttribute("aria-invalid", "true")
   })

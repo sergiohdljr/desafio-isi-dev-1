@@ -1,18 +1,8 @@
-import type { PlayerSort, Position } from "@/features/players/types/player.types"
+import type { PlayerSort } from "@/features/players/types/player.types"
 
 const PAGE_SIZE = 10
 const AGE_MIN = 16
 const AGE_MAX = 45
-const MARKET_VALUE_MIN = 0
-const MARKET_VALUE_MAX = 550
-
-const POSITION_ORDER: Record<Position, number> = {
-  GOL: 0,
-  ZAG: 1,
-  LAT: 2,
-  MEI: 3,
-  ATA: 4,
-}
 
 const SORTS: { value: PlayerSort; label: string }[] = [
   { value: "name", label: "nome" },
@@ -36,4 +26,4 @@ const money = new Intl.NumberFormat("pt-BR", {
   maximumFractionDigits: 2,
 })
 
-export { AGE_MAX, AGE_MIN, AVATAR_TONES, MARKET_VALUE_MAX, MARKET_VALUE_MIN, PAGE_SIZE, POSITION_ORDER, SORTS, money }
+export { AGE_MAX, AGE_MIN, AVATAR_TONES, PAGE_SIZE, SORTS, money }

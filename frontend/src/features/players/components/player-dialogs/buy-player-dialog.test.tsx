@@ -46,9 +46,7 @@ describe("BuyPlayerDialog", () => {
     const user = userEvent.setup()
     const club = makeClub({ id: 10, name: "Clube Aurora" })
     const onSubmit = vi.fn().mockResolvedValue(purchaseFixture(club.id))
-    renderWithProviders(
-      <BuyPlayerDialog player={makePlayer()} clubs={[club]} onClose={vi.fn()} onSubmit={onSubmit} />,
-    )
+    renderWithProviders(<BuyPlayerDialog player={makePlayer()} clubs={[club]} onClose={vi.fn()} onSubmit={onSubmit} />)
     const dialog = screen.getByRole("dialog", { name: "Comprar jogador" })
 
     await user.click(within(dialog).getByRole("combobox"))
@@ -65,9 +63,7 @@ describe("BuyPlayerDialog", () => {
     const user = userEvent.setup()
     const club = makeClub()
     const onSubmit = vi.fn().mockRejectedValue(new ApiError("falha", 0))
-    renderWithProviders(
-      <BuyPlayerDialog player={makePlayer()} clubs={[club]} onClose={vi.fn()} onSubmit={onSubmit} />,
-    )
+    renderWithProviders(<BuyPlayerDialog player={makePlayer()} clubs={[club]} onClose={vi.fn()} onSubmit={onSubmit} />)
     const dialog = screen.getByRole("dialog", { name: "Comprar jogador" })
 
     await user.click(within(dialog).getByRole("combobox"))
