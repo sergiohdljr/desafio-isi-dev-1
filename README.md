@@ -5,31 +5,61 @@ API em NestJS e frontend em React. Detalhes por pasta: [backend/README.md](backe
 | Serviço | URL |
 | --- | --- |
 | Frontend | http://localhost:5173 |
-| API | http://localhost:3000 (`/api/v1`) |
+| Origem da API | http://localhost:3000 |
 | Docs da API | http://localhost:3000/docs |
 
-## Como rodar (Docker Compose)
+A origem da API é `http://localhost:3000`. O prefixo `/api/v1` não faz parte dessa origem.
 
-Forma recomendada. Sobe Postgres, API e frontend. A API aplica as migrations ao iniciar.
+## Pré-requisitos
 
-**Pré-requisito:** Docker com Compose (Ubuntu 24.04). Imagem do banco: `postgres:17-alpine`.
+A banca instala só os runtimes e o gerenciador oficial. O banco e o restante sobem pelos comandos da seção de execução.
+
+| Ferramenta | Versão |
+| --- | --- |
+| Ubuntu | 24.04 |
+| Node.js | 22 (com npm, que acompanha essa versão) |
+| Docker Engine | com o plugin Docker Compose v2 |
+| PostgreSQL | 17 (imagem pública `postgres:17-alpine`, iniciada pelo Compose) |
+
+Arquivos de trava versionados: `backend/package-lock.json` e `frontend/package-lock.json`. A instalação usa `npm ci` a partir desses arquivos e registros públicos do npm. As imagens `node:22-alpine`, `nginx:alpine` e `postgres:17-alpine` são públicas.
+
+## Banco de dados
+
+O Compose cria o banco vazio (`POSTGRES_DB` do `.env`) e a API aplica as migrations em `backend/prisma/migrations` ao iniciar (`prisma migrate deploy`). O schema fica sem jogadores, clubes, transações nem partidas.
+
+Criar o banco:
+
+```bash
+cp .env.example .env
+docker compose up -d postgres
+docker compose up --build api
+```
+
+Recriar do zero (apaga o volume e cria de novo, só com o schema):
+
+```bash
+docker compose down -v
+docker compose up -d postgres
+docker compose up --build api
+```
+
+Dados de exemplo são opcionais e ficam fora desses passos. Com Node.js 22 no host e a API parada:
+
+```bash
+cd backend && npm ci && npm run db:reset
+```
+
+## Instalação e execução
+
+Ubuntu 24.04, na raiz deste repositório. Sobe PostgreSQL 17, a API e o frontend a partir do código daqui.
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-| Serviço | Porta |
-| --- | --- |
-| Frontend | 5173 |
-| API | 3000 (`API_PORT`) |
-| Postgres | 5432 (`POSTGRES_PORT`) |
-
-O banco nasce vazio. Dados de exemplo (opcional), com a API parada e Node no host:
-
-```bash
-cd backend && npm ci && npm run db:reset
-```
+- Origem da API: http://localhost:3000
+- Frontend: http://localhost:5173
 
 Parar:
 
@@ -39,77 +69,143 @@ docker compose down
 
 ## Variáveis de ambiente
 
-Só o `.env` na raiz é necessário para o Compose da app. Modelo: [.env.example](.env.example).
+Modelo versionado: [.env.example](.env.example). Copie para `.env` na raiz. O Compose da aplicação lê só esse arquivo.
 
 | Variável | Função |
 | --- | --- |
-| `POSTGRES_USER` / `POSTGRES_PASSWORD` | Credenciais do Postgres |
+| `POSTGRES_USER` | Usuário do Postgres |
+| `POSTGRES_PASSWORD` | Senha do Postgres |
 | `POSTGRES_DB` | Nome do banco da aplicação |
 | `POSTGRES_PORT` | Porta do Postgres no host |
 | `API_PORT` | Porta da API no host |
-| `FRONTEND_ORIGIN` | Origem liberada no CORS (use a URL do frontend) |
+| `FRONTEND_ORIGIN` | Origem liberada no CORS (a URL do frontend) |
 
-O e2e usa [.env.test](.env.test) (modelo: [.env.test.example](.env.test.example)), com `POSTGRES_*` de teste, `POSTGRES_TEST_*` e `E2E_*`. O `docker compose up` da aplicação não lê esse arquivo.
-
-## Desenvolvimento na máquina (opcional)
-
-Quando for alterar código com hot reload. Exige Node.js 22 e npm.
-
-```bash
-cp .env.example .env
-cp backend/.env.example backend/.env   # opcional: só PORT da API no host
-docker compose up -d postgres
-
-cd backend && npm ci && npx prisma migrate deploy && npm run start:dev
-# outro terminal
-cd frontend && npm ci && npm run dev
-```
-
-A API monta `DATABASE_URL` a partir do `.env` da raiz. O Vite encaminha `/api` para `http://127.0.0.1:3000`.
+O `backend/.env.example` só define `PORT` da API quando ela roda no host. O e2e usa [.env.test](.env.test) (modelo: [.env.test.example](.env.test.example)). O `docker compose up` da aplicação não lê esse arquivo.
 
 ## Testes
 
-Stack isolado em `docker-compose.e2e.yml` (não sobe com o Compose da app).
+O e2e usa um Compose próprio (`docker-compose.e2e.yml`) e o `.env.test` da raiz. Ele não sobe com o `docker compose up` da aplicação e não usa as portas 5432, 3000 e 5173.
+
+Na raiz:
 
 ```bash
-# na raiz — sobe/derruba o Compose e2e
 npm run compose:e2e
 npm run compose:e2e:build
 npm run compose:e2e:down
-
-# frontend (Playwright; :up reconstrói a imagem da API)
-cd frontend && npm run test:e2e:up
-# ou, com o Compose e2e já no ar:
-cd frontend && npm run test:e2e
-
-# backend (Vitest/Supertest; sobe só o Postgres de teste)
-cd backend && npm run test:e2e
 ```
 
-Se mudar credenciais ou `POSTGRES_TEST_*` no `.env.test` com volume antigo:
+Backend (Vitest). O e2e sobe o Postgres de teste se precisar:
+
+```bash
+cd backend && npm ci
+npm test
+npm run test:e2e
+```
+
+Frontend. Unitários com Vitest; e2e com Playwright contra a API do Compose de e2e:
+
+```bash
+cd frontend && npm ci
+npm test
+npm run test:e2e:up
+```
+
+`test:e2e:up` reconstrói a imagem da API e roda a suíte. Com o Compose e2e já no ar, `npm run test:e2e` basta. Ao fim, o Playwright derruba esse Compose. `E2E_KEEP_UP=1` mantém os serviços no ar.
+
+Se as credenciais ou `POSTGRES_TEST_*` mudarem com volume antigo:
 
 ```bash
 docker compose --env-file .env.test -f docker-compose.e2e.yml down -v
 ```
 
-## Estrutura
+## Estrutura de pastas
+
+Detalhes de execução de cada parte: [backend/README.md](backend/README.md) e [frontend/README.md](frontend/README.md).
 
 ```text
-.env.example            Credenciais e portas da app
-.env.test               Credenciais e portas do e2e (versionado)
-.env.test.example       Modelo do .env.test
-docker-compose.yml      App (Postgres + API + frontend)
-docker-compose.e2e.yml  E2e (Postgres de teste + API)
-package.json            Scripts compose:e2e*
-backend/                API NestJS e Prisma
-frontend/               Interface React
+.env.example                 Credenciais e portas da app
+.env.test                    Credenciais e portas do e2e (versionado)
+.env.test.example            Modelo do .env.test
+docker-compose.yml           Postgres + API + frontend
+docker-compose.e2e.yml       Postgres de teste + API
+package.json                 Scripts compose:e2e*
+backend/                     Monolito modular
+frontend/                    Package-by-feature
+```
+
+O backend é um monolito modular: um processo NestJS, um módulo por capacidade de negócio (`players`, `clubs`, `market`, `league`). Em cada módulo, `domain/` guarda a regra, `application/` os casos de uso e `infra/` o HTTP e o Prisma.
+
+```text
+backend/src/app.module.ts
+backend/src/config/          Ambiente validado na subida
+backend/src/common/          Filtro de erros, relógio e validação
+backend/src/prisma/          PrismaService
+backend/src/shared/          Tipos usados por mais de um módulo
+backend/src/docs/            Schemas da documentação OpenAPI
+backend/src/scripts/         Limpeza e dados de exemplo
+backend/src/modules/<módulo>/
+  domain/
+  application/
+  infra/
+backend/prisma/migrations/   Schema versionado
+```
+
+O frontend segue package-by-feature. Cada feature em `src/features/` reúne `pages/`, `components/`, `api/`, `hooks/`, `utils/`, `types/` e `consts/`. Features: `home`, `players`, `clubs` e `league`.
+
+```text
+frontend/src/app/            Rotas e layout
+frontend/src/components/ui/  Componentes visuais compartilhados
+frontend/src/lib/            HTTP e utilitários gerais
+frontend/src/assets/         Arquivos estáticos
+frontend/src/test/           Setup e fixtures dos testes
+frontend/src/features/<feature>/
+  pages/
+  components/
+  api/
+  hooks/
+  utils/
+  types/
+  consts/
 ```
 
 ## Bibliotecas
 
-Backend: NestJS (Fastify), Prisma, Zod, Vitest, Supertest, TypeScript.
+Backend (`backend/package.json`):
 
-Frontend: React, Vite, React Router, TanStack Query, Axios, Tailwind, shadcn/Base UI, Vitest, Playwright, TypeScript.
+| Biblioteca | Uso |
+| --- | --- |
+| `@nestjs/common`, `@nestjs/core`, `@nestjs/platform-fastify` | Módulos, controllers e o servidor HTTP em Fastify |
+| `@nestjs/config` | Lê `PORT`, `FRONTEND_ORIGIN` e `DATABASE_URL` e valida na subida |
+| `@fastify/helmet` | Cabeçalhos de segurança em toda resposta da API |
+| `@fastify/rate-limit` | Teto de requisições por janela, configurado em `app.config` |
+| `@prisma/client`, `@prisma/adapter-pg` | Consultas e transações no Postgres, via driver `pg` |
+| `prisma` | Gera o client e aplica as migrations no start do container |
+| `zod` | Valida body, query e param nas rotas pelo `ZodPipe` |
+| `@scalar/fastify-api-reference` | Página interativa da OpenAPI em `/docs` |
+| `reflect-metadata` | Metadados dos decorators do Nest |
+| `rxjs` | Streams internos do Nest entre guards, pipes e controllers |
+| `typescript` | Compila `src/` para `dist/` no build |
+| `vitest`, `@nestjs/testing` | Testes unitários com módulos e Prisma mockados |
+| `supertest` | E2e HTTP contra a API e o Postgres de teste |
+
+Frontend (`frontend/package.json`):
+
+| Biblioteca | Uso |
+| --- | --- |
+| `react`, `react-dom` | Telas e montagem no `index.html` |
+| `vite`, `@vitejs/plugin-react` | Dev server, build e proxy de `/api` para a API |
+| `react-router` | Rotas de home, jogadores, clubes e liga |
+| `@tanstack/react-query` | Busca, cache e invalidação depois de criar, editar ou excluir |
+| `axios` | Cliente HTTP único em `src/lib/http.ts`, com base `/api/v1` |
+| `tailwindcss`, `@tailwindcss/vite` | Classes de estilo no markup, processadas pelo Vite |
+| `tw-animate-css` | Animações dos diálogos e transições |
+| `shadcn`, `@base-ui/react` | Primitivos dos componentes em `src/components/ui` |
+| `class-variance-authority`, `cn` | Variantes de estilo e junção de classes |
+| `lucide-react` | Ícones das ações e da navegação |
+| `@fontsource-variable/geist` | Fonte carregada no CSS global |
+| `typescript` | Checagem de tipos no `npm run build` |
+| `vitest`, `@testing-library/react` | Testes de funções e de componentes com o DOM |
+| `@playwright/test` | E2e no navegador contra a API do Compose de teste |
 
 ## Decisões e premissas
 
