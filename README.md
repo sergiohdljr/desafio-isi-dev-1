@@ -239,6 +239,6 @@ Nenhuma.
 
 ## Uso de inteligência artificial
 
-- **Ferramenta:** Cursor, com o modelo Grok.
-- **Onde foi usada:** geração e ajuste de código da API (NestJS), da interface (React) e dos testes; pesquisa de biblioteca e de abordagem; apoio em decisões de implementação, como organização por feature, casos de uso e consultas do Prisma.
+- **Ferramenta:** Cursor, com o modelo Grok, e o MCP do Figma.
+- **Onde foi usada:** geração e ajuste de código da API (NestJS), da interface (React) e dos testes; pesquisa de biblioteca e de abordagem; apoio em decisões de implementação, como organização por feature, casos de uso e consultas do Prisma. O MCP do Figma foi usado para implementar a interface a partir do design, na criação dos tokens de estilo e dos componentes.
 - **Como validei:** revisei, refatorei e aprovei cada mudança antes de entrar no repositório. A arquitetura, as regras de negócio e os contratos da API ficaram sob meu controle. Conferi o resultado com a suíte de testes (unitários, de componente e e2e) e com a execução da aplicação.
