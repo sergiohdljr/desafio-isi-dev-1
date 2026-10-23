@@ -31,7 +31,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-O comando fica em primeiro plano e só está pronto quando o log da API mostrar `Nest application successfully started`. Antes disso as migrations ainda estão rodando e a porta 3000 recusa conexão. O Compose espera o Postgres ficar healthy; não há healthcheck na API.
+O Compose espera o Postgres (`pg_isready`) e a API (`GET /api/v1/health`) ficarem healthy. O frontend só sobe depois disso. Com `docker compose up --build --wait`, o comando só devolve quando os dois estão healthy. Sem `--wait`, o processo continua em primeiro plano; a API está pronta no log `Nest application successfully started`. Antes disso as migrations ainda estão rodando e a porta 3000 recusa conexão.
 
 O Compose cria o banco vazio (`POSTGRES_DB` do `.env`) e a API aplica as migrations em `backend/prisma/migrations` ao iniciar (`prisma migrate deploy`). A interface abre sem jogadores, clubes, transações nem partidas: isso é o estado esperado, não falha de subida.
 
