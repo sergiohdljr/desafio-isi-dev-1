@@ -105,6 +105,15 @@ Se as credenciais ou `POSTGRES_TEST_*` mudarem com volume antigo:
 docker compose --env-file .env.test -f docker-compose.e2e.yml down -v
 ```
 
+## Lint e Prettier
+
+```bash
+npm run lint --prefix backend && npm run format:check --prefix backend
+npm run lint --prefix frontend && npm run format:check --prefix frontend
+```
+
+`npm run format --prefix backend` e `npm run format --prefix frontend` aplicam o Prettier.
+
 ## Estrutura de pastas
 
 Detalhes de execução de cada parte: [backend/README.md](backend/README.md) e [frontend/README.md](frontend/README.md).
