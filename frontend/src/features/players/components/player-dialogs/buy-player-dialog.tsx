@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react"
 import { useNavigate } from "react-router"
-import { ArrowRight, Calendar, Clock, Shield, ShoppingCart } from "lucide-react"
+import { ArrowRight, Calendar, Clock, LoaderCircle, RefreshCw, Shield, ShoppingCart } from "lucide-react"
 import { paths } from "@/app/routes"
 import { Alert } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -40,7 +40,7 @@ function BuyPlayerDialog({
   const [date, setDate] = useState("")
   const [time, setTime] = useState("")
   const [fieldError, setFieldError] = useState<string | null>(null)
-  const [failure, setFailure] = useState<"network" | "refused" | null>(null)
+  const [failure, setFailure] = useState<"network" | "server" | "refused" | null>(null)
   const [failureMessage, setFailureMessage] = useState("")
   const [pending, setPending] = useState(false)
   const [purchase, setPurchase] = useState<Purchase | null>(null)
@@ -59,9 +59,16 @@ function BuyPlayerDialog({
       const result = await onSubmit(Number(clubId), `${date}T${time}-03:00`)
       setPurchase(result)
     } catch (error) {
-      const offline = error instanceof ApiError && error.status === 0
-      setFailure(offline ? "network" : "refused")
-      setFailureMessage(error instanceof Error ? error.message : "Não foi possível comprar o jogador.")
+      const status = error instanceof ApiError ? error.status : 0
+      const kind = status === 0 ? "network" : status >= 500 ? "server" : "refused"
+      setFailure(kind)
+      setFailureMessage(
+        kind === "network"
+          ? "A compra não foi confirmada. Verifique a conexão e tente de novo."
+          : error instanceof Error
+            ? error.message
+            : "Não foi possível comprar o jogador.",
+      )
       setPending(false)
     }
   }
@@ -120,8 +127,12 @@ function BuyPlayerDialog({
       onClose={onClose}
     >
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-        {failure === "network" ? (
-          <Alert variant="destructive" title="Sem conexão" description={failureMessage} />
+        {failure === "network" || failure === "server" ? (
+          <Alert
+            variant="destructive"
+            title={failure === "network" ? "Sem conexão" : "Falha no servidor"}
+            description={failureMessage}
+          />
         ) : null}
         {failure === "refused" ? (
           <Alert variant="destructive" title="Compra recusada" description={failureMessage} />
@@ -193,14 +204,20 @@ function BuyPlayerDialog({
         <RulesNote>
           {`A taxa é de ${FEE_RATE * 100}% do valor de mercado, só quando ele passa de ${coins.format(FEE_THRESHOLD)}. Taxa, custo e novo caixa são calculados ao confirmar.`}
         </RulesNote>
-        {pending ? <PendingNote>Enviando a compra. Os botões ficam desabilitados.</PendingNote> : null}
+        {pending ? <PendingNote>Enviando a compra. Os botões ficam desabilitados até a resposta.</PendingNote> : null}
         <div className="flex justify-end gap-2 border-t border-border pt-4">
           <Button type="button" variant="outline" disabled={pending} onClick={onClose}>
             Cancelar
           </Button>
           <Button type="submit" disabled={pending}>
-            <ShoppingCart />
-            {pending ? "Comprando…" : failure === "network" ? "Tentar de novo" : "Confirmar compra"}
+            {pending ? (
+              <LoaderCircle className="animate-spin" />
+            ) : failure === "network" || failure === "server" ? (
+              <RefreshCw />
+            ) : (
+              <ShoppingCart />
+            )}
+            {pending ? "Comprando…" : failure === "network" || failure === "server" ? "Tentar de novo" : "Confirmar compra"}
           </Button>
         </div>
       </form>

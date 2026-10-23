@@ -75,4 +75,22 @@ describe("BuyPlayerDialog", () => {
     expect(await within(dialog).findByText("Sem conexão")).toBeInTheDocument()
     expect(within(dialog).getByRole("button", { name: /Tentar de novo/i })).toBeInTheDocument()
   })
+
+  it("permite tentar de novo em erro 500", async () => {
+    const user = userEvent.setup()
+    const club = makeClub()
+    const onSubmit = vi.fn().mockRejectedValue(new ApiError("indisponível", 503))
+    renderWithProviders(<BuyPlayerDialog player={makePlayer()} clubs={[club]} onClose={vi.fn()} onSubmit={onSubmit} />)
+    const dialog = screen.getByRole("dialog", { name: "Comprar jogador" })
+
+    await user.click(within(dialog).getByRole("combobox"))
+    await user.click(await screen.findByRole("option", { name: clubOption(club) }))
+    await user.type(within(dialog).getByLabelText("Data da fidelidade"), "2027-06-01")
+    await user.type(within(dialog).getByLabelText("Hora da fidelidade"), "15:30")
+    await user.click(within(dialog).getByRole("button", { name: /Confirmar compra/i }))
+
+    expect(await within(dialog).findByText("Falha no servidor")).toBeInTheDocument()
+    expect(within(dialog).getByText("indisponível")).toBeInTheDocument()
+    expect(within(dialog).getByRole("button", { name: /Tentar de novo/i })).toBeEnabled()
+  })
 })
