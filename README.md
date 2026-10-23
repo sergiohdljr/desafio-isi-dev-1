@@ -8,11 +8,11 @@ API em NestJS e frontend em React. Detalhes por pasta: [backend/README.md](backe
 | Origem da API | http://localhost:3000 |
 | Docs da API | http://localhost:3000/docs |
 
-A origem da API é `http://localhost:3000`. O prefixo `/api/v1` não faz parte dessa origem.
+A origem da API (CORS e `FRONTEND_ORIGIN`) é `http://localhost:3000`. As rotas ficam embaixo de `/api/v1`. Exemplo: `GET http://localhost:3000/api/v1/health`. A página `/docs` redireciona para `/docs/`.
 
 ## Pré-requisitos
 
-A banca instala só os runtimes e o gerenciador oficial. O banco e o restante sobem pelos comandos da seção de execução.
+A banca instala só os runtimes e o gerenciador oficial. Postgres, nginx e as dependências npm da aplicação sobem no Compose; não há `npm install` no host para ver o sistema no ar. Node.js 22 no host entra só em teste, lint e nos scripts `db:clean` / `db:reset`. O usuário que avalia precisa conseguir rodar `docker` (serviço ativo e permissão no daemon).
 
 | Ferramenta | Versão |
 | --- | --- |
@@ -31,10 +31,12 @@ cp .env.example .env
 docker compose up --build
 ```
 
-O Compose cria o banco vazio (`POSTGRES_DB` do `.env`) e a API aplica as migrations em `backend/prisma/migrations` ao iniciar (`prisma migrate deploy`). O schema fica sem jogadores, clubes, transações nem partidas.
+O comando fica em primeiro plano e só está pronto quando o log da API mostrar `Nest application successfully started`. Antes disso as migrations ainda estão rodando e a porta 3000 recusa conexão. O Compose espera o Postgres ficar healthy; não há healthcheck na API.
+
+O Compose cria o banco vazio (`POSTGRES_DB` do `.env`) e a API aplica as migrations em `backend/prisma/migrations` ao iniciar (`prisma migrate deploy`). A interface abre sem jogadores, clubes, transações nem partidas: isso é o estado esperado, não falha de subida.
 
 - Origem da API: http://localhost:3000
-- Frontend: http://localhost:5173
+- Frontend (nginx de produção do Compose, porta 80 do container): http://localhost:5173
 
 Parar:
 
@@ -48,10 +50,16 @@ Recriar o banco do zero (apaga o volume; o próximo `up` cria de novo, só com o
 docker compose down -v
 ```
 
-Limpar os dados (jogadores, clubes, transações e partidas) e manter o schema. Com Node.js 22 no host e a API parada:
+Limpar os dados (jogadores, clubes, transações e partidas) e manter o schema. O container do Postgres continua no ar; pare só a API (`docker compose stop api`), com Node.js 22 no host. O script lê o `.env` da raiz e monta `DATABASE_URL` a partir de `POSTGRES_*` (host `localhost`, porta `POSTGRES_PORT`):
 
 ```bash
 cd backend && npm ci && npm run db:clean
+```
+
+Dados de exemplo para percorrer a UI (mesmo pré-requisito: Postgres no ar, API parada):
+
+```bash
+cd backend && npm run db:reset
 ```
 
 ## Variáveis de ambiente
@@ -67,7 +75,7 @@ Modelo versionado: [.env.example](.env.example). Copie para `.env` na raiz. O Co
 | `API_PORT` | Porta da API no host |
 | `FRONTEND_ORIGIN` | Origem liberada no CORS (a URL do frontend) |
 
-O `backend/.env.example` só define `PORT` da API quando ela roda no host. O e2e usa [.env.test](.env.test) (modelo: [.env.test.example](.env.test.example)). O `docker compose up` da aplicação não lê esse arquivo.
+`DATABASE_URL` não vai no `.env`. No container o entrypoint monta essa URL com `POSTGRES_HOST=postgres`. No host, `loadHostEnv` monta a mesma URL com `localhost` e `POSTGRES_PORT`. O `backend/.env.example` só define `PORT` quando a API roda fora do Compose. O e2e usa [.env.test](.env.test) (modelo: [.env.test.example](.env.test.example)). O `docker compose up` da aplicação não lê esse arquivo.
 
 ## Testes
 
@@ -214,7 +222,7 @@ Frontend (`frontend/package.json`):
 - Invariantes que só a aplicação garantia ganharam `CHECK` no banco, com os mesmos limites do schema de entrada. A caixa do clube é atualizada com `increment` atômico, e o valor resultante vem do próprio `UPDATE`.
 - Frontend organizado por feature (`src/features/<feature>/`): páginas, componentes, API e utils ficam juntos no módulo da tela.
 - Dados do frontend com TanStack Query: a consulta busca, guarda em cache e repete em caso de falha; loading e erro ficam na query. Depois de criar, editar ou excluir, a mutation invalida as queries relacionadas.
-- A listagem de jogadores faz uma única requisição por filtro. A resposta traz a página e os totais das abas (todos, livres e em clubes) no mesmo `meta` para evitar fazer multiplos requests, retornando além do contrato esperado o campo `meta.count`{ all: 1, free: 1, signed: 0 },.
+- A listagem de jogadores faz uma única requisição por filtro. A página e os totais das abas (todos, livres e em clubes) vêm no mesmo `meta`, no campo `count`: `{ "all": 1, "free": 1, "signed": 0 }`.
 - No Compose, o frontend acessa a API pelo proxy do nginx (`/api` → API).
 - A aplicação inteira sobe no Docker Compose: Postgres, API e frontend. O Compose de e2e é separado e não entra no `docker compose up` da app.
 - Backend: unitários (Vitest, com Prisma e HTTP mockados) e e2e (Supertest contra a API e o Postgres de teste).
