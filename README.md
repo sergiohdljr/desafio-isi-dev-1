@@ -10,6 +10,19 @@ API em NestJS e frontend em React. Detalhes por pasta: [backend/README.md](backe
 
 A origem da API (CORS e `FRONTEND_ORIGIN`) é `http://localhost:3000`. As rotas ficam embaixo de `/api/v1`. Exemplo: `GET http://localhost:3000/api/v1/health`. A página `/docs` redireciona para `/docs/`.
 
+## Sumário
+
+- [Pré-requisitos](#pré-requisitos)
+- [Instalação e execução](#instalação-e-execução)
+- [Variáveis de ambiente](#variáveis-de-ambiente)
+- [Testes](#testes)
+- [Lint e Prettier](#lint-e-prettier)
+- [Estrutura de pastas](#estrutura-de-pastas)
+- [Bibliotecas](#bibliotecas)
+- [Decisões e premissas](#decisões-e-premissas)
+- [Funcionalidades não implementadas](#funcionalidades-não-implementadas)
+- [Uso de inteligência artificial](#uso-de-inteligência-artificial)
+
 ## Pré-requisitos
 
 A banca instala só os runtimes e o gerenciador oficial. Postgres, nginx e as dependências npm da aplicação sobem no Compose; não há `npm install` no host para ver o sistema no ar. Node.js 22 no host entra só em teste, lint e nos scripts `db:clean` / `db:reset`. O usuário que avalia precisa conseguir rodar `docker` (serviço ativo e permissão no daemon).
