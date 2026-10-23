@@ -1,6 +1,17 @@
 import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowUpDown, CircleAlert, Coins, HeartPulse, Plus, Search, Shield, Shirt, UserRound, Users } from "lucide-react"
+import {
+  ArrowUpDown,
+  CircleAlert,
+  Coins,
+  HeartPulse,
+  Plus,
+  Search,
+  Shield,
+  Shirt,
+  UserRound,
+  Users,
+} from "lucide-react"
 import { useAppChrome } from "@/app/app-layout"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"

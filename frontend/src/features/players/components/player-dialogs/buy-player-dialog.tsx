@@ -217,7 +217,11 @@ function BuyPlayerDialog({
             ) : (
               <ShoppingCart />
             )}
-            {pending ? "Comprando…" : failure === "network" || failure === "server" ? "Tentar de novo" : "Confirmar compra"}
+            {pending
+              ? "Comprando…"
+              : failure === "network" || failure === "server"
+                ? "Tentar de novo"
+                : "Confirmar compra"}
           </Button>
         </div>
       </form>
