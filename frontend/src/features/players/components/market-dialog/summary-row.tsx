@@ -25,7 +25,7 @@ function SummaryRow({
       )}
     >
       <dt>
-        <span className={emphasis ? "text-body-sm-semibold" : "text-muted-foreground"}>{label}</span>
+        <span className={emphasis ? "text-body-sm-semibold" : "text-body-sm text-muted-foreground"}>{label}</span>
         {hint ? <span className="block text-caption-xs text-muted-foreground">{hint}</span> : null}
       </dt>
       <dd
