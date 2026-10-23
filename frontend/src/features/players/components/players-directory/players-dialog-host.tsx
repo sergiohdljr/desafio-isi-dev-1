@@ -2,6 +2,7 @@ import type { Club } from "@/features/clubs/types/club.types"
 import {
   BuyPlayerDialog,
   ConditionDialog,
+  CreatedPlayerDialog,
   CreatePlayerDialog,
   DeletePlayerDialog,
   DetailsDialog,
@@ -37,12 +38,18 @@ function PlayersDialogHost({
         onClose={onClose}
         onSubmit={async (input) => {
           const created = await mutations.createPlayer(input)
-          onFinish({
-            variant: "success",
-            title: "Jogador cadastrado",
-            description: `${created.name} entrou livre e Apto.`,
-          })
+          onOpen({ type: "created", player: created })
         }}
+      />
+    )
+  }
+
+  if (dialog.type === "created") {
+    return (
+      <CreatedPlayerDialog
+        player={dialog.player}
+        onClose={onClose}
+        onDetails={() => onOpen({ type: "details", player: dialog.player })}
       />
     )
   }
@@ -57,7 +64,7 @@ function PlayersDialogHost({
           onFinish({
             variant: "success",
             title: "Jogador atualizado",
-            description: "A linha mostra os dados devolvidos pela API.",
+            description: "Dados do jogador foram atualizados com sucesso.",
           })
         }}
       />

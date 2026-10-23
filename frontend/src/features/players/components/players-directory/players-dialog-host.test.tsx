@@ -32,10 +32,11 @@ describe("PlayersDialogHost", () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it("abre create e chama onFinish após cadastrar", async () => {
+  it("abre create e mostra o resumo após cadastrar", async () => {
     const user = userEvent.setup()
-    const onFinish = vi.fn()
-    const createPlayer = vi.fn().mockResolvedValue(makePlayer({ name: "Davi Melo" }))
+    const onOpen = vi.fn()
+    const created = makePlayer({ name: "Davi Melo" })
+    const createPlayer = vi.fn().mockResolvedValue(created)
     render(
       <PlayersDialogHost
         dialog={{ type: "create" }}
@@ -43,8 +44,8 @@ describe("PlayersDialogHost", () => {
         starterClub={null}
         mutations={mutationsMock({ createPlayer }) as never}
         onClose={vi.fn()}
-        onFinish={onFinish}
-        onOpen={vi.fn()}
+        onFinish={vi.fn()}
+        onOpen={onOpen}
       />,
     )
 
@@ -60,7 +61,7 @@ describe("PlayersDialogHost", () => {
     await user.click(within(dialog).getByRole("button", { name: "Salvar jogador" }))
 
     expect(createPlayer).toHaveBeenCalled()
-    expect(onFinish).toHaveBeenCalledWith(expect.objectContaining({ variant: "success", title: "Jogador cadastrado" }))
+    expect(onOpen).toHaveBeenCalledWith({ type: "created", player: created })
   })
 
   it("em details, Editar chama onOpen com edit", async () => {

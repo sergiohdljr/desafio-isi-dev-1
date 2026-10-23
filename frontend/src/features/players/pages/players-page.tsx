@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowUpDown, Coins, HeartPulse, Plus, Search, Shield, Shirt, UserRound, Users } from "lucide-react"
+import { ArrowUpDown, CircleAlert, Coins, HeartPulse, Plus, Search, Shield, Shirt, UserRound, Users } from "lucide-react"
 import { useAppChrome } from "@/app/app-layout"
 import { Alert } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -232,17 +232,28 @@ function PlayersPage() {
             }}
             options={CONDITIONS.map((item) => ({ value: item.value, label: item.label }))}
           />
-          <FilterSelect
-            label="Clube"
-            icon={<Shield className="size-4" />}
-            value={scope === "free" ? "" : clubId}
-            disabled={scope === "free"}
-            onChange={(value) => {
-              setClubId(value)
-              setPage(1)
-            }}
-            options={clubs.map((club) => ({ value: String(club.id), label: club.name }))}
-          />
+          <span className="group relative shrink-0">
+            <FilterSelect
+              label="Clube"
+              icon={<Shield className="size-4" />}
+              value={scope === "free" ? "" : clubId}
+              disabled={scope === "free"}
+              onChange={(value) => {
+                setClubId(value)
+                setPage(1)
+              }}
+              options={clubs.map((club) => ({ value: String(club.id), label: club.name }))}
+            />
+            {scope === "free" ? (
+              <span
+                role="tooltip"
+                className="pointer-events-none absolute top-full left-0 z-20 mt-2 hidden items-center gap-1.5 rounded-md bg-black px-2.5 py-1.5 text-caption-xs whitespace-nowrap text-white group-hover:flex"
+              >
+                <CircleAlert className="size-3.5 shrink-0" aria-hidden />
+                livres não combinam com filtro por clubes
+              </span>
+            ) : null}
+          </span>
           <RangeFilter
             label="Idade"
             valueLabel={ageSummary}
@@ -258,6 +269,7 @@ function PlayersPage() {
             icon={<Coins className="size-4" />}
             min={minValue}
             max={maxValue}
+            align="end"
             onMinChange={setMinValue}
             onMaxChange={setMaxValue}
           />

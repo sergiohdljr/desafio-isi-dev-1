@@ -2,6 +2,7 @@ import type { Player } from "@/features/players/types/player.types"
 
 type PlayersDialog =
   | { type: "create" }
+  | { type: "created"; player: Player }
   | { type: "edit"; player: Player }
   | { type: "condition"; player: Player }
   | { type: "delete"; player: Player }

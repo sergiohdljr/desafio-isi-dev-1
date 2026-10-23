@@ -8,6 +8,7 @@ function RangeFilter({
   icon,
   min,
   max,
+  align = "start",
   onMinChange,
   onMaxChange,
 }: {
@@ -16,6 +17,7 @@ function RangeFilter({
   icon: ReactNode
   min: string
   max: string
+  align?: "start" | "end"
   onMinChange: (value: string) => void
   onMaxChange: (value: string) => void
 }) {
@@ -46,7 +48,9 @@ function RangeFilter({
         <ChevronDown className="size-4 text-muted-foreground" aria-hidden />
       </button>
       {open ? (
-        <div className="absolute top-11 z-10 flex w-56 flex-col gap-2 rounded-lg border border-border bg-popover p-3 shadow-md">
+        <div
+          className={`absolute top-11 z-10 flex w-56 flex-col gap-2 rounded-lg border border-border bg-popover p-3 shadow-md ${align === "end" ? "right-0" : "left-0"}`}
+        >
           <label className="flex flex-col gap-1 text-caption-xs text-muted-foreground">
             Mínimo
             <Input value={min} onChange={(event) => onMinChange(event.target.value)} />
