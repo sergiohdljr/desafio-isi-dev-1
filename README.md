@@ -231,4 +231,4 @@ Nenhuma.
 
 ## Uso de inteligência artificial
 
-Usei o Cursor, com o modelo Grok, para implementar a API, a interface e os testes. Revisei o código e os comandos deste repositório antes de entregá-los.
+No desenvolvimento usei o Cursor para ajudar a gerar código, pesquisar e auxiliar na tomada de algumas decisões. O projeto ficou sob meu controle: nada entrou no projeto sem eu revisar, refatorar e validar. A IA acelera o trabalho quando fica sujeita a um processo de desenvolvimento e a uma arquitetura bem definidos.
