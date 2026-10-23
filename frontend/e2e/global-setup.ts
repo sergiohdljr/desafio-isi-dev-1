@@ -10,6 +10,8 @@ const ENV_FILE = ".env.test"
  * Não toca no Postgres da aplicação.
  */
 function globalSetup() {
+  if (process.env.E2E_SKIP_COMPOSE === "1") return
+
   const frontendRoot = path.dirname(path.dirname(fileURLToPath(import.meta.url)))
   const repoRoot = path.dirname(frontendRoot)
   const sql =

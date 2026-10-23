@@ -62,8 +62,10 @@ async function fillPlayerForm(page: Page, draft: PlayerDraft) {
 async function fillAndSave(page: Page, draft: PlayerDraft) {
   const dialog = await fillPlayerForm(page, draft)
   await dialog.getByRole("button", { name: "Salvar jogador" }).click()
-  await expect(page.getByText("Jogador cadastrado")).toBeVisible()
-  await expect(page.getByRole("dialog", { name: "Novo jogador" })).toHaveCount(0)
+  const created = page.getByRole("dialog", { name: "Jogador cadastrado" })
+  await expect(created).toBeVisible()
+  await created.getByRole("button", { name: "Fechar", exact: true }).first().click()
+  await expect(created).toHaveCount(0)
 }
 
 export { fillAndSave, fillPlayerForm, openPlayers, playerRow, removeByName, searchPlayers }

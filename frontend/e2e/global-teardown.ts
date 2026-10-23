@@ -10,6 +10,7 @@ const ENV_FILE = ".env.test"
  * Use E2E_KEEP_UP=1 para manter a stack no ar (debug).
  */
 function globalTeardown() {
+  if (process.env.E2E_SKIP_COMPOSE === "1") return
   if (process.env.E2E_KEEP_UP === "1") {
     console.log("E2E_KEEP_UP=1 — mantendo docker-compose.e2e.yml no ar.")
     return

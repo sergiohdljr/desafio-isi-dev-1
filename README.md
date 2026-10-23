@@ -97,7 +97,7 @@ npm test
 npm run test:e2e:up
 ```
 
-`test:e2e:up` reconstrói a imagem da API e roda a suíte. Com o Compose e2e já no ar, `npm run test:e2e` basta. Ao fim, o Playwright derruba esse Compose. `E2E_KEEP_UP=1` mantém os serviços no ar.
+`test:e2e:up` reconstrói a imagem da API e roda a suíte. `npm run test:e2e` sobe o Compose se precisar e roda a suíte. O Playwright executa na imagem `mcr.microsoft.com/playwright` (Chromium incluso); o host não precisa de `playwright install`. Na primeira vez o Docker baixa essa imagem. Ao fim, o script derruba o Compose e2e. `E2E_KEEP_UP=1` mantém os serviços no ar.
 
 Se as credenciais ou `POSTGRES_TEST_*` mudarem com volume antigo:
 
