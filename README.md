@@ -210,6 +210,7 @@ Frontend (`frontend/package.json`):
 - A aplicação inteira sobe no Docker Compose: Postgres, API e frontend. O Compose de e2e é separado e não entra no `docker compose up` da app.
 - Backend: unitários (Vitest, com Prisma e HTTP mockados) e e2e (Supertest contra a API e o Postgres de teste).
 - Frontend: unitários (Vitest), de componente (Testing Library) e e2e (Playwright contra a API no Compose de e2e). O e2e usa ambiente próprio (`.env.test`, `docker-compose.e2e.yml`, portas `E2E_*` e `POSTGRES_TEST_*`) e não mexe no stack de desenvolvimento.
+- O Playwright do e2e do frontend roda na imagem oficial `mcr.microsoft.com/playwright`, na mesma versão do `@playwright/test`. O host só precisa de Node e Docker: a imagem já traz o Chromium e as bibliotecas do sistema, então um Linux mínimo não instala navegador nem pacotes nativos. O Compose de Postgres e API continua no host; o container usa a rede do host para alcançar a API em `127.0.0.1`.
 - Testes de usecases usando repositorios em memória, focando apenas na lógica.
 - Cada requisição da API gera uma linha de log com método, caminho e status, pelo `Logger` do Nest. O filtro global também registra os erros.
 - Documentação OpenAPI em `/docs`, com os endpoints da API.
