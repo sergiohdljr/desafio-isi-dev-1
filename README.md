@@ -139,7 +139,7 @@ backend/                     Monolito modular
 frontend/                    Package-by-feature
 ```
 
-`.cursor/rules/` guarda as convenções usadas na implementação (`clean-code`, `nestjs-best-practices`, `design-system`). `.cursor/mcp.json` aponta o MCP do Figma. `docs/` reúne, por capacidade (`players`, `clubs`, `market`, `league` e `backend-refactor`), a spec da regra e as issues que a detalham.
+`.cursor/rules/` guarda as convenções usadas na implementação (`clean-code`, `nestjs-best-practices`, `design-system`). `.cursor/mcp.json` aponta o MCP do Figma. `docs/` reúne, por capacidade (`players`, `clubs`, `market` e `league`), a spec da regra e as issues que a detalham.
 
 O backend é um monolito modular: um processo NestJS, um módulo por capacidade de negócio (`players`, `clubs`, `market`, `league`). Em cada módulo, `domain/` guarda a regra, `application/` os casos de uso e `infra/` o HTTP e o Prisma.
 
