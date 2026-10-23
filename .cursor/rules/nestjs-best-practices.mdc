@@ -1,0 +1,18 @@
+---
+description: Padrões NestJS desta API. Vale para qualquer alteração no backend.
+alwaysApply: true
+---
+
+# NestJS
+
+Ao alterar o backend, siga `backend/.agents/skills/nestjs-best-practices/SKILL.md` e leia a regra em `rules/` que cobre a mudança. Aplique só o que o código precisa; não adicione JWT, filas, cache ou microsserviços sem um caso de uso.
+
+- Módulo por feature em `src/<feature>/` (`*.module.ts`, controller, service, dto, repository). `AppModule` importa esses módulos e registra o filtro global.
+- Injeção pelo construtor. Exporte o provider no módulo e importe o módulo; não registre o mesmo provider em dois lugares. `@Global()` só para config.
+- Config em `src/config/`, validada na subida (`database.url`, `app.port`). Sem `process.env` em service.
+- Entrada com schema Zod e `ZodPipe` na rota (`@Body`, `@Query`, `@Param`). Campo desconhecido é ignorado. Sem coerção de tipo no corpo JSON.
+- Erro de negócio com `HttpException`. O `AllExceptionsFilter` formata a resposta. Sem `try/catch` que monta JSON no controller.
+- Banco via `PrismaService`. Query fica em repository da feature; service fica com a regra de negócio. Migrations com `prisma migrate`, sem `db push`.
+- Teste unitário com `Test.createTestingModule` e mock de Prisma/HTTP. E2E com Supertest e os mesmos schemas Zod das rotas. Sem banco real em teste unitário.
+- `enableShutdownHooks()` permanece. Log com `Logger` do Nest, sem `console.log`.
+- Imports ESM com sufixo `.js`.
