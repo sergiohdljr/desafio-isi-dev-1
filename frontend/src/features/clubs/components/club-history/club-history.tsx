@@ -92,7 +92,9 @@ function ClubHistory({ clubId, players }: { clubId: number; players: SquadPlayer
             onValueChange={(value) => setPlayerId(value && value !== "all" ? value : "")}
           >
             <SelectTrigger className="w-auto" aria-label="Filtrar por jogador">
-              <SelectValue placeholder="Todos os jogadores" />
+              <SelectValue placeholder="Todos os jogadores">
+                {players.find((player) => String(player.id) === playerId)?.name}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os jogadores</SelectItem>
