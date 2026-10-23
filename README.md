@@ -133,9 +133,13 @@ Detalhes de execução de cada parte: [backend/README.md](backend/README.md) e [
 docker-compose.yml           Postgres + API + frontend
 docker-compose.e2e.yml       Postgres de teste + API
 package.json                 Scripts compose:e2e*
+.cursor/                     Regras do editor e o MCP do Figma
+docs/                        Specs e issues das regras de negócio
 backend/                     Monolito modular
 frontend/                    Package-by-feature
 ```
+
+`.cursor/rules/` guarda as convenções usadas na implementação (`clean-code`, `nestjs-best-practices`, `design-system`). `.cursor/mcp.json` aponta o MCP do Figma. `docs/` reúne, por capacidade (`players`, `clubs`, `market`, `league` e `backend-refactor`), a spec da regra e as issues que a detalham.
 
 O backend é um monolito modular: um processo NestJS, um módulo por capacidade de negócio (`players`, `clubs`, `market`, `league`). Em cada módulo, `domain/` guarda a regra, `application/` os casos de uso e `infra/` o HTTP e o Prisma.
 
@@ -240,5 +244,5 @@ Nenhuma.
 ## Uso de inteligência artificial
 
 - **Ferramenta:** Cursor, com o modelo Grok, e o MCP do Figma.
-- **Onde foi usada:** geração e ajuste de código da API (NestJS), da interface (React) e dos testes; pesquisa de biblioteca e de abordagem; apoio em decisões de implementação, como organização por feature, casos de uso e consultas do Prisma. O MCP do Figma foi usado para implementar a interface a partir do design, na criação dos tokens de estilo e dos componentes.
+- **Onde foi usada:** geração e ajuste de código da API (NestJS), da interface (React) e dos testes; pesquisa de biblioteca e de abordagem; apoio em decisões de implementação, como organização por feature, casos de uso e consultas do Prisma. O MCP do Figma foi usado para implementar a interface a partir do design, na criação dos tokens de estilo e dos componentes. As specs em `docs/` foram escritas antes do código, uma por capacidade (`players`, `clubs`, `market`, `league`), para fixar as regras de negócio do enunciado e servir de base na implementação.
 - **Como validei:** revisei, refatorei e aprovei cada mudança antes de entrar no repositório. A arquitetura, as regras de negócio e os contratos da API ficaram sob meu controle. Conferi o resultado com a suíte de testes (unitários, de componente e e2e) e com a execução da aplicação.
