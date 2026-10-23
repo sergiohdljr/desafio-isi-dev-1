@@ -19,35 +19,8 @@ A banca instala só os runtimes e o gerenciador oficial. O banco e o restante so
 | Ubuntu | 24.04 |
 | Node.js | 22 (com npm, que acompanha essa versão) |
 | Docker Engine | com o plugin Docker Compose v2 |
-| PostgreSQL | 17 (imagem pública `postgres:17-alpine`, iniciada pelo Compose) |
 
 Arquivos de trava versionados: `backend/package-lock.json` e `frontend/package-lock.json`. A instalação usa `npm ci` a partir desses arquivos e registros públicos do npm. As imagens `node:22-alpine`, `nginx:alpine` e `postgres:17-alpine` são públicas.
-
-## Banco de dados
-
-O Compose cria o banco vazio (`POSTGRES_DB` do `.env`) e a API aplica as migrations em `backend/prisma/migrations` ao iniciar (`prisma migrate deploy`). O schema fica sem jogadores, clubes, transações nem partidas.
-
-Criar o banco:
-
-```bash
-cp .env.example .env
-docker compose up -d postgres
-docker compose up --build api
-```
-
-Recriar do zero (apaga o volume e cria de novo, só com o schema):
-
-```bash
-docker compose down -v
-docker compose up -d postgres
-docker compose up --build api
-```
-
-Limpar os dados (jogadores, clubes, transações e partidas) e manter o schema. Com Node.js 22 no host e a API parada:
-
-```bash
-cd backend && npm ci && npm run db:clean
-```
 
 ## Instalação e execução
 
@@ -58,6 +31,8 @@ cp .env.example .env
 docker compose up --build
 ```
 
+O Compose cria o banco vazio (`POSTGRES_DB` do `.env`) e a API aplica as migrations em `backend/prisma/migrations` ao iniciar (`prisma migrate deploy`). O schema fica sem jogadores, clubes, transações nem partidas.
+
 - Origem da API: http://localhost:3000
 - Frontend: http://localhost:5173
 
@@ -65,6 +40,18 @@ Parar:
 
 ```bash
 docker compose down
+```
+
+Recriar o banco do zero (apaga o volume; o próximo `up` cria de novo, só com o schema):
+
+```bash
+docker compose down -v
+```
+
+Limpar os dados (jogadores, clubes, transações e partidas) e manter o schema. Com Node.js 22 no host e a API parada:
+
+```bash
+cd backend && npm ci && npm run db:clean
 ```
 
 ## Variáveis de ambiente
