@@ -239,4 +239,6 @@ Nenhuma.
 
 ## Uso de inteligência artificial
 
-No desenvolvimento usei o Cursor para ajudar a gerar código, pesquisar e auxiliar na tomada de algumas decisões. O projeto ficou sob meu controle: nada entrou no projeto sem eu revisar, refatorar e validar. A IA acelera o trabalho quando fica sujeita a um processo de desenvolvimento e a uma arquitetura bem definidos.
+- **Ferramenta:** Cursor, com o modelo Grok.
+- **Onde foi usada:** geração e ajuste de código da API (NestJS), da interface (React) e dos testes; pesquisa de biblioteca e de abordagem; apoio em decisões de implementação, como organização por feature, casos de uso e consultas do Prisma.
+- **Como validei:** revisei, refatorei e aprovei cada mudança antes de entrar no repositório. A arquitetura, as regras de negócio e os contratos da API ficaram sob meu controle. Conferi o resultado com a suíte de testes (unitários, de componente e e2e) e com a execução da aplicação.
